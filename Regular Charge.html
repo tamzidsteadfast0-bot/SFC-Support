@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<title>Courier Charge Calculator</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f4f6f9; padding:20px; }
+  .container { max-width:600px; margin:auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,.1);}
+  h2 { text-align:center; color:#2c3e50; }
+  label { display:block; margin-top:12px; font-weight:bold; }
+  select, input, button { width:100%; padding:10px; margin-top:6px; border:1px solid #ccc; border-radius:6px; font-size:15px;}
+  button { background:#27ae60; color:#fff; border:none; margin-top:18px; cursor:pointer; font-size:16px;}
+  button:hover { background:#1e8449; }
+  .result { margin-top:18px; padding:15px; background:#ecf0f1; border-left:5px solid #27ae60; border-radius:6px; font-size:17px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>📦 Courier Charge Calculator</h2>
+
+  <label>Service Type</label>
+  <select id="service" onchange="renderOptions()">
+    <option value="regular">Regular / Next Day Delivery</option>
+    <option value="pickdrop">Pick and Drop</option>
+    <option value="express">Express Delivery</option>
+    <option value="book">Book</option>
+    <option value="document">Document</option>
+    <option value="point">Point Delivery</option>
+  </select>
+
+  <div id="dynamic"></div>
+
+  <label>Weight (KG)</label>
+  <input type="number" id="weight" step="0.01" min="0.1" placeholder="যেমন: 1.5">
+
+  <button onclick="calculate()">Calculate Charge</button>
+  <div class="result" id="result">এখানে charge দেখাবে...</div>
+</div>
+
+<script>
+const routes = {
+  regular: [
+    {v:"dhaka_dhaka", t:"Dhaka → Dhaka", r:[{w:0.15,p:55},{w:0.5,p:65},{w:1,p:75}], extra:20},
+    {v:"dhaka_other", t:"Dhaka → Other District", r:[{w:0.5,p:115},{w:1,p:135}], extra:20},
+    {v:"other_dhaka", t:"Other District → Dhaka", r:[{w:0.5,p:115},{w:1,p:115}], extra:20},
+    {v:"other_other", t:"Other District → Other District", r:[{w:0.5,p:115},{w:1,p:135}], extra:20},
+    {v:"dhaka_suburban", t:"Dhaka → Sub Urban", r:[{w:1,p:105}], extra:20},
+    {v:"suburban_dhaka", t:"Sub Urban → Dhaka", r:[{w:1,p:85}], extra:20},
+    {v:"suburban_suburban", t:"Sub Urban → Sub Urban", r:[{w:0.5,p:115},{w:1,p:135}], extra:20},
+    {v:"same_district", t:"Same District", r:[{w:1,p:60}], extra:20},
+    {v:"dhaka_gazipur", t:"Dhaka → Gazipur", r:[{w:1,p:105}], extra:20},
+    {v:"gazipur_dhaka", t:"Gazipur → Dhaka", r:[{w:1,p:105}], extra:20},
+    {v:"dhaka_rangpur", t:"Dhaka → Rangpur", r:[{w:1,p:115}], extra:20},
+    {v:"rangpur_dhaka", t:"Rangpur → Dhaka", r:[{w:1,p:95}], extra:20},
+  ],
+  pickdrop: [
+    {v:"dhaka_dhaka", t:"Dhaka → Dhaka", r:[{w:1,p:85}], extra:20},
+    {v:"other_other", t:"Other → Other District", r:[{w:0.5,p:135},{w:1,p:155}], extra:20},
+    {v:"same", t:"Same District", r:[{w:1,p:85}], extra:20},
+  ],
+  express: [
+    {v:"dhaka_dhaka", t:"Dhaka City → Dhaka City", r:[{w:1,p:105}], extra:20},
+    {v:"ctg_ctg", t:"Chittagong City → Chittagong City", r:[{w:1,p:75}], extra:20},
+    {v:"sub_dhaka", t:"Keraniganj/Savar/Tongi → Dhaka City", r:[{w:1,p:105}], extra:20},
+    {v:"dhaka_sub", t:"Dhaka City → Keraniganj/Savar/Tongi", r:[{w:1,p:105}], extra:20},
+  ],
+  book: [
+    {v:"dhaka_dhaka", t:"Dhaka City → Dhaka City", r:[{w:1,p:55}], extra:20},
+    {v:"dhaka_other", t:"Dhaka City → Other District", r:[{w:1,p:95}], extra:20},
+    {v:"other_other", t:"Other District → Other District", r:[{w:1,p:95}], extra:20},
+  ],
+};
+
+function renderOptions(){
+  const s = document.getElementById('service').value;
+  const d = document.getElementById('dynamic');
+  if(s==='document'){
+    d.innerHTML = `<p style="margin-top:10px;color:#555;">📄 Document (120GM) সারা বাংলাদেশে — flat 50 টাকা</p>`;
+  } else if(s==='point'){
+    d.innerHTML = `<label>Area Type</label>
+      <select id="route">
+        <option value="isd_osd">ISD-OSD / OSD-OSD</option>
+        <option value="osd_isd">OSD-ISD</option>
+        <option value="isd_isd">ISD-ISD</option>
+      </select>`;
+  } else {
+    let opts = routes[s].map(r=>`<option value="${r.v}">${r.t}</option>`).join('');
+    d.innerHTML = `<label>Route</label><select id="route">${opts}</select>`;
+  }
+}
+
+function calculate(){
+  const s = document.getElementById('service').value;
+  const w = parseFloat(document.getElementById('weight').value);
+  const res = document.getElementById('result');
+  if(!w || w<=0){ res.innerHTML="⚠️ সঠিক weight দিন"; return; }
+
+  if(s==='document'){
+    res.innerHTML = `✅ Document Charge: <b>৳50</b> (Up to 120GM)`;
+    return;
+  }
+
+  if(s==='point'){
+    const route = document.getElementById('route').value;
+    let charge=0;
+    const base = {isd_osd:120, osd_isd:100, isd_isd:60}[route];
+    if(w<=1) charge = base;
+    else if(w<=7) charge = base + Math.ceil(w-1)*20;
+    else if(w<=10) charge = (route==='isd_isd')?200:180;
+    else if(w<=15) charge = (route==='isd_isd')?225:250;
+    else if(w<=20) charge = (route==='isd_isd')?250:320;
+    else if(w<=25) charge = (route==='isd_isd')?300:390;
+    else if(w<=30) charge = (route==='isd_isd')?350:460;
+    else if(w<=35) charge = (route==='isd_isd')?400:530;
+    else if(w<=36) charge = (route==='isd_isd')?468:525;
+    else {
+      const baseCh = (route==='isd_isd')?468:525;
+      const perKg = (route==='isd_isd')?13:12;
+      charge = baseCh + Math.ceil(w-36)*perKg;
+    }
+    res.innerHTML = `✅ Point Delivery Charge: <b>৳${charge}</b>`;
+    return;
+  }
+
+  const route = document.getElementById('route').value;
+  const obj = routes[s].find(r=>r.v===route);
+  const slabs = obj.r;
+  let charge=0;
+  const maxSlab = slabs[slabs.length-1];
+
+  if(w<=maxSlab.w){
+    for(const sl of slabs){ if(w<=sl.w){ charge=sl.p; break; } }
+  } else {
+    const extraKg = Math.ceil(w-maxSlab.w);
+    charge = maxSlab.p + extraKg*obj.extra;
+  }
+  res.innerHTML = `✅ Charge: <b>৳${charge}</b><br><small>Route: ${obj.t} | Weight: ${w} KG</small>`;
+}
+
+renderOptions();
+</script>
+</body>
+</html>

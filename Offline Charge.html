@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>Offline Parcel Courier Charge Calculator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet" />
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            background-color: #f8f9fa; 
+            padding: 20px; 
+            color: #333; 
+        }
+        .container { 
+            max-width: 700px; 
+            margin: auto; 
+            background: #fff; 
+            padding: 25px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+        }
+        h2 { text-align: center; color: #0056b3; margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; }
+        input[type="number"], button, select:not(.select2-hidden-accessible) { 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 6px; 
+            border: 1px solid #ced4da; 
+            font-size: 16px; 
+            box-sizing: border-box; 
+        }
+        
+        /* ===== Select2 FIXED STYLING ===== */
+        .select2-container {
+            width: 100% !important;
+            display: block !important;
+        }
+        .select2-container--default .select2-selection--single {
+            height: 48px !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 6px !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 48px !important;
+            padding-left: 12px !important;
+            padding-right: 30px !important;
+            color: #333 !important;
+            font-size: 16px !important;
+            width: 100% !important;
+            display: block !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 46px !important;
+            width: 30px !important;
+            right: 5px !important;
+            top: 0 !important;
+            position: absolute !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            top: 50% !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #999 !important;
+            line-height: 48px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__clear {
+            position: absolute !important;
+            right: 30px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            font-size: 20px !important;
+            color: #999 !important;
+        }
+        /* Dropdown styling */
+        .select2-dropdown {
+            border: 1px solid #ced4da !important;
+            border-radius: 6px !important;
+            z-index: 99999 !important;
+        }
+        .select2-container--open .select2-dropdown {
+            z-index: 99999 !important;
+        }
+        .select2-search--dropdown .select2-search__field {
+            padding: 8px !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 4px !important;
+            font-size: 15px !important;
+        }
+        .select2-results__option {
+            padding: 10px 12px !important;
+            font-size: 15px !important;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #007bff !important;
+            color: white !important;
+        }
+        /* ===== END Select2 STYLING ===== */
+        
+        button { 
+            background-color: #007bff; 
+            color: white; 
+            font-weight: bold; 
+            border: none; 
+            cursor: pointer; 
+            transition: background-color 0.3s; 
+            margin-top: 10px; 
+        }
+        button:hover { background-color: #0056b3; }
+        .radio-group { 
+            display: flex; 
+            gap: 20px; 
+            padding: 10px; 
+            border: 1px solid #ced4da; 
+            border-radius: 6px; 
+        }
+        .radio-group label { margin-bottom: 0; font-weight: normal; cursor: pointer; }
+        .result { 
+            margin-top: 25px; 
+            padding: 20px; 
+            background-color: #e9f7ef; 
+            border-left: 5px solid #28a745; 
+            border-radius: 6px; 
+            font-size: 18px; 
+            line-height: 1.7; 
+        }
+        .result b { font-size: 24px; color: #155724; }
+        .result small { color: #555; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📦 Offline Parcel Courier Charge Calculator</h2>
+
+    <div class="form-group">
+        <label for="product">পণ্যের নাম</label>
+        <select id="product" style="width: 100%;">
+            <option value="">প্রথমে একটি পণ্য সিলেক্ট করুন...</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>ডেলিভারির ধরণ</label>
+        <div class="radio-group">
+            <label><input type="radio" name="deliveryType" value="point" checked> SFC Point Charge</label>
+            <label><input type="radio" name="deliveryType" value="home"> SFC Home Charge</label>
+        </div>
+    </div>
+    
+    <div id="extra-inputs"></div>
+
+    <button onclick="calculateCharge()">Calculate Charge</button>
+
+    <div class="result hidden" id="result"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+
+<script>
+const products = [
+    {id: "button_mobile", name: "বাটন মোবাইল / স্মার্ট মোবাইল / ট্যাব", point: 100, home: 140, type: "simple"},
+    {id: "laptop", name: "ল্যাপটপ", point: 150, home: 180, type: "simple"},
+    {id: "led_22_26", name: "LED 22\"-26\" with Wooden Box", point: 400, home: 600, type: "simple"},
+    {id: "led_28_32", name: "LED 28\"-32\" with Wooden Box", point: 600, home: 800, type: "simple"},
+    {id: "led_43_52", name: "LED 43\"-52\" with Wooden Box", point: 850, home: 950, type: "simple"},
+    {id: "monitor_19", name: "Monitor 19\" with Wooden Box", point: 300, home: 400, type: "simple"},
+    {id: "monitor_24", name: "Monitor 24\" with Wooden Box", point: 400, home: 450, type: "simple"},
+    {id: "tv_24_32", name: "TV 24\"-32\" with Wooden Box", point: 700, home: 900, type: "simple"},
+    {id: "computer_full_set", name: "কম্পিউটার ফুল সেট with Wooden Box", point: 700, home: 1000, type: "simple"},
+    {id: "microwave_small", name: "মাইক্রোওয়েভ ওভেন ছোট", point: 300, home: 400, type: "simple"},
+    {id: "microwave_medium", name: "মাইক্রোওয়েভ ওভেন মাঝারি", point: 350, home: 450, type: "simple"},
+    {id: "microwave_big", name: "মাইক্রোওয়েভ ওভেন বড়", point: 600, home: 800, type: "simple"},
+    {id: "rice_cooker_small", name: "রাইস কুকার ছোট", point: 200, home: 350, type: "simple"},
+    {id: "rice_cooker_big", name: "রাইস কুকার বড়", point: 500, home: 700, type: "simple"},
+    {id: "electric_kettle", name: "ইলেকট্রিক কেটেল", point: 150, home: 250, type: "simple"},
+    {id: "refrigerator", name: "রেফ্রিজারেটর", point: 180, home: 220, type: "simple"},
+    {id: "deep_fridge_small", name: "ডিপ ফ্রিজ- ছোট", point: 1000, home: 1500, type: "simple"},
+    {id: "deep_fridge_medium", name: "ডিপ ফ্রিজ- মাঝারি", point: 1500, home: 2000, type: "simple"},
+    {id: "deep_fridge_big", name: "ডিপ ফ্রিজ- বড়", point: 2000, home: 3000, type: "simple"},
+    {id: "compressor_fridge_per_piece", name: "ফ্রিজ কম্প্রেসর প্রতি পিস", point: 200, home: 350, type: "simple"},
+    {id: "compressor_ac_per_piece", name: "এসি কম্প্রেসর প্রতি পিস", point: 250, home: 400, type: "simple"},
+    {id: "stabilizer", name: "Stabilizer", point: 200, home: 350, type: "simple"},
+    {id: "ac_1_to_1.5_ton", name: "এয়ার কন্ডিশনার (১ টন থেকে ১.৫ টন)", point: 1000, home: 1500, type: "simple"},
+    {id: "ac_2_ton", name: "এয়ার কন্ডিশনার (২ টন)", point: 1200, home: 1800, type: "simple"},
+    {id: "ac_3_to_4_ton", name: "এয়ার কন্ডিশনার (৩ টন থেকে ৪ টন)", point: 1600, home: 2000, type: "simple"},
+    {id: "ac_angle", name: "এসি এঙ্গেল", point: 300, home: 500, type: "simple"},
+    {id: "washing_machine_small", name: "ওয়াশিং মেশিন ছোট", point: 450, home: 800, type: "simple"},
+    {id: "washing_machine_medium", name: "ওয়াশিং মেশিন মাঝারি", point: 900, home: 1200, type: "simple"},
+    {id: "washing_machine_big", name: "ওয়াশিং মেশিন বড়", point: 1200, home: 1600, type: "simple"},
+    {id: "ceiling_fan", name: "সিলিং ফ্যান", point: 130, home: 200, type: "simple"},
+    {id: "electric_iron", name: "ইলেকট্রিক আয়রন", point: 100, home: 150, type: "simple"},
+    {id: "drill_machine_small", name: "ড্রিল মেশিন ছোট", point: 500, home: 700, type: "simple"},
+    {id: "drill_machine_medium", name: "ড্রিল মেশিন মাঝারি", point: 800, home: 1000, type: "simple"},
+    {id: "drill_machine_big", name: "ড্রিল মেশিন বড়", point: 1200, home: 1500, type: "simple"},
+    {id: "grass_cutter_with_motor", name: "ঘাস কাটার মেশিন মোটরসহ", point: 700, home: 1200, type: "simple"},
+    {id: "grass_cutter_without_motor", name: "ঘাস কাটার মেশিন মোটর ছাড়া", point: 600, home: 1000, type: "simple"},
+    {id: "welding_machine_small", name: "ওয়েল্ডিং মেশিন ছোট", point: 400, home: 700, type: "simple"},
+    {id: "welding_machine_medium", name: "ওয়েল্ডিং মেশিন মাঝারি", point: 750, home: 1200, type: "simple"},
+    {id: "welding_machine_big", name: "ওয়েল্ডিং মেশিন বড়", point: 1200, home: 1800, type: "simple"},
+    {id: "pedestal_table_fan_small", name: "প্যাডেস্টাল / টেবিল ফ্যান ছোট", point: 250, home: 350, type: "simple"},
+    {id: "pedestal_table_fan_medium", name: "প্যাডেস্টাল / টেবিল ফ্যান মাঝারি", point: 400, home: 600, type: "simple"},
+    {id: "pedestal_table_fan_big", name: "প্যাডেস্টাল / টেবিল ফ্যান বড়", point: 700, home: 1000, type: "simple"},
+    {id: "ventilation_exhaust_fan_small", name: "ভেন্টিলেশন / এগজস্ট ফ্যান ছোট", point: 300, home: 400, type: "simple"},
+    {id: "ventilation_exhaust_fan_medium", name: "ভেন্টিলেশন / এগজস্ট ফ্যান মাঝারি", point: 400, home: 600, type: "simple"},
+    {id: "ventilation_exhaust_fan_big", name: "ভেন্টিলেশন / এগজস্ট ফ্যান বড়", point: 600, home: 1000, type: "simple"},
+    {id: "dry_battery_rickshaw_4pcs", name: "ড্রাই ব্যাটারি-রিক্সার/ভ্যান ৪ পিস", point: 220, home: 250, type: "simple"},
+    {id: "dry_battery_rickshaw_2pcs", name: "ড্রাই ব্যাটারি-রিক্সার/ভ্যান ২ পিস", point: 150, home: 300, type: "simple"},
+    {id: "easy_bike_mishuk_battery_no_water", name: "ইজি বাইক / মিশুক ব্যাটারি পানি ছাড়া", point: 150, home: 250, type: "simple"},
+    {id: "bike_electric", name: "বাইক ইলেকট্রিক", point: 2500, home: 3500, type: "simple"},
+    {id: "wheelchair_electric", name: "হুইলচেয়ার ইলেকট্রিক", point: 1200, home: 1600, type: "simple"},
+    {id: "ips_battery_medium", name: "আইপিএস ব্যাটারি মাঝারি", point: 450, home: 600, type: "simple"},
+    {id: "ips_battery_big", name: "আইপিএস ব্যাটারি বড়", point: 700, home: 900, type: "simple"},
+    {id: "ups_small", name: "ইউপিএস-ছোট", point: 350, home: 450, type: "simple"},
+    {id: "ups_big", name: "ইউপিএস-বড়", point: 550, home: 750, type: "simple"},
+    {id: "transformer", name: "ট্রান্সফরমার", point: 130, home: 150, type: "simple"},
+    {id: "ips_battery", name: "আইপিএস ব্যাটারি", point: 150, home: 250, type: "simple"},
+    {id: "lithium_battery", name: "লিথিয়াম ব্যাটারি", point: 120, home: 200, type: "simple"},
+    {id: "electric_vehicle_charger", name: "ইলেকট্রিক ভেহিকল চার্জার", point: 120, home: 200, type: "simple"},
+    {id: "rickshaw_van", name: "রিকশা / ভ্যান", point: 6500, home: 8500, type: "simple"},
+    {id: "easy_bike_auto", name: "ইজি বাইক / অটো", point: 8500, home: 10500, type: "simple"},
+    {id: "cng_per_pcs", name: "সিএনজি প্রতি পিস", point: 9000, home: 11000, type: "simple"},
+    {id: "electric_motorcycle_scooter", name: "ইলেকট্রিক মোটরসাইকেল / স্কুটার", point: 2500, home: 3000, type: "simple"},
+    {id: "blender_juicer_machine", name: "ব্লেন্ডার / জুসার মেশিন", point: 220, home: 300, type: "simple"},
+    {id: "fry_pan_set_box", name: "ফ্রাই প্যান সেট বক্স", point: 250, home: 350, type: "simple"},
+    {id: "blower_machine", name: "ব্লোয়ার মেশিন", point: 200, home: 250, type: "simple"},
+    {id: "camera_small", name: "ক্যামেরা ছোট", point: 250, home: 350, type: "simple"},
+    {id: "camera_standard", name: "ক্যামেরা স্ট্যান্ডার্ড", point: 400, home: 600, type: "simple"},
+    {id: "camera_dslr", name: "ক্যামেরা ডিএসএলআর", point: 1000, home: 1200, type: "simple"},
+    {id: "cc_camera", name: "সিসি ক্যামেরা", point: 120, home: 200, type: "simple"},
+    {id: "router", name: "রাউটার", point: 180, home: 300, type: "simple"},
+    {id: "coffee_machine_small", name: "কফি মেশিন-ছোট", point: 300, home: 500, type: "simple"},
+    {id: "coffee_machine_medium", name: "কফি মেশিন-মাঝারি", point: 500, home: 700, type: "simple"},
+    {id: "coffee_machine_big", name: "কফি মেশিন-বড়", point: 700, home: 1000, type: "simple"},
+    {id: "electric_motor_up_to_3hp", name: "ইলেকট্রিক মোটর ৩ এইচপি/কেডব্লিউ পর্যন্ত", point: 150, home: 250, type: "simple"},
+    {id: "electric_motor_up_to_5hp", name: "ইলেকট্রিক মোটর ৫ এইচপি/কেডব্লিউ পর্যন্ত", point: 600, home: 900, type: "simple"},
+    {id: "electric_motor_up_to_10hp", name: "ইলেকট্রিক মোটর ১০ এইচপি/কেডব্লিউ পর্যন্ত", point: 1200, home: 1500, type: "simple"},
+    {id: "photocopy_machine_small", name: "ফটোকপি মেশিন ছোট", point: 700, home: 1000, type: "simple"},
+    {id: "photocopy_machine_medium", name: "ফটোকপি মেশিন মাঝারি", point: 1000, home: 1300, type: "simple"},
+    {id: "photocopy_machine_big", name: "ফটোকপি মেশিন বড়", point: 1200, home: 1700, type: "simple"},
+    {id: "printer_small", name: "প্রিন্টার ছোট", point: 250, home: 400, type: "simple"},
+    {id: "printer_medium", name: "প্রিন্টার মাঝারি", point: 400, home: 700, type: "simple"},
+    {id: "printer_big", name: "প্রিন্টার বড়", point: 900, home: 1200, type: "simple"},
+    {id: "laminating_machine_small", name: "লেমিনেটিং মেশিন-ছোট", point: 300, home: 450, type: "simple"},
+    {id: "laminating_machine_medium", name: "লেমিনেটিং মেশিন-মাঝারি", point: 500, home: 750, type: "simple"},
+    {id: "laminating_machine_big", name: "লেমিনেটিং মেশিন-বড়", point: 800, home: 1100, type: "simple"},
+    {id: "speaker_small", name: "স্পিকার, ছোট", point: 500, home: 700, type: "simple"},
+    {id: "speaker_medium", name: "স্পিকার, মাঝারি", point: 800, home: 1000, type: "simple"},
+    {id: "speaker_big", name: "স্পিকার, বড়", point: 1100, home: 1500, type: "simple"},
+    {id: "money_counting_machine", name: "মানি কাউন্টিং মেশিন", point: 800, home: 1200, type: "simple"},
+    {id: "vending_machine_standard", name: "ভেন্ডিং মেশিন স্ট্যান্ডার্ড", point: 3300, home: 4000, type: "simple"},
+    {id: "incubator_18_19", name: "ইনকিউবেটর ১৮”-১৯”", point: 500, home: 800, type: "simple"},
+    {id: "incubator_30_40", name: "ইনকিউবেটর ৩০”-৪০”", point: 800, home: 1000, type: "simple"},
+    {id: "incubator_50_60", name: "ইনকিউবেটর ৫০”-৬০”", point: 1500, home: 2000, type: "simple"},
+    {id: "incubator_70_77", name: "ইনকিউবেটর ৭০”-৭৭”", point: 2000, home: 3000, type: "simple"},
+    {id: "geyser_up_to_10ltr", name: "গিজার ১০ লিটার পর্যন্ত", point: 150, home: 250, type: "simple"},
+    {id: "geyser_up_to_30ltr", name: "গিজার ৩০ লিটার পর্যন্ত", point: 250, home: 350, type: "simple"},
+    {id: "geyser_up_to_50ltr", name: "গিজার ৫০ লিটার পর্যন্ত", point: 350, home: 450, type: "simple"},
+    {id: "pureit_classic_filter", name: "পিউরিট ক্লাসিক ফিল্টার", point: 250, home: 350, type: "simple"},
+    {id: "pureit_ro_uv_filter", name: "পিউরিট আরও-ইউভি ফিল্টার", point: 300, home: 500, type: "simple"},
+    {id: "pureit_water_tank", name: "পিউরিট ওয়াটার ট্যাংক", point: 650, home: 900, type: "simple"},
+    {id: "water_filter_wooden_box", name: "ওয়াটার ফিল্টার- কাঠের বক্সসহ", point: 400, home: 500, type: "simple"},
+    {id: "water_filter_mini", name: "ওয়াটার ফিল্টার-মিনি", point: 300, home: 500, type: "simple"},
+    {id: "water_filter_medium", name: "ওয়াটার ফিল্টার-মাঝারি", point: 500, home: 800, type: "simple"},
+    {id: "generator_per_kva", name: "জেনারেটর প্রতি কেভিএ", point: 350, home: 500, type: "simple"},
+    {id: "portable_air_cooler_20l", name: "পোর্টেবল এয়ার কুলার ২০ লিটার", point: 220, home: 350, type: "simple"},
+    {id: "portable_air_cooler_45l", name: "পোর্টেবল এয়ার কুলার ৪৫ লিটার", point: 350, home: 450, type: "simple"},
+    {id: "portable_air_cooler_60l", name: "পোর্টেবল এয়ার কুলার ৬০ লিটার", point: 500, home: 800, type: "simple"},
+    {id: "bicycle_small", name: "বাইসাইকেল ছোট", point: 500, home: 700, type: "simple"},
+    {id: "bicycle_medium", name: "বাইসাইকেল মাঝারি", point: 700, home: 900, type: "simple"},
+    {id: "bicycle_big", name: "বাইসাইকেল বড়", point: 900, home: 1200, type: "simple"},
+    {id: "gym_cycle_small", name: "জিম সাইকেল ছোট", point: 800, home: 1200, type: "simple"},
+    {id: "gym_cycle_medium", name: "জিম সাইকেল মাঝারি", point: 1200, home: 1600, type: "simple"},
+    {id: "gym_cycle_big", name: "জিম সাইকেল বড়", point: 1600, home: 2000, type: "simple"},
+    {id: "treadmill_small", name: "ট্রেডমিল-ছোট", point: 1400, home: 1800, type: "simple"},
+    {id: "treadmill_medium", name: "ট্রেডমিল-মাঝারি", point: 1600, home: 2200, type: "simple"},
+    {id: "treadmill_big", name: "ট্রেডমিল-বড়", point: 2500, home: 3200, type: "simple"},
+    {id: "cricket_bat_per_pcs", name: "ক্রিকেট ব্যাট", point: 120, home: 220, type: "simple"},
+    {id: "racket_bat_per_pcs", name: "র‍্যাকেট ব্যাট", point: 110, home: 170, type: "simple"},
+    {id: "motorcycle_80_100cc", name: "মোটরসাইকেল ৮০ সিসি থেকে ১০০ সিসি", point: 3000, home: 3500, type: "simple"},
+    {id: "motorcycle_120_150cc", name: "মোটরসাইকেল ১২০ সিসি থেকে ১৫০ সিসি", point: 3500, home: 4500, type: "simple"},
+    {id: "helmet", name: "হেলমেট", point: 200, home: 280, type: "simple"},
+    {id: "trunk_small", name: "ট্রাঙ্ক ছোট", point: 300, home: 500, type: "simple"},
+    {id: "trunk_medium", name: "ট্রাঙ্ক মাঝারি", point: 550, home: 800, type: "simple"},
+    {id: "trunk_big", name: "ট্রাঙ্ক বড়", point: 1500, home: 2500, type: "simple"},
+    {id: "shallow_machine_mini", name: "শ্যালো মেশিন মিনি", point: 1000, home: 1500, type: "simple"},
+    {id: "shallow_machine_small", name: "শ্যালো মেশিন ছোট", point: 3500, home: 4500, type: "simple"},
+    {id: "shallow_machine_medium", name: "শ্যালো মেশিন মাঝারি", point: 6500, home: 8500, type: "simple"},
+    {id: "power_tiller", name: "পাওয়ার টিলার", point: 16000, home: 20000, type: "simple"},
+    {id: "rice_machine", name: "রাইস মেশিন", point: 1300, home: 1800, type: "simple"},
+    {id: "kitchen_rack_small", name: "কিচেন র‍্যাক ছোট", point: 400, home: 600, type: "simple"},
+    {id: "kitchen_rack_medium", name: "কিচেন র‍্যাক মাঝারি", point: 700, home: 1000, type: "simple"},
+    {id: "kitchen_rack_big", name: "কিচেন র‍্যাক বড়", point: 1000, home: 1500, type: "simple"},
+    {id: "chair_wheel_electric_medium", name: "হুইলচেয়ার ইলেকট্রিক-মাঝারি", point: 1000, home: 1300, type: "simple"},
+    {id: "chair_wheel_electric_big", name: "হুইলচেয়ার ইলেকট্রিক-বড়", point: 1200, home: 1700, type: "simple"},
+    {id: "carrom_board_below_45", name: "ক্যারাম বোর্ড ৪৫” এর নিচে", point: 250, home: 400, type: "simple"},
+    {id: "carrom_board_45", name: "ক্যারাম বোর্ড ৪৫”", point: 300, home: 500, type: "simple"},
+    {id: "carrom_board_50_56", name: "ক্যারাম বোর্ড ৫০-৫৬”", point: 400, home: 600, type: "simple"},
+    {id: "alna_wooden_metal", name: "আলনা (কাঠের/মেটাল)", point: 1000, home: 1300, type: "simple"},
+    {id: "file_cabinet_4_drawers", name: "ফাইল কেবিনেট ৪ ড্রয়ার", point: 1200, home: 1600, type: "simple"},
+    {id: "almira_wood_steel_small", name: "আলমারি কাঠ-স্টিল ছোট", point: 2200, home: 3000, type: "simple"},
+    {id: "almira_wood_steel_standard", name: "আলমারি কাঠ-স্টিল স্ট্যান্ডার্ড", point: 3300, home: 4000, type: "simple"},
+    {id: "almira_wood_steel_double_door", name: "আলমারি কাঠ-স্টিল ডাবল ডোর", point: 4500, home: 6000, type: "simple"},
+    {id: "visiting_chair", name: "ভিজিটিং চেয়ার", point: 150, home: 200, type: "simple"},
+    {id: "general_executive_chair", name: "জেনারেল এক্সিকিউটিভ চেয়ার", point: 200, home: 300, type: "simple"},
+    {id: "executive_chair_revolving", name: "এক্সিকিউটিভ চেয়ার (রিভলভিং)", point: 250, home: 380, type: "simple"},
+    {id: "luxury_boss_chair", name: "লাক্সারি / বস চেয়ার এক্সিকিউটিভ রিভলভিং", point: 800, home: 1100, type: "simple"},
+    {id: "chair_wooden_standard", name: "চেয়ার কাঠের স্ট্যান্ডার্ড", point: 500, home: 700, type: "simple"},
+    {id: "rocking_chair", name: "রকিং চেয়ার", point: 700, home: 900, type: "simple"},
+    {id: "chair_dental", name: "ডেন্টাল চেয়ার", point: 6000, home: 8000, type: "simple"},
+    {id: "chair_dental_with_machine", name: "ডেন্টাল চেয়ার মেশিনসহ", point: 7000, home: 9000, type: "simple"},
+    {id: "salon_chair_with_stand", name: "স্যালন চেয়ার স্ট্যান্ড সহ", point: 700, home: 1200, type: "simple"},
+    {id: "plastic_stool", name: "প্লাস্টিক টুল", point: 100, home: 150, type: "simple"},
+    {id: "steel_tool", name: "স্টিল টুল", point: 150, home: 250, type: "simple"},
+    {id: "normal_foam_sofa_5_seat_no_handle", name: "সাধারণ ফোম সোফা ৫ সিট হাতল ছাড়া", point: 1500, home: 2000, type: "simple"},
+    {id: "normal_foam_sofa_5_seat_with_handle", name: "সাধারণ ফোম সোফা ৫ সিট হাতলসহ", point: 3000, home: 3500, type: "simple"},
+    {id: "luxury_vip_foam_sofa_5_seat", name: "লাক্সারি / ভিআইপি ফোম সোফা ৫ সিট", point: 2000, home: 2500, type: "simple"},
+    {id: "vip_wooden_sofa_5_seat", name: "ভিআইপি কাঠের সোফা ৫ সিট", point: 3500, home: 4200, type: "simple"},
+    {id: "sofa_tea_table", name: "সোফা টি-টেবিল", point: 450, home: 600, type: "simple"},
+    {id: "devine_sofa", name: "বিলাসবহুল সোফা", point: 1800, home: 2200, type: "simple"},
+    {id: "mini_cum_bed", name: "মিনি কাম বেড", point: 550, home: 650, type: "simple"},
+    {id: "single_cum_bed", name: "সিঙ্গেল কাম বেড", point: 750, home: 850, type: "simple"},
+    {id: "double_cum_bed", name: "ডাবল কাম বেড", point: 1000, home: 1100, type: "simple"},
+    {id: "vip_cum_bed", name: "ভিআইপি কাম বেড", point: 1500, home: 1700, type: "simple"},
+    {id: "dining_table_with_4_chairs", name: "ডাইনিং টেবিল ৪ চেয়ারসহ", point: 2800, home: 3500, type: "simple"},
+    {id: "dining_table_with_6_chairs", name: "ডাইনিং টেবিল ৬ চেয়ারসহ", point: 3500, home: 4500, type: "simple"},
+    {id: "book_shelves_small", name: "বুকসেলফ ছোট", point: 500, home: 800, type: "simple"},
+    {id: "book_shelves_medium", name: "বুকসেলফ মাঝারি", point: 1200, home: 1700, type: "simple"},
+    {id: "book_shelves_big", name: "বুকসেলফ বড়", point: 2200, home: 2600, type: "simple"},
+    {id: "wooden_full_box_bed_6_7", name: "কাঠের ফুল বক্স খাট (৬/৭)", point: 4500, home: 6000, type: "simple"},
+    {id: "wooden_full_box_bed_5_7", name: "কাঠের ফুল বক্স খাট (৫/৭)", point: 4000, home: 5000, type: "simple"},
+    {id: "wooden_semi_box_bed_6_7", name: "কাঠের সেমি বক্স খাট (৬/৭)", point: 3500, home: 4000, type: "simple"},
+    {id: "wooden_semi_box_bed_5_7", name: "কাঠের সেমি বক্স খাট (৫/৭)", point: 3000, home: 3500, type: "simple"},
+    {id: "wooden_general_bed_6_7", name: "কাঠের সাধারণ খাট (৬/৭)", point: 2500, home: 3000, type: "simple"},
+    {id: "wooden_general_bed_5_7", name: "কাঠের সাধারণ খাট (৫/৭)", point: 2000, home: 2500, type: "simple"},
+    {id: "wooden_normal_bed_small_medium", name: "কাঠের সাধারণ খাট ছোট/মাঝারি", point: 1200, home: 1800, type: "simple"},
+    {id: "bed_steel_small", name: "স্টিলের খাট ছোট", point: 1600, home: 2300, type: "simple"},
+    {id: "bed_steel_medium", name: "স্টিলের খাট মাঝারি", point: 2500, home: 3000, type: "simple"},
+    {id: "bed_steel_big", name: "স্টিলের খাট বড়", point: 3000, home: 4000, type: "simple"},
+    {id: "ot_bed", name: "ওটি বেড", point: 1500, home: 2000, type: "simple"},
+    {id: "shoe_rack_wood", name: "কাঠের জুতার র‍্যাক", point: 1000, home: 1500, type: "simple"},
+    {id: "shoe_rack_plastic", name: "প্লাস্টিক জুতার র‍্যাক", point: 700, home: 1200, type: "simple"},
+    {id: "dressing_table", name: "ড্রেসিং টেবিল", point: 2000, home: 3000, type: "simple"},
+    {id: "wooden_wardrobe_medium_4_7", name: "কাঠের ওয়ারড্রব মাঝারি (৪/৭)", point: 2500, home: 3500, type: "simple"},
+    {id: "wooden_wardrobe_big_6_7", name: "কাঠের ওয়ারড্রব বড় (৬/৭)", point: 4000, home: 6000, type: "simple"},
+    {id: "plastic_wardrobe_medium", name: "প্লাস্টিক ওয়ারড্রব মাঝারি", point: 1400, home: 1800, type: "simple"},
+    {id: "plastic_wardrobe_big", name: "প্লাস্টিক ওয়ারড্রব বড়", point: 1800, home: 2200, type: "simple"},
+    {id: "ladder_06fit", name: "মই ০৬ ফুট", point: 600, home: 900, type: "simple"},
+    {id: "ladder_10fit", name: "মই ১০ ফুট", point: 1000, home: 1300, type: "simple"},
+    {id: "parlour_bed_small", name: "পার্লার বেড-ছোট", point: 700, home: 1000, type: "simple"},
+    {id: "parlour_bed_standard", name: "পার্লার বেড-স্ট্যান্ডার্ড", point: 1200, home: 1700, type: "simple"},
+    {id: "travelling_luggage_small", name: "ট্র্যাভেলিং লাগেজ ছোট", point: 400, home: 550, type: "simple"},
+    {id: "travelling_luggage_medium", name: "ট্র্যাভেলিং লাগেজ মাঝারি", point: 550, home: 700, type: "simple"},
+    {id: "travelling_luggage_big", name: "ট্র্যাভেলিং লাগেজ বড়", point: 700, home: 900, type: "simple"},
+    {id: "pillow_per_pcs", name: "বালিশ প্রতি পিস", point: 150, home: 220, type: "simple"},
+    {id: "tyre_5.50_13", name: "টায়ার / 5.50-13LT 95/93K SLG N10", point: 120, home: 200, type: "simple"},
+    {id: "tyre_6.50_16", name: "টায়ার / 6.50-16 SUPERMILLER N10 TT", point: 280, home: 350, type: "simple"},
+    {id: "tyre_7.00_15", name: "টায়ার / 7.00-15LT ESTATE N6", point: 200, home: 300, type: "simple"},
+    {id: "tyre_7.50_16", name: "টায়ার / 7.00-15 SLG N12 EXP", point: 300, home: 400, type: "simple"},
+    {id: "tyre_8.25_20", name: "টায়ার / 8.25-20 SML 99 N16", point: 400, home: 500, type: "simple"},
+    {id: "tyre_9.00_20", name: "টায়ার / 9.00-20 M77 N16 Exp", point: 400, home: 500, type: "simple"},
+    {id: "tyre_10.00_20", name: "টায়ার / 10.00-20 SML SED N16", point: 400, home: 500, type: "simple"},
+    {id: "tyre_11r_22.5", name: "টায়ার / 11R 22.5 S1R4 C R 16 TL", point: 700, home: 900, type: "simple"},
+    {id: "tyre_12.00_20", name: "টায়ার / 12.00R 20 S1M4 TTF", point: 800, home: 1000, type: "simple"},
+    {id: "tyre_315_80r_22.5", name: "টায়ার / 315/80R 22.5 S1N4 R18 TL", point: 1000, home: 1200, type: "simple"},
+    {id: "tyre_bike", name: "টায়ার-বাইক", point: 70, home: 100, type: "simple"},
+    {id: "tyre_tractor_13620", name: "ট্রাক্টর টায়ার 13620", point: 200, home: 250, type: "simple"},
+    {id: "ring_car_small", name: "কার রিং-ছোট", point: 200, home: 300, type: "simple"},
+    {id: "ring_car_medium", name: "কার রিং-মাঝারি", point: 280, home: 400, type: "simple"},
+    {id: "ring_car_big", name: "কার রিং-বড়", point: 420, home: 600, type: "simple"},
+    {id: "ring_car_large", name: "কার রিং-লার্জ", point: 550, home: 750, type: "simple"},
+    {id: "car_parts_ctn_small", name: "গাড়ির পার্টস কার্টন-ছোট", point: 250, home: 350, type: "simple"},
+    {id: "car_parts_ctn_medium", name: "গাড়ির পার্টস কার্টন-মাঝারি", point: 300, home: 400, type: "simple"},
+    {id: "car_parts_ctn_big", name: "গাড়ির পার্টস কার্টন-বড়", point: 400, home: 600, type: "simple"},
+    {id: "guitar_up_to_3kg", name: "গিটার ৩ কেজি পর্যন্ত", point: 150, home: 250, type: "simple"},
+    {id: "guitar_up_to_5kg", name: "গিটার ৫ কেজি পর্যন্ত", point: 250, home: 350, type: "simple"},
+    {id: "tabla_small", name: "তবলা-ছোট", point: 220, home: 300, type: "simple"},
+    {id: "tabla_medium", name: "তবলা-মাঝারি", point: 350, home: 500, type: "simple"},
+    {id: "liquid_jar_up_to_20kg", name: "লিকুইড জার ২০ কেজি পর্যন্ত", point: 120, home: 150, type: "simple"},
+    {id: "liquid_jar_up_to_50kg", name: "লিকুইড জার ৫০ কেজি পর্যন্ত", point: 220, home: 250, type: "simple"},
+    {id: "rice_corn_bag_25kg", name: "চাল/ভুট্টা বস্তা ২৫ কেজি পর্যন্ত", point: 125, home: 150, type: "simple"},
+    {id: "rice_corn_bag_50kg", name: "চাল/ভুট্টা বস্তা ৫০ কেজি পর্যন্ত", point: 150, home: 200, type: "simple"},
+    {id: "carton_small_12", name: "কার্টন ছোট ১২*১২*১২ পর্যন্ত", point: 60, home: 80, type: "simple"},
+    {id: "carton_medium_24", name: "কার্টন মাঝারি ২৪*১৮*১৮ পর্যন্ত", point: 200, home: 220, type: "simple"},
+    {id: "carton_big_36", name: "কার্টন বড় ৩৬*২৪*২৪ পর্যন্ত", point: 400, home: 500, type: "simple"},
+    {id: "mixer_machine_small", name: "মিক্সার মেশিন-ছোট", point: 1400, home: 2000, type: "simple"},
+    {id: "mixer_machine_medium", name: "মিক্সার মেশিন-মাঝারি", point: 2400, home: 3000, type: "simple"},
+    {id: "mixer_machine_big", name: "মিক্সার মেশিন-বড়", point: 3000, home: 4000, type: "simple"},
+    {id: "mixer_machine_with_trolley", name: "ট্রলিসহ মিক্সার মেশিন-বড়", point: 5500, home: 7000, type: "simple"},
+    {id: "server_rack_small", name: "সার্ভার র‍্যাক-ছোট", point: 600, home: 900, type: "simple"},
+    {id: "server_rack_medium", name: "সার্ভার র‍্যাক-মাঝারিসাইজ", point: 1200, home: 1700, type: "simple"},
+    {id: "server_rack_big", name: "সার্ভার র‍্যাক-বড়", point: 2200, home: 3000, type: "simple"},
+    {id: "nebulizer_machine_small", name: "নেবুলাইজার মেশিন-ছোট", point: 200, home: 300, type: "simple"},
+    {id: "dolna_mini", name: "দোলনা-মিনি", point: 300, home: 500, type: "simple"},
+    {id: "dolna_small", name: "দোলনা-ছোট", point: 400, home: 700, type: "simple"},
+    {id: "dolna_medium", name: "দোলনা-মাঝারি", point: 600, home: 1000, type: "simple"},
+    {id: "dolna_big", name: "দোলনা-বড়", point: 800, home: 1300, type: "simple"},
+    {id: "water_tank_500_ltr", name: "ওয়াটার ট্যাংক ৫০০ লিটার", point: 3000, home: 4000, type: "simple"},
+    {id: "water_tank_1000_ltr", name: "ওয়াটার ট্যাংক ১০০০ লিটার", point: 6000, home: 7000, type: "simple"},
+    {id: "sewing_machine_with_table", name: "সেলাই মেশিন টেবিলসহ", point: 1200, home: 1800, type: "simple"},
+    {id: "sewing_machine_table_per_piece", name: "সেলাই মেশিন টেবিল প্রতি পিস", point: 600, home: 1000, type: "simple"},
+    {id: "sewing_machine_manual", name: "সেলাই মেশিন ম্যানুয়াল", point: 800, home: 1300, type: "simple"},
+    {id: "sewing_machine_electric", name: "সেলাই মেশিন ইলেকট্রিক", point: 1000, home: 1500, type: "simple"},
+    {id: "sewing_machine_head", name: "সেলাই মেশিন হেড", point: 200, home: 300, type: "simple"},
+    {id: "oxygen_cylinder_small", name: "অক্সিজেন সিলিন্ডার-ছোট", point: 400, home: 600, type: "simple"},
+    {id: "oxygen_cylinder_medium", name: "অক্সিজেন সিলিন্ডার-মাঝারি", point: 500, home: 700, type: "simple"},
+    {id: "oxygen_cylinder_big", name: "অক্সিজেন সিলিন্ডার-বড়", point: 600, home: 800, type: "simple"},
+    {id: "fire_extinguisher_small", name: "অগ্নি নির্বাপক যন্ত্র-ছোট", point: 150, home: 220, type: "simple"},
+    {id: "fire_extinguisher_medium", name: "অগ্নি নির্বাপক যন্ত্র-মাঝারি", point: 220, home: 300, type: "simple"},
+    {id: "fire_extinguisher_big", name: "অগ্নি নির্বাপক যন্ত্র-বড়", point: 320, home: 500, type: "simple"},
+    {id: "compressor_100_ltr", name: "কম্প্রেসার-১০০ লিটার", point: 1500, home: 2000, type: "simple"},
+    {id: "compressor_200_ltr", name: "কম্প্রেসার-২০০ লিটার", point: 3000, home: 4000, type: "simple"},
+    {id: "compressor_300_ltr", name: "কম্প্রেসার-৩০০ লিটার", point: 4000, home: 5000, type: "simple"},
+    {id: "toner_small", name: "টোনার-ছোট", point: 200, home: 300, type: "simple"},
+    {id: "toner_medium", name: "টোনার-মাঝারি", point: 250, home: 350, type: "simple"},
+    {id: "toner_standard", name: "টোনার-স্ট্যান্ডার্ড", point: 350, home: 450, type: "simple"},
+    {id: "xray_film_carton", name: "এক্স-রে ফিল্ম কার্টন", point: 150, home: 250, type: "simple"},
+    {id: "army_bag_small", name: "আর্মি ব্যাগ-ছোট", point: 300, home: 500, type: "simple"},
+    {id: "army_bag_medium", name: "আর্মি ব্যাগ-মাঝারি", point: 400, home: 600, type: "simple"},
+    {id: "army_bag_big", name: "আর্মি ব্যাগ-বড়", point: 450, home: 700, type: "simple"},
+    {id: "army_trunk_small", name: "আর্মি ট্রাঙ্ক-ছোট", point: 700, home: 1000, type: "simple"},
+    {id: "army_trunk_medium", name: "আর্মি ট্রাঙ্ক-মাঝারি", point: 800, home: 1200, type: "simple"},
+    {id: "army_trunk_big", name: "আর্মি ট্রাঙ্ক-বড়", point: 1300, home: 1800, type: "simple"},
+    {id: "cable_drum_per_kg", name: "ক্যাবল ড্রাম প্রতি কেজি", point: 8, home: 9, type: "simple"},
+    {id: "cable_bundle_medium", name: "ক্যাবল বান্ডিল-মাঝারি", point: 1200, home: 2000, type: "simple"},
+    {id: "honey_drum_up_to_30kg", name: "মধুর ড্রাম ৩০ কেজি পর্যন্ত", point: 200, home: 250, type: "simple"},
+    {id: "honey_drum_up_to_50kg", name: "মধুর ড্রাম ৫০ কেজি পর্যন্ত", point: 300, home: 350, type: "simple"},
+    {id: "lubricant_box_12ltr", name: "লুব্রিকেন্ট বক্স ১২ লিটার পর্যন্ত", point: 80, home: 100, type: "simple"},
+    {id: "lubricant_box_24ltr", name: "লুব্রিকেন্ট বক্স ২৪ লিটার পর্যন্ত", point: 140, home: 180, type: "simple"},
+    {id: "fish_feed_25kg", name: "মাছের খাবার ২৫ কেজি", point: 140, home: 160, type: "simple"},
+    {id: "fish_feed_50kg", name: "মাছের খাবার ৫০ কেজি", point: 250, home: 300, type: "simple"},
+    {id: "cattle_feed_25kg", name: "গরুর পশুর খাবার ২৫ কেজি", point: 150, home: 180, type: "simple"},
+    {id: "cattle_feed_50kg", name: "গরুর পশুর খাবার ৫০ কেজি", point: 250, home: 300, type: "simple"},
+    {id: "gas_stove_single", name: "গ্যাস চুলা সিঙ্গেল", point: 60, home: 100, type: "simple"},
+    {id: "gas_stove_double", name: "গ্যাস চুলা ডাবল", point: 90, home: 150, type: "simple"},
+    {id: "gas_stove_single_glass", name: "গ্যাস চুলা সিঙ্গেল গ্লাস", point: 80, home: 120, type: "simple"},
+    {id: "gas_stove_double_glass", name: "গ্যাস চুলা ডাবল গ্লাস", point: 120, home: 200, type: "simple"},
+    {id: "comforter_single", name: "কমফোর্টার সিঙ্গেল", point: 200, home: 300, type: "simple"},
+    {id: "comforter_double", name: "কমফোর্টার ডাবল", point: 300, home: 450, type: "simple"},
+    {id: "paint_bucket_10l", name: "পেইন্ট বালতি ১০ লিটার পর্যন্ত", point: 80, home: 100, type: "simple"},
+    {id: "paint_bucket_20l", name: "পেইন্ট বালতি ২০ লিটার পর্যন্ত", point: 120, home: 150, type: "simple"},
+    {id: "oil_lubricant_drum_220l", name: "তেল/লুব্রিকেন্ট স্টিল ড্রাম ২২০ লিটার", point: 1400, home: 2000, type: "simple"},
+    {id: "carpet_per_cft", name: "কার্পেট প্রতি সিএফটি", point: 150, home: 180, type: "simple"},
+    {id: "mud_pump_small_wooden_box", name: "মাটির পাম্প- কাঠের বক্স সহ ছোট", point: 350, home: 500, type: "simple"},
+    {id: "mud_pump_medium_wooden_box", name: "মাটির পাম্প- কাঠের বক্স সহ মিডিয়াম", point: 800, home: 1000, type: "simple"},
+    {id: "mud_pump_big_wooden_box", name: "মাটির পাম্প- কাঠের বক্স সহ বড়", point: 1300, home: 1600, type: "simple"},
+    {id: "police_ration_bosta_small", name: "পুলিশ রেশন বস্তা-ছোট", point: 150, home: 200, type: "simple"},
+    {id: "police_ration_bosta_medium", name: "পুলিশ রেশন বস্তা-মাঝারি", point: 220, home: 280, type: "simple"},
+    {id: "police_ration_bosta_big", name: "পুলিশ রেশন বস্তা-বড়", point: 400, home: 600, type: "simple"},
+    
+    // Per-unit items
+    {id: "mattress_4_inch", name: "ম্যাট্রেস ৪ ইঞ্চি থিকনেস পর্যন্ত", point: 25, home: 35, type: "unit", unitName: "Sft"},
+    {id: "mattress_up_to_8", name: "ম্যাট্রেস ৬ থেকে ৮ ইঞ্চি থিকনেস", point: 30, home: 40, type: "unit", unitName: "Sft"},
+    {id: "tea_per_kg", name: "চা প্রতি কেজি", point: 5, home: 6, type: "unit", unitName: "KG"},
+    {id: "shutki_dried_fish", name: "শুটকি মাছ প্রতি কেজি (৪০ কেজির বেশি)", point: 6, home: 7, type: "unit", unitName: "KG"},
+    {id: "supari_betul_nut", name: "সুপারি প্রতি কেজি", point: 5, home: 6, type: "unit", unitName: "KG"},
+    {id: "rice_seed_per_kg", name: "ধানের বীজ প্রতি কেজি", point: 6, home: 7, type: "unit", unitName: "KG"},
+    {id: "nut_per_kg", name: "বাদাম প্রতি কেজি", point: 6, home: 7, type: "unit", unitName: "KG"},
+    {id: "rice_per_kg", name: "চাল প্রতি কেজি", point: 6, home: 8, type: "unit", unitName: "KG"},
+    {id: "carton_per_kg", name: "কার্টন প্রতি কেজি", point: 6, home: 8, type: "unit", unitName: "KG"},
+    {id: "solar_panel", name: "সোলার প্যানেল প্রতি ওয়াট", point: 2.5, home: 3, type: "unit", unitName: "Watt"},
+    {id: "internet_cable", name: "ইন্টারনেট কেবল (ড্রাম - প্রতি মিটার)", point: 2, home: 2.5, type: "unit", unitName: "Meter"},
+    {id: "comforter_king", name: "কমফোর্টার কিং সাইজ (৭ ফুট x ৭.৫ ফুট)", point: 20, home: 30, type: "unit", unitName: "Feet"},
+    {id: "floor_mats_per_cft", name: "ফ্লোর ম্যাট প্রতি সিএফটি", point: 20, home: 22, type: "unit", unitName: "CFT"},
+
+    // Location-based items
+    {id: "wooden_door_chawkat_7_3.5", name: "কাঠের দরজার চৌকাঠ (৭ ফুট বাই ৩.৫ ফুট)", point: { zila: 350, upazila: 400 }, home: { zila: 450, upazila: 500 }, type: "location"},
+    {id: "wooden_door_chawkat_3_2.5", name: "কাঠের দরজার চৌকাঠ (৩ ফুট বাই ২.৫ ফুট)", point: { zila: 250, upazila: 300 }, home: { zila: 350, upazila: 400 }, type: "location"},
+    {id: "wooden_door_palla_3_2.5", name: "দরজার পাল্লা (কাঠ) (৩ ফুট বাই ২.৫ ফুট)", point: { zila: 300, upazila: 350 }, home: { zila: 400, upazila: 450 }, type: "location"},
+    {id: "plastic_door_set_7_2.5", name: "প্লাস্টিক দরজা সেট (৭ ফুট বাই ২.৫ ফুট)", point: { zila: 350, upazila: 400 }, home: { zila: 450, upazila: 500 }, type: "location"},
+    {id: "plastic_door_set_3_2.5", name: "প্লাস্টিক দরজা সেট (৩ ফুট বাই ২.৫ ফুট)", point: { zila: 250, upazila: 300 }, home: { zila: 350, upazila: 400 }, type: "location"},
+    {id: "metal_door_set_7_3.5", name: "মেটাল / স্টিল দরজা (৭ ফুট বাই ৩.৫ ফুট)", point: { zila: 800, upazila: 900 }, home: { zila: 1000, upazila: 1100 }, type: "location"},
+    {id: "metal_door_set_7_5", name: "মেটাল / স্টিল দরজা (৭ ফুট বাই ৫ ফুট)", point: { zila: 1500, upazila: 1600 }, home: { zila: 2000, upazila: 2100 }, type: "location"},
+
+    // Tiered items
+    {id: "bubble_roll", name: "বাবল রোল ৫ কেজি ডেলিভারি বুকিং চার্জ", type: "tiered-location"},
+    {id: "plant_booking", name: "গাছের পয়েন্ট ডেলিভারি বুকিং চার্জ", type: "tiered-weight", tiers: [
+        {max: 14, price: 200}, {max: 20, price: 250}, {max: 25, price: 300}, {max: 30, price: 350}
+    ], extraPerKg: 13, extraStartFrom: 30},
+    {id: "grass_seed", name: "ঘাসের বীজ/চারা পয়েন্ট ডেলিভারি বুকিং চার্জ", type: "tiered-weight", tiers: [
+        {max: 5, price: 100}, {max: 10, price: 200}, {max: 35, price: 250}, {max: 50, price: 400}
+    ], extraPerKg: 7, extraStartFrom: 50},
+    {id: "geo_bag", name: "জিও ব্যাগ পয়েন্ট ডেলিভারি বুকিং চার্জ", type: "tiered-weight-special"},
+    {id: "rice_seed_delivery", name: "ধানের বীজের পয়েন্ট ডেলিভারি বুকিং চার্জ", type: "tiered-weight-rice"},
+    {id: "popcorn_delivery", name: "পপকর্ন পয়েন্ট ডেলিভারি বুকিং চার্জ", type: "location-based-simple", zila: 180, upazila: 200},
+    {id: "straw_delivery_25", name: "খড় পয়েন্ট ডেলিভারি বুকিং চার্জ (২৫ কেজি)", type: "location-based-simple", zila: 280, upazila: 300},
+    {id: "straw_delivery_50", name: "খড় পয়েন্ট ডেলিভারি বুকিং চার্জ (৫০ কেজি)", type: "location-based-simple", zila: 450, upazila: 500},
+    {id: "corn_silage_50", name: "ভুট্টা সাইলেজ পয়েন্ট ডেলিভারি বুকিং চার্জ (৫০ কেজি)", type: "location-based-simple", zila: 300, upazila: 350},
+    {id: "empty_bags_30", name: "প্যাকেজিং বস্তা / খালি বস্তা (৩০ কেজি)", type: "location-based-simple", zila: 450, upazila: 500},
+    {id: "tree_booking", name: "গাছের পয়েন্ট ডেলিভারি বুকিং চার্জ (সর্বোচ্চ ৫ ফুট)", type: "tiered-weight", tiers: [
+        {max: 14, price: 200}, {max: 20, price: 250}, {max: 25, price: 300}, {max: 30, price: 350}
+    ], extraPerKg: 13, extraStartFrom: 30}
+];
+
+$(document).ready(function() {
+    products.sort((a, b) => a.name.localeCompare(b.name, 'bn'));
+    
+    const productSelect = $('#product');
+    
+    products.forEach(p => {
+        productSelect.append(new Option(p.name, p.id));
+    });
+
+    productSelect.select2({
+        placeholder: "পণ্যের নাম লিখে সার্চ করুন...",
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('body')
+    });
+
+    productSelect.on('change', function() {
+        handleProductChange();
+    });
+});
+
+function handleProductChange() {
+    const productId = $('#product').val();
+    const product = products.find(p => p.id === productId);
+    const extraInputsDiv = $('#extra-inputs');
+    extraInputsDiv.html('');
+    $('#result').addClass('hidden');
+
+    if (!product) return;
+
+    if (product.type === 'unit') {
+        extraInputsDiv.html(`
+            <div class="form-group">
+                <label>পরিমাণ (${product.unitName})</label>
+                <input type="number" id="quantity" placeholder="যেমন: 10" min="0.1" step="any">
+            </div>
+        `);
+    } else if (product.type === 'location' || product.type === 'location-based-simple') {
+        extraInputsDiv.html(`
+            <div class="form-group">
+                <label>এলাকা</label>
+                <select id="sub_location">
+                    <option value="zila">জেলা সদর</option>
+                    <option value="upazila">উপজেলা</option>
+                </select>
+            </div>
+        `);
+    } else if (product.type === 'tiered-location') {
+         extraInputsDiv.html(`
+            <div class="form-group">
+                <label>এলাকা</label>
+                <select id="sub_location">
+                    <option value="dhaka">ঢাকার মধ্যে</option>
+                    <option value="outside_dhaka">ঢাকার বাইরে</option>
+                </select>
+            </div>
+        `);
+    } else if (product.type.startsWith('tiered-weight')) {
+        extraInputsDiv.html(`
+            <div class="form-group">
+                <label>ওজন (KG)</label>
+                <input type="number" id="weight" placeholder="যেমন: 22" min="0.1" step="any">
+            </div>
+        `);
+    }
+}
+
+function calculateCharge() {
+    const productId = $('#product').val();
+    const deliveryType = $('input[name="deliveryType"]:checked').val();
+    const resultDiv = $('#result');
+
+    if (!productId) {
+        resultDiv.html("⚠️ অনুগ্রহ করে একটি পণ্য সিলেক্ট করুন।").removeClass('hidden').css('border-left-color', '#ffc107');
+        return;
+    }
+
+    const product = products.find(p => p.id === productId);
+    let charge = 0;
+    let description = `${product.name} | ${deliveryType === 'point' ? 'পয়েন্ট' : 'হোম'} ডেলিভারি`;
+
+    try {
+        switch(product.type) {
+            case 'simple':
+                charge = product[deliveryType];
+                break;
+            
+            case 'unit':
+                const quantity = parseFloat($('#quantity').val());
+                if (!quantity || quantity <= 0) throw new Error(`সঠিক পরিমাণ (${product.unitName}) দিন।`);
+                charge = product[deliveryType] * quantity;
+                description += ` | পরিমাণ: ${quantity} ${product.unitName}`;
+                break;
+
+            case 'location':
+                const subLoc = $('#sub_location').val();
+                charge = product[deliveryType][subLoc];
+                description += ` | এলাকা: ${subLoc === 'zila' ? 'জেলা সদর' : 'উপজেলা'}`;
+                break;
+            
+            case 'location-based-simple':
+                const loc = $('#sub_location').val();
+                charge = (loc === 'zila') ? product.zila : product.upazila;
+                description += ` | এলাকা: ${loc === 'zila' ? 'জেলা সদর' : 'উপজেলা'}`;
+                break;
+            
+            case 'tiered-location':
+                const bubbleLoc = $('#sub_location').val();
+                if(deliveryType === 'point') charge = (bubbleLoc === 'dhaka') ? 250 : 400;
+                else charge = (bubbleLoc === 'dhaka') ? 350 : 500;
+                description += ` | এলাকা: ${bubbleLoc === 'dhaka' ? 'ঢাকার মধ্যে' : 'ঢাকার বাইরে'}`;
+                break;
+
+            case 'tiered-weight':
+                const weight = parseFloat($('#weight').val());
+                if (!weight || weight <= 0) throw new Error("সঠিক ওজন (KG) দিন।");
+                description += ` | ওজন: ${weight} KG`;
+                let foundTier = false;
+                for (const tier of product.tiers) {
+                    if (weight <= tier.max) {
+                        charge = tier.price;
+                        foundTier = true;
+                        break;
+                    }
+                }
+                if (!foundTier) {
+                    if(product.extraPerKg && product.extraStartFrom) {
+                         charge = Math.ceil(weight) * product.extraPerKg;
+                    } else {
+                         charge = product.tiers[product.tiers.length - 1].price;
+                    }
+                }
+                break;
+
+            case 'tiered-weight-special':
+                const geoWeight = parseFloat($('#weight').val());
+                if (!geoWeight || geoWeight <= 0) throw new Error("সঠিক ওজন (KG) দিন।");
+                description += ` | ওজন: ${geoWeight} KG`;
+                if(geoWeight <= 5) charge = 100;
+                else if(geoWeight <= 10) charge = 220;
+                else charge = 220 + (Math.ceil(geoWeight - 10) * 25);
+                break;
+            
+            case 'tiered-weight-rice':
+                const riceWeight = parseFloat($('#weight').val());
+                if (!riceWeight || riceWeight <= 0) throw new Error("সঠিক ওজন (KG) দিন।");
+                description += ` | ওজন: ${riceWeight} KG`;
+                if(riceWeight < 25) charge = 150;
+                else charge = 150 + (Math.ceil(riceWeight - 25) * 6);
+                break;
+
+            default:
+                throw new Error("এই পণ্যের জন্য চার্জ হিসাব করা সম্ভব নয়।");
+        }
+        
+        resultDiv.html(`✅ মোট চার্জ: <b>৳${Math.ceil(charge)}</b><br><small>${description}</small>`).removeClass('hidden').css('border-left-color', '#28a745');
+
+    } catch (e) {
+        resultDiv.html(`⚠️ ${e.message}`).removeClass('hidden').css('border-left-color', '#dc3545');
+    }
+}
+</script>
+
+</body>
+</html>

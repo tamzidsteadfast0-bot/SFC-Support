@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<title>আম ডেলিভারি চার্জ ক্যালকুলেটর</title>
+<style>
+  body { 
+    font-family: 'Hind Siliguri', Arial, sans-serif; 
+    background-color: #f0fff4; /* Light Mint Green */
+    padding: 20px;
+  }
+  .container {
+    max-width: 550px;
+    margin: auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 80, 0, 0.1);
+    border-top: 5px solid #2e8b57; /* Sea Green */
+  }
+  h2 {
+    text-align: center;
+    color: #2e8b57;
+    margin-bottom: 25px;
+  }
+  .form-group {
+    margin-bottom: 18px;
+  }
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #333;
+  }
+  select, input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box; /* Important for padding */
+  }
+  button {
+    width: 100%;
+    padding: 14px;
+    background-color: #ff8c00; /* Dark Orange - Mango color */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #e07b00;
+  }
+  .result {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e8f5e9; /* Light Green */
+    border-left: 5px solid #4caf50; /* Green */
+    border-radius: 8px;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+  .result b {
+    font-size: 22px;
+    color: #2e7d32;
+  }
+  .result small {
+      color: #555;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>🥭 আম ডেলিভারি চার্জ ক্যালকুলেটর</h2>
+
+  <div class="form-group">
+    <label for="location">ডেলিভারি এরিয়া</label>
+    <select id="location">
+      <option value="dhaka_city">ঢাকা সিটি</option>
+      <option value="district_city">সারাদেশ (জেলা/সিটি)</option>
+      <option value="upazila">সারাদেশ (উপজেলা)</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="delivery_type">ডেলিভারির ধরণ</label>
+    <select id="delivery_type">
+      <option value="point">পয়েন্ট ডেলিভারি</option>
+      <option value="home">হোম ডেলিভারি</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="weight">ওজন (কেজি)</label>
+    <input type="number" id="weight" placeholder="যেমন: 15" min="1" step="0.1">
+  </div>
+
+  <button onclick="calculateMangoCharge()">চার্জ হিসাব করুন</button>
+
+  <div class="result" id="result">এখানে মোট চার্জ দেখানো হবে...</div>
+</div>
+
+<script>
+function calculateMangoCharge() {
+  const location = document.getElementById('location').value;
+  const deliveryType = document.getElementById('delivery_type').value;
+  const weight = parseFloat(document.getElementById('weight').value);
+  const resultDiv = document.getElementById('result');
+
+  if (!weight || weight <= 0) {
+    resultDiv.innerHTML = "⚠️ অনুগ্রহ করে সঠিক ওজন ইনপুট দিন।";
+    resultDiv.style.borderColor = '#d32f2f'; // Red for error
+    return;
+  }
+
+  let perKgRate = 0;
+  let minCharge = 0;
+
+  // Determine Per KG Rate based on weight and location
+  if (weight < 20) {
+    if (location === 'dhaka_city') {
+      perKgRate = (deliveryType === 'point') ? 13 : 22;
+    } else if (location === 'district_city') {
+      perKgRate = (deliveryType === 'point') ? 16 : 24;
+    } else { // upazila
+      perKgRate = (deliveryType === 'point') ? 18 : 26;
+    }
+  } else { // 20 KG or more
+    if (location === 'dhaka_city') {
+      perKgRate = (deliveryType === 'point') ? 12 : 20;
+    } else if (location === 'district_city') {
+      perKgRate = (deliveryType === 'point') ? 16 : 22;
+    } else { // upazila
+      perKgRate = (deliveryType === 'point') ? 16 : 24;
+    }
+  }
+
+  // Determine Minimum Booking Charge
+  if (location === 'dhaka_city') {
+    minCharge = (deliveryType === 'point') ? 100 : 120;
+  } else { // Outside Dhaka (District/Upazila)
+    minCharge = (deliveryType === 'point') ? 120 : 130;
+  }
+
+  // Calculate the charge and compare with minimum
+  const calculatedCharge = weight * perKgRate;
+  const finalCharge = Math.max(calculatedCharge, minCharge);
+
+  // Display the result
+  resultDiv.style.borderColor = '#4caf50'; // Green for success
+  resultDiv.innerHTML = `
+    ✅ মোট ডেলিভারি চার্জ: <b>৳${Math.ceil(finalCharge)}</b>
+    <hr style="border:0; border-top: 1px solid #ddd; margin: 8px 0;">
+    <small>
+      <b>হিসাবের বিবরণ:</b><br>
+      ওজন অনুযায়ী চার্জ: ${weight} কেজি × ৳${perKgRate}/কেজি = ৳${calculatedCharge.toFixed(2)}<br>
+      এই রুটের সর্বনিম্ন চার্জ: ৳${minCharge}<br>
+      (যেহেতু সর্বনিম্ন চার্জ প্রযোজ্য, তাই চূড়ান্ত চার্জ নির্ধারিত হয়েছে)
+    </small>
+  `;
+
+  // Adjust message if calculated charge is higher
+  if (calculatedCharge > minCharge) {
+      resultDiv.innerHTML = `
+        ✅ মোট ডেলিভারি চার্জ: <b>৳${Math.ceil(finalCharge)}</b>
+        <hr style="border:0; border-top: 1px solid #ddd; margin: 8px 0;">
+        <small>
+          <b>হিসাবের বিবরণ:</b><br>
+          ওজন অনুযায়ী চার্জ: ${weight} কেজি × ৳${perKgRate}/কেজি = ৳${calculatedCharge.toFixed(2)}
+        </small>
+      `;
+  }
+}
+</script>
+
+</body>
+</html>
