@@ -1,109 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator Portal</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:Arial, sans-serif;
-        }
+<title>IR Support Portal</title>
 
-        body{
-            background:#f4f6f9;
-        }
+<style>
 
-        header{
-            background:#0d6efd;
-            color:white;
-            padding:20px;
-            text-align:center;
-            font-size:28px;
-            font-weight:bold;
-        }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
+}
 
-        .container{
-            width:90%;
-            max-width:1100px;
-            margin:40px auto;
-        }
+body{
+    background:#f5f7fb;
+}
 
-        .cards{
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-            gap:20px;
-        }
+/* Header */
 
-        .card{
-            background:white;
-            border-radius:10px;
-            padding:30px;
-            text-align:center;
-            box-shadow:0 5px 15px rgba(0,0,0,.1);
-        }
+header{
+    background:#0d6efd;
+    color:#fff;
+    text-align:center;
+    padding:25px;
+    box-shadow:0 2px 10px rgba(0,0,0,.15);
+}
 
-        .card h2{
-            margin-bottom:20px;
-        }
+header h1{
+    font-size:34px;
+}
 
-        .card a{
-            display:inline-block;
-            text-decoration:none;
-            background:#0d6efd;
-            color:white;
-            padding:10px 20px;
-            border-radius:5px;
-        }
+header p{
+    margin-top:8px;
+    font-size:15px;
+    opacity:.9;
+}
 
-        .card a:hover{
-            background:#084298;
-        }
-    </style>
+/* Container */
+
+.container{
+    width:90%;
+    max-width:1200px;
+    margin:40px auto;
+}
+
+/* Cards */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:25px;
+}
+
+.card{
+    background:#fff;
+    border-radius:15px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 15px 35px rgba(0,0,0,.15);
+}
+
+.card h2{
+    margin-bottom:20px;
+    color:#333;
+    font-size:24px;
+}
+
+.card p{
+    color:#666;
+    margin-bottom:25px;
+}
+
+.card a{
+    display:inline-block;
+    text-decoration:none;
+    background:#0d6efd;
+    color:#fff;
+    padding:12px 25px;
+    border-radius:8px;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.card a:hover{
+    background:#084298;
+}
+
+/* Footer */
+
+footer{
+    margin-top:60px;
+    background:#0d6efd;
+    color:white;
+    text-align:center;
+    padding:18px;
+    font-size:14px;
+}
+
+</style>
 
 </head>
+
 <body>
 
 <header>
-    IR Support Portal
+
+<h1>IR Support Portal</h1>
+
+<p>Steadfast Customer Care Internal Tools</p>
+
 </header>
 
 <div class="container">
 
-    <div class="cards">
+<div class="cards">
 
-        <div class="card">
-            <h2>Regular Charge</h2>
-            <a href="Regular Charge.html">Open</a>
-        </div>
+<!-- Regular Charge -->
 
-        <div class="card">
-            <h2>Mango Charge</h2>
-            <a href="Mango Charge.html">Open</a>
-        </div>
+<div class="card">
 
-        <div class="card">
-            <h2>Offline Charge</h2>
-            <a href="Offline Charge.html">Open</a>
-        </div>
+<h2>💰 Regular Charge</h2>
 
-        <div class="card">
-            <h2>Hub Emergency Contact</h2>
-            <a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0"
-               target="_blank">
-                <h2>Duty Roster</h2>
-            <a href="https://docs.google.com/spreadsheets/d/1YQQnCBFFJNu7K65TrmSBT0aAJVPlCvNrc_oDUImSgZQ/edit?gid=1425212002#gid=1425212002"
-               target="_blank">
-               Open Sheet
-            </a>
-        </div>
+<p>Open Regular Charge Calculator</p>
 
-    </div>
+<a href="Regular Charge.html">
+
+Open Calculator
+
+</a>
 
 </div>
+
+<!-- Mango Charge -->
+
+<div class="card">
+
+<h2>🥭 Mango Charge</h2>
+
+<p>Open Mango Charge Calculator</p>
+
+<a href="Mango Charge.html">
+
+Open Calculator
+
+</a>
+
+</div>
+
+<!-- Offline Charge -->
+
+<div class="card">
+
+<h2>📦 Offline Charge</h2>
+
+<p>Open Offline Charge Calculator</p>
+
+<a href="Offline Charge.html">
+
+Open Calculator
+
+</a>
+
+</div>
+
+<!-- Hub Emergency -->
+
+<div class="card">
+
+<h2>📞 Hub Emergency Contact</h2>
+
+<p>View Hub Emergency Contact List</p>
+
+<a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0"
+target="_blank">
+
+Open Sheet
+
+</a>
+
+</div>
+
+<!-- Duty Roster -->
+
+<div class="card">
+
+<h2>📅 Duty Roster</h2>
+
+<p>Open Daily Duty Roster</p>
+
+<a href="https://docs.google.com/spreadsheets/d/1YQQnCBFFJNu7K65TrmSBT0aAJVPlCvNrc_oDUImSgZQ/edit?gid=1425212002#gid=1425212002"
+target="_blank">
+
+Open Sheet
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<footer>
+
+© 2026 IR Support Portal | Developed for Steadfast Customer Care
+
+</footer>
 
 </body>
 </html>
