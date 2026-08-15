@@ -1,668 +1,987 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <title>Offline Parcel Courier Charge Calculator</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet" />
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-            background-color: #f8f9fa; 
-            padding: 20px; 
-            color: #333; 
-        }
-        .container { 
-            max-width: 700px; 
-            margin: auto; 
-            background: #fff; 
-            padding: 25px; 
-            border-radius: 10px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
-        }
-        h2 { text-align: center; color: #0056b3; margin-bottom: 25px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; }
-        input[type="number"], button, select:not(.select2-hidden-accessible) { 
-            width: 100%; 
-            padding: 12px; 
-            border-radius: 6px; 
-            border: 1px solid #ced4da; 
-            font-size: 16px; 
-            box-sizing: border-box; 
-        }
-        
-        /* ===== Select2 FIXED STYLING ===== */
-        .select2-container {
-            width: 100% !important;
-            display: block !important;
-        }
-        .select2-container--default .select2-selection--single {
-            height: 48px !important;
-            border: 1px solid #ced4da !important;
-            border-radius: 6px !important;
-            padding: 0 !important;
-            display: flex !important;
-            align-items: center !important;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 48px !important;
-            padding-left: 12px !important;
-            padding-right: 30px !important;
-            color: #333 !important;
-            font-size: 16px !important;
-            width: 100% !important;
-            display: block !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 46px !important;
-            width: 30px !important;
-            right: 5px !important;
-            top: 0 !important;
-            position: absolute !important;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__arrow b {
-            top: 50% !important;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__placeholder {
-            color: #999 !important;
-            line-height: 48px !important;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__clear {
-            position: absolute !important;
-            right: 30px !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            font-size: 20px !important;
-            color: #999 !important;
-        }
-        /* Dropdown styling */
-        .select2-dropdown {
-            border: 1px solid #ced4da !important;
-            border-radius: 6px !important;
-            z-index: 99999 !important;
-        }
-        .select2-container--open .select2-dropdown {
-            z-index: 99999 !important;
-        }
-        .select2-search--dropdown .select2-search__field {
-            padding: 8px !important;
-            border: 1px solid #ced4da !important;
-            border-radius: 4px !important;
-            font-size: 15px !important;
-        }
-        .select2-results__option {
-            padding: 10px 12px !important;
-            font-size: 15px !important;
-        }
-        .select2-container--default .select2-results__option--highlighted[aria-selected] {
-            background-color: #007bff !important;
-            color: white !important;
-        }
-        /* ===== END Select2 STYLING ===== */
-        
-        button { 
-            background-color: #007bff; 
-            color: white; 
-            font-weight: bold; 
-            border: none; 
-            cursor: pointer; 
-            transition: background-color 0.3s; 
-            margin-top: 10px; 
-        }
-        button:hover { background-color: #0056b3; }
-        .radio-group { 
-            display: flex; 
-            gap: 20px; 
-            padding: 10px; 
-            border: 1px solid #ced4da; 
-            border-radius: 6px; 
-        }
-        .radio-group label { margin-bottom: 0; font-weight: normal; cursor: pointer; }
-        .result { 
-            margin-top: 25px; 
-            padding: 20px; 
-            background-color: #e9f7ef; 
-            border-left: 5px solid #28a745; 
-            border-radius: 6px; 
-            font-size: 18px; 
-            line-height: 1.7; 
-        }
-        .result b { font-size: 24px; color: #155724; }
-        .result small { color: #555; }
-        .hidden { display: none; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SFC Charge Calculator</title>
+<style>
+:root{
+  --primary:#2563eb;
+  --secondary:#0f172a;
+  --success:#16a34a;
+  --danger:#dc2626;
+  --warning:#f59e0b;
+  --bg:#f1f5f9;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(135deg,#dbeafe,#f8fafc);
+  color:var(--text);
+  font-family:Segoe UI, "Noto Sans Bengali", Arial, sans-serif;
+}
+.app{
+  max-width:1100px;
+  margin:24px auto;
+  padding:0 14px 40px;
+}
+.header{
+  background:linear-gradient(135deg,#0f172a,#1e3a8a);
+  color:#fff;
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 15px 40px rgba(15,23,42,.25);
+  text-align:center;
+}
+.header h1{margin:0;font-size:26px}
+.header p{margin:6px 0 0;color:#cbd5e1;font-size:14px}
+.badge{
+  display:inline-block;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:13px;
+  margin-top:12px;
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(15,23,42,.08);
+}
+.service-box{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.radio-pill{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:2px solid var(--border);
+  padding:12px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  background:#fff;
+  font-weight:700;
+  transition:.15s;
+}
+.radio-pill:has(input:checked){
+  border-color:var(--primary);
+  background:#eff6ff;
+  color:var(--primary);
+}
+.radio-pill input{accent-color:var(--primary)}
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.form-group{position:relative}
+.form-group label{
+  display:block;
+  font-size:13px;
+  color:var(--muted);
+  font-weight:700;
+  margin-bottom:6px;
+}
+input,select{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px 13px;
+  outline:none;
+  font-size:15px;
+  background:#fff;
+  font-family:inherit;
+}
+input:focus,select:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 4px rgba(37,99,235,.12);
+}
+.search-wrap{position:relative}
+.suggestions{
+  position:absolute;
+  z-index:50;
+  top:100%;
+  left:0;
+  right:0;
+  margin-top:6px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 20px 40px rgba(15,23,42,.18);
+  overflow:hidden;
+  display:none;
+  max-height:360px;
+  overflow-y:auto;
+}
+.suggestions.show{display:block}
+.suggestion{
+  padding:11px 12px;
+  border-bottom:1px solid #f1f5f9;
+  cursor:pointer;
+}
+.suggestion:hover{background:#eff6ff}
+.suggestion b{font-size:14px}
+.suggestion small{display:block;color:var(--muted);margin-top:3px}
+.suggestion .meta{
+  color:var(--primary);
+  font-size:12px;
+  font-weight:700;
+  margin-top:5px;
+}
+.selected-box{
+  border:1px dashed #bfdbfe;
+  background:#eff6ff;
+  border-radius:16px;
+  padding:16px;
+  margin-top:16px;
+}
+.selected-box h3{margin:0 0 4px;font-size:17px;color:#0f172a}
+.selected-box .bn{margin:0;color:var(--muted);font-size:13px}
+.warning{
+  margin:12px 0 0;
+  background:#fffbeb;
+  border:1px solid #fde68a;
+  color:#92400e;
+  padding:10px 12px;
+  border-radius:12px;
+  font-size:13px;
+}
+.result-box{
+  margin-top:18px;
+  background:linear-gradient(135deg,#16a34a,#15803d);
+  color:#fff;
+  border-radius:18px;
+  padding:24px;
+  text-align:center;
+  box-shadow:0 15px 30px rgba(22,163,74,.25);
+}
+.result-box .label{
+  color:#dcfce7;
+  font-size:14px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.result-box .amount{
+  font-size:52px;
+  font-weight:900;
+  line-height:1.1;
+}
+.result-box .details{
+  color:#dcfce7;
+  font-size:13px;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.2);
+}
+.empty-result{
+  background:#f8fafc;
+  color:var(--muted);
+  border:2px dashed var(--border);
+}
+.empty-result .amount{color:#94a3b8}
+.reset-btn{
+  width:100%;
+  margin-top:14px;
+  border:0;
+  border-radius:12px;
+  padding:13px;
+  font-weight:800;
+  cursor:pointer;
+  background:#e2e8f0;
+  color:var(--text);
+  font-size:15px;
+  transition:.15s;
+}
+.reset-btn:hover{background:#cbd5e1}
+
+/* ============ Layout for Sidebar ============ */
+.main-layout{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:18px;
+  margin-top:18px;
+}
+@media(min-width:960px){
+  .main-layout{
+    grid-template-columns:1fr 1fr;
+    align-items:start;
+  }
+}
+
+/* ============ Notice/Terms Box ============ */
+.notice-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(15,23,42,.08);
+}
+.notice-card h3.warn-box{
+  color:#dc2626;
+  font-size:15px;
+  background:#fef2f2;
+  border-left:4px solid #dc2626;
+  padding:10px 12px;
+  border-radius:10px;
+  margin:0 0 16px;
+  font-weight:800;
+}
+.notice-card h4{
+  color:#0f172a;
+  font-size:15px;
+  margin:18px 0 10px;
+  padding-bottom:6px;
+  border-bottom:2px solid #e2e8f0;
+}
+.notice-card h4:first-of-type{margin-top:0}
+.notice-list{
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+.notice-list li{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  padding:8px 0;
+  font-size:13px;
+  line-height:1.6;
+  color:#334155;
+  border-bottom:1px dashed #f1f5f9;
+}
+.notice-list li:last-child{border-bottom:none}
+.notice-list li .ic{
+  flex-shrink:0;
+  margin-top:1px;
+}
+.notice-list.numbered{
+  counter-reset:item;
+}
+.notice-list.numbered li{
+  counter-increment:item;
+  padding-left:4px;
+}
+.notice-list.numbered li::before{
+  content:counter(item)".";
+  font-weight:800;
+  color:#dc2626;
+  margin-right:6px;
+  flex-shrink:0;
+}
+.prohibited-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px 14px;
+}
+@media(max-width:500px){
+  .prohibited-grid{grid-template-columns:1fr}
+}
+.prohibited-grid li{
+  border-bottom:none;
+  padding:6px 0;
+  font-size:13px;
+}
+.final-warn{
+  margin-top:14px;
+  background:#fef2f2;
+  border:1px solid #fecaca;
+  color:#991b1b;
+  padding:10px 12px;
+  border-radius:10px;
+  font-size:12.5px;
+  font-weight:700;
+  text-align:center;
+}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .header h1{font-size:22px}
+  .result-box .amount{font-size:42px}
+}
+@media print{
+  .notice-card{display:none!important}
+}
+</style>
 </head>
 <body>
+<div class="app">
+  <header class="header">
+    <h1>🚚 SFC Charge Calculator</h1>
+    <p>Product search করুন → charge instantly দেখুন</p>
+    <div class="badge">Total Products: <b id="productCount">0</b></div>
+  </header>
 
-<div class="container">
-    <h2>📦 Offline Parcel Courier Charge Calculator</h2>
+  <div class="main-layout">
+    <!-- LEFT: Calculator -->
+    <section class="card">
+      <div class="service-box">
+        <label class="radio-pill">
+          <input type="radio" name="service" value="point" checked>
+          📍 SFC Point Charge
+        </label>
+        <label class="radio-pill">
+          <input type="radio" name="service" value="home">
+          🏠 SFC Home Charge
+        </label>
+      </div>
 
-    <div class="form-group">
-        <label for="product">পণ্যের নাম</label>
-        <select id="product" style="width: 100%;">
-            <option value="">প্রথমে একটি পণ্য সিলেক্ট করুন...</option>
-        </select>
-    </div>
+      <div class="form-group search-wrap">
+        <label>Product Search (English / বাংলা)</label>
+        <input id="searchInput" type="text" placeholder="Product name লিখুন..." autocomplete="off">
+        <div id="suggestions" class="suggestions"></div>
+      </div>
 
-    <div class="form-group">
-        <label>ডেলিভারির ধরণ</label>
-        <div class="radio-group">
-            <label><input type="radio" name="deliveryType" value="point" checked> SFC Point Charge</label>
-            <label><input type="radio" name="deliveryType" value="home"> SFC Home Charge</label>
-        </div>
-    </div>
-    
-    <div id="extra-inputs"></div>
+      <div id="fieldBox" class="selected-box">
+        <h3>Product select করুন</h3>
+        <p class="bn">Search box থেকে product choose করলে charge calculation দেখাবে।</p>
+      </div>
 
-    <button onclick="calculateCharge()">Calculate Charge</button>
+      <div class="result-box empty-result" id="resultBox">
+        <div class="label">Charge Amount</div>
+        <div class="amount">৳ 0</div>
+      </div>
 
-    <div class="result hidden" id="result"></div>
+      <button class="reset-btn" onclick="resetSelection()">🔄 Reset / New Calculation</button>
+    </section>
+
+    <!-- RIGHT: Notice / Terms -->
+    <aside class="notice-card">
+      <h3 class="warn-box">⚠️ বিশেষ দ্রষ্টব্য: পয়েন্ট ডেলিভারি সর্বনিম্ন চার্জ ১০০ টাকা।</h3>
+
+      <h4>📋 বুকিংয়ের শর্তাবলী</h4>
+      <ul class="notice-list">
+        <li><span class="ic">🔸</span> ভঙ্গুর পণ্য (যেমন: মাটির তৈরি আসবাবপত্র, শোপিস, কাঁচের সামগ্রী ইত্যাদি) ক্ষতিগ্রস্ত হলে রিফান্ড বা ক্ষতিপূরণ প্রদান করা হবে না।</li>
+        <li><span class="ic">🔸</span> তরল (Liquid) পণ্য ক্ষতিগ্রস্ত, লিকেজ বা নষ্ট হলে রিফান্ড বা ক্ষতিপূরণ প্রদান করা হবে না।</li>
+        <li><span class="ic">🔸</span> টিভি, এসি, ফ্রিজ, বিভিন্ন মেশিনারিজ এবং অন্যান্য সংবেদনশীল (Sensitive) ইলেকট্রনিক পণ্য অবশ্যই কাঠের বক্স (Wooden Box)-এ প্যাকিং করে বুকিং করতে হবে। অন্যথায় ক্ষতির দায় কর্তৃপক্ষ নেবে না।</li>
+        <li><span class="ic">🔸</span> বুকিংয়ের সময় পণ্যের প্রকৃত বিবরণ ও সঠিক মূল্য ঘোষণা করা বাধ্যতামূলক।</li>
+        <li><span class="ic">🔸</span> অপর্যাপ্ত বা ক্রুটিপূর্ণ প্যাকেজিংয়ের কারণে কোনো ক্ষতি হলে তার দায় প্রেরককে বহন করতে হবে।</li>
+        <li><span class="ic">🔸</span> পার্সেল বুকিং সম্পন্ন হওয়ার পর বুকিং বাতিল করলে মোট ডেলিভারি চার্জের ৩০% ক্যান্সেলেশন চার্জ প্রযোজ্য হবে।</li>
+        <li><span class="ic">🔸</span> যেকোনো ধরনের ফার্নিচার আইটেমের ক্ষেত্রে কোনো রিফান্ড প্রদান করা হবে না।</li>
+      </ul>
+
+      <h4>🚫 বুকিং নিষিদ্ধ পণ্য সমূহ</h4>
+      <ul class="notice-list numbered prohibited-grid">
+        <li>মাদকদ্রব্য</li>
+        <li>পানি সহ ব্যাটারী</li>
+        <li>গ্যাস সহ সিলিন্ডার</li>
+        <li>তেলভর্তি মোটরসাইকেল</li>
+        <li>তেলভর্তি জেনারেটর</li>
+        <li>দাহা পদার্থ</li>
+        <li>দাহা কেমিক্যাল</li>
+        <li>নগদ টাকা/ব্যাংক চেক</li>
+        <li>স্বর্ণালংকার</li>
+        <li>পোষ্যপ্রাণী/জীবত মাছ</li>
+        <li>কারেন্ট জাল</li>
+        <li>স্বচ্ছ পলিথিন ব্যাগ</li>
+        <li>বন বিভাগের অনুমতি বিহীন কাঠ</li>
+        <li>নিষিদ্ধ, অবৈধ বা আইনবিরোধী কোনো পণ্য বুকিং করা যাবে না।</li>
+      </ul>
+
+      <div class="final-warn">
+        ⚠️ উপরের শর্তাবলী না মানলে ক্ষতিপূরণ/রিফান্ড প্রদান করা হবে না।
+      </div>
+    </aside>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
-
 <script>
-const products = [
-    {id: "button_mobile", name: "বাটন মোবাইল", point: 100, home: 140, type: "simple"},
-	{id: "Smart Mobile /Tab", name: "স্মার্ট মোবাইল / ট্যাব", point: 150, home: 180, type: "simple"},
-    {id: "laptop", name: "ল্যাপটপ", point: 300, home: 400, type: "simple"},
-    {id: "led_22_26", name: "LED 22\"-26\" with Wooden Box", point: 400, home: 600, type: "simple"},
-    {id: "led_28_32", name: "LED 28\"-32\" with Wooden Box", point: 600, home: 800, type: "simple"},
-    {id: "led_43_52", name: "LED 43\"-52\" with Wooden Box", point: 850, home: 950, type: "simple"},
-    {id: "monitor_19", name: "Monitor 19\" with Wooden Box", point: 300, home: 400, type: "simple"},
-    {id: "monitor_24", name: "Monitor 24\" with Wooden Box", point: 400, home: 450, type: "simple"},
-    {id: "tv_24_32", name: "TV 24\"-32\" with Wooden Box", point: 700, home: 900, type: "simple"},
-    {id: "computer_full_set", name: "কম্পিউটার ফুল সেট with Wooden Box", point: 700, home: 1000, type: "simple"},
-    {id: "microwave_small", name: "মাইক্রোওয়েভ ওভেন ছোট", point: 300, home: 400, type: "simple"},
-    {id: "microwave_medium", name: "মাইক্রোওয়েভ ওভেন মাঝারি", point: 350, home: 450, type: "simple"},
-    {id: "microwave_big", name: "মাইক্রোওয়েভ ওভেন বড়", point: 600, home: 800, type: "simple"},
-    {id: "rice_cooker_small", name: "রাইস কুকার ছোট", point: 200, home: 350, type: "simple"},
-    {id: "rice_cooker_big", name: "রাইস কুকার বড়", point: 500, home: 700, type: "simple"},
-    {id: "electric_kettle", name: "ইলেকট্রিক কেটেল", point: 150, home: 250, type: "simple"},
-    {id: "refrigerator", name: "রেফ্রিজারেটর", point: 180, home: 220, type: "simple"},
-    {id: "deep_fridge_small", name: "ডিপ ফ্রিজ- ছোট", point: 1000, home: 1500, type: "simple"},
-    {id: "deep_fridge_medium", name: "ডিপ ফ্রিজ- মাঝারি", point: 1500, home: 2000, type: "simple"},
-    {id: "deep_fridge_big", name: "ডিপ ফ্রিজ- বড়", point: 2000, home: 3000, type: "simple"},
-    {id: "compressor_fridge_per_piece", name: "ফ্রিজ কম্প্রেসর প্রতি পিস", point: 200, home: 350, type: "simple"},
-    {id: "compressor_ac_per_piece", name: "এসি কম্প্রেসর প্রতি পিস", point: 250, home: 400, type: "simple"},
-    {id: "stabilizer", name: "Stabilizer", point: 200, home: 350, type: "simple"},
-    {id: "ac_1_to_1.5_ton", name: "এয়ার কন্ডিশনার (১ টন থেকে ১.৫ টন)", point: 1000, home: 1500, type: "simple"},
-    {id: "ac_2_ton", name: "এয়ার কন্ডিশনার (২ টন)", point: 1200, home: 1800, type: "simple"},
-    {id: "ac_3_to_4_ton", name: "এয়ার কন্ডিশনার (৩ টন থেকে ৪ টন)", point: 1600, home: 2000, type: "simple"},
-    {id: "ac_angle", name: "এসি এঙ্গেল", point: 300, home: 500, type: "simple"},
-    {id: "washing_machine_small", name: "ওয়াশিং মেশিন ছোট", point: 450, home: 800, type: "simple"},
-    {id: "washing_machine_medium", name: "ওয়াশিং মেশিন মাঝারি", point: 900, home: 1200, type: "simple"},
-    {id: "washing_machine_big", name: "ওয়াশিং মেশিন বড়", point: 1200, home: 1600, type: "simple"},
-    {id: "ceiling_fan", name: "সিলিং ফ্যান", point: 130, home: 200, type: "simple"},
-    {id: "electric_iron", name: "ইলেকট্রিক আয়রন", point: 100, home: 150, type: "simple"},
-    {id: "drill_machine_small", name: "ড্রিল মেশিন ছোট", point: 500, home: 700, type: "simple"},
-    {id: "drill_machine_medium", name: "ড্রিল মেশিন মাঝারি", point: 800, home: 1000, type: "simple"},
-    {id: "drill_machine_big", name: "ড্রিল মেশিন বড়", point: 1200, home: 1500, type: "simple"},
-    {id: "grass_cutter_with_motor", name: "ঘাস কাটার মেশিন মোটরসহ", point: 700, home: 1200, type: "simple"},
-    {id: "grass_cutter_without_motor", name: "ঘাস কাটার মেশিন মোটর ছাড়া", point: 600, home: 1000, type: "simple"},
-    {id: "welding_machine_small", name: "ওয়েল্ডিং মেশিন ছোট", point: 400, home: 700, type: "simple"},
-    {id: "welding_machine_medium", name: "ওয়েল্ডিং মেশিন মাঝারি", point: 750, home: 1200, type: "simple"},
-    {id: "welding_machine_big", name: "ওয়েল্ডিং মেশিন বড়", point: 1200, home: 1800, type: "simple"},
-    {id: "pedestal_table_fan_small", name: "প্যাডেস্টাল / টেবিল ফ্যান ছোট", point: 250, home: 350, type: "simple"},
-    {id: "pedestal_table_fan_medium", name: "প্যাডেস্টাল / টেবিল ফ্যান মাঝারি", point: 400, home: 600, type: "simple"},
-    {id: "pedestal_table_fan_big", name: "প্যাডেস্টাল / টেবিল ফ্যান বড়", point: 700, home: 1000, type: "simple"},
-    {id: "ventilation_exhaust_fan_small", name: "ভেন্টিলেশন / এগজস্ট ফ্যান ছোট", point: 300, home: 400, type: "simple"},
-    {id: "ventilation_exhaust_fan_medium", name: "ভেন্টিলেশন / এগজস্ট ফ্যান মাঝারি", point: 400, home: 600, type: "simple"},
-    {id: "ventilation_exhaust_fan_big", name: "ভেন্টিলেশন / এগজস্ট ফ্যান বড়", point: 600, home: 1000, type: "simple"},
-    {id: "dry_battery_rickshaw_4pcs", name: "ড্রাই ব্যাটারি-রিক্সার/ভ্যান ৪ পিস", point: 220, home: 250, type: "simple"},
-    {id: "dry_battery_rickshaw_2pcs", name: "ড্রাই ব্যাটারি-রিক্সার/ভ্যান ২ পিস", point: 150, home: 300, type: "simple"},
-    {id: "easy_bike_mishuk_battery_no_water", name: "ইজি বাইক / মিশুক ব্যাটারি পানি ছাড়া", point: 150, home: 250, type: "simple"},
-    {id: "bike_electric", name: "বাইক ইলেকট্রিক", point: 2500, home: 3500, type: "simple"},
-    {id: "wheelchair_electric", name: "হুইলচেয়ার ইলেকট্রিক", point: 1200, home: 1600, type: "simple"},
-    {id: "ips_battery_medium", name: "আইপিএস ব্যাটারি মাঝারি", point: 450, home: 600, type: "simple"},
-    {id: "ips_battery_big", name: "আইপিএস ব্যাটারি বড়", point: 700, home: 900, type: "simple"},
-    {id: "ups_small", name: "ইউপিএস-ছোট", point: 350, home: 450, type: "simple"},
-    {id: "ups_big", name: "ইউপিএস-বড়", point: 550, home: 750, type: "simple"},
-    {id: "transformer", name: "ট্রান্সফরমার", point: 130, home: 150, type: "simple"},
-    {id: "ips_battery", name: "আইপিএস ব্যাটারি", point: 150, home: 250, type: "simple"},
-    {id: "lithium_battery", name: "লিথিয়াম ব্যাটারি", point: 120, home: 200, type: "simple"},
-    {id: "electric_vehicle_charger", name: "ইলেকট্রিক ভেহিকল চার্জার", point: 120, home: 200, type: "simple"},
-    {id: "rickshaw_van", name: "রিকশা / ভ্যান", point: 6500, home: 8500, type: "simple"},
-    {id: "easy_bike_auto", name: "ইজি বাইক / অটো", point: 8500, home: 10500, type: "simple"},
-    {id: "cng_per_pcs", name: "সিএনজি প্রতি পিস", point: 9000, home: 11000, type: "simple"},
-    {id: "electric_motorcycle_scooter", name: "ইলেকট্রিক মোটরসাইকেল / স্কুটার", point: 2500, home: 3000, type: "simple"},
-    {id: "blender_juicer_machine", name: "ব্লেন্ডার / জুসার মেশিন", point: 220, home: 300, type: "simple"},
-    {id: "fry_pan_set_box", name: "ফ্রাই প্যান সেট বক্স", point: 250, home: 350, type: "simple"},
-    {id: "blower_machine", name: "ব্লোয়ার মেশিন", point: 200, home: 250, type: "simple"},
-    {id: "camera_small", name: "ক্যামেরা ছোট", point: 250, home: 350, type: "simple"},
-    {id: "camera_standard", name: "ক্যামেরা স্ট্যান্ডার্ড", point: 400, home: 600, type: "simple"},
-    {id: "camera_dslr", name: "ক্যামেরা ডিএসএলআর", point: 1000, home: 1200, type: "simple"},
-    {id: "cc_camera", name: "সিসি ক্যামেরা", point: 120, home: 200, type: "simple"},
-    {id: "router", name: "রাউটার", point: 180, home: 300, type: "simple"},
-    {id: "coffee_machine_small", name: "কফি মেশিন-ছোট", point: 300, home: 500, type: "simple"},
-    {id: "coffee_machine_medium", name: "কফি মেশিন-মাঝারি", point: 500, home: 700, type: "simple"},
-    {id: "coffee_machine_big", name: "কফি মেশিন-বড়", point: 700, home: 1000, type: "simple"},
-    {id: "electric_motor_up_to_3hp", name: "ইলেকট্রিক মোটর ৩ এইচপি/কেডব্লিউ পর্যন্ত", point: 150, home: 250, type: "simple"},
-    {id: "electric_motor_up_to_5hp", name: "ইলেকট্রিক মোটর ৫ এইচপি/কেডব্লিউ পর্যন্ত", point: 600, home: 900, type: "simple"},
-    {id: "electric_motor_up_to_10hp", name: "ইলেকট্রিক মোটর ১০ এইচপি/কেডব্লিউ পর্যন্ত", point: 1200, home: 1500, type: "simple"},
-    {id: "photocopy_machine_small", name: "ফটোকপি মেশিন ছোট", point: 700, home: 1000, type: "simple"},
-    {id: "photocopy_machine_medium", name: "ফটোকপি মেশিন মাঝারি", point: 1000, home: 1300, type: "simple"},
-    {id: "photocopy_machine_big", name: "ফটোকপি মেশিন বড়", point: 1200, home: 1700, type: "simple"},
-    {id: "printer_small", name: "প্রিন্টার ছোট", point: 250, home: 400, type: "simple"},
-    {id: "printer_medium", name: "প্রিন্টার মাঝারি", point: 400, home: 700, type: "simple"},
-    {id: "printer_big", name: "প্রিন্টার বড়", point: 900, home: 1200, type: "simple"},
-    {id: "laminating_machine_small", name: "লেমিনেটিং মেশিন-ছোট", point: 300, home: 450, type: "simple"},
-    {id: "laminating_machine_medium", name: "লেমিনেটিং মেশিন-মাঝারি", point: 500, home: 750, type: "simple"},
-    {id: "laminating_machine_big", name: "লেমিনেটিং মেশিন-বড়", point: 800, home: 1100, type: "simple"},
-    {id: "speaker_small", name: "স্পিকার, ছোট", point: 500, home: 700, type: "simple"},
-    {id: "speaker_medium", name: "স্পিকার, মাঝারি", point: 800, home: 1000, type: "simple"},
-    {id: "speaker_big", name: "স্পিকার, বড়", point: 1100, home: 1500, type: "simple"},
-    {id: "money_counting_machine", name: "মানি কাউন্টিং মেশিন", point: 800, home: 1200, type: "simple"},
-    {id: "vending_machine_standard", name: "ভেন্ডিং মেশিন স্ট্যান্ডার্ড", point: 3300, home: 4000, type: "simple"},
-    {id: "incubator_18_19", name: "ইনকিউবেটর ১৮”-১৯”", point: 500, home: 800, type: "simple"},
-    {id: "incubator_30_40", name: "ইনকিউবেটর ৩০”-৪০”", point: 800, home: 1000, type: "simple"},
-    {id: "incubator_50_60", name: "ইনকিউবেটর ৫০”-৬০”", point: 1500, home: 2000, type: "simple"},
-    {id: "incubator_70_77", name: "ইনকিউবেটর ৭০”-৭৭”", point: 2000, home: 3000, type: "simple"},
-    {id: "geyser_up_to_10ltr", name: "গিজার ১০ লিটার পর্যন্ত", point: 150, home: 250, type: "simple"},
-    {id: "geyser_up_to_30ltr", name: "গিজার ৩০ লিটার পর্যন্ত", point: 250, home: 350, type: "simple"},
-    {id: "geyser_up_to_50ltr", name: "গিজার ৫০ লিটার পর্যন্ত", point: 350, home: 450, type: "simple"},
-    {id: "pureit_classic_filter", name: "পিউরিট ক্লাসিক ফিল্টার", point: 250, home: 350, type: "simple"},
-    {id: "pureit_ro_uv_filter", name: "পিউরিট আরও-ইউভি ফিল্টার", point: 300, home: 500, type: "simple"},
-    {id: "pureit_water_tank", name: "পিউরিট ওয়াটার ট্যাংক", point: 650, home: 900, type: "simple"},
-    {id: "water_filter_wooden_box", name: "ওয়াটার ফিল্টার- কাঠের বক্সসহ", point: 400, home: 500, type: "simple"},
-    {id: "water_filter_mini", name: "ওয়াটার ফিল্টার-মিনি", point: 300, home: 500, type: "simple"},
-    {id: "water_filter_medium", name: "ওয়াটার ফিল্টার-মাঝারি", point: 500, home: 800, type: "simple"},
-    {id: "generator_per_kva", name: "জেনারেটর প্রতি কেভিএ", point: 350, home: 500, type: "simple"},
-    {id: "portable_air_cooler_20l", name: "পোর্টেবল এয়ার কুলার ২০ লিটার", point: 220, home: 350, type: "simple"},
-    {id: "portable_air_cooler_45l", name: "পোর্টেবল এয়ার কুলার ৪৫ লিটার", point: 350, home: 450, type: "simple"},
-    {id: "portable_air_cooler_60l", name: "পোর্টেবল এয়ার কুলার ৬০ লিটার", point: 500, home: 800, type: "simple"},
-    {id: "bicycle_small", name: "বাইসাইকেল ছোট", point: 500, home: 700, type: "simple"},
-    {id: "bicycle_medium", name: "বাইসাইকেল মাঝারি", point: 700, home: 900, type: "simple"},
-    {id: "bicycle_big", name: "বাইসাইকেল বড়", point: 900, home: 1200, type: "simple"},
-    {id: "gym_cycle_small", name: "জিম সাইকেল ছোট", point: 800, home: 1200, type: "simple"},
-    {id: "gym_cycle_medium", name: "জিম সাইকেল মাঝারি", point: 1200, home: 1600, type: "simple"},
-    {id: "gym_cycle_big", name: "জিম সাইকেল বড়", point: 1600, home: 2000, type: "simple"},
-    {id: "treadmill_small", name: "ট্রেডমিল-ছোট", point: 1400, home: 1800, type: "simple"},
-    {id: "treadmill_medium", name: "ট্রেডমিল-মাঝারি", point: 1600, home: 2200, type: "simple"},
-    {id: "treadmill_big", name: "ট্রেডমিল-বড়", point: 2500, home: 3200, type: "simple"},
-    {id: "cricket_bat_per_pcs", name: "ক্রিকেট ব্যাট", point: 120, home: 220, type: "simple"},
-    {id: "racket_bat_per_pcs", name: "র‍্যাকেট ব্যাট", point: 110, home: 170, type: "simple"},
-    {id: "motorcycle_80_100cc", name: "মোটরসাইকেল ৮০ সিসি থেকে ১০০ সিসি", point: 3000, home: 3500, type: "simple"},
-    {id: "motorcycle_120_150cc", name: "মোটরসাইকেল ১২০ সিসি থেকে ১৫০ সিসি", point: 3500, home: 4500, type: "simple"},
-    {id: "helmet", name: "হেলমেট", point: 200, home: 280, type: "simple"},
-    {id: "trunk_small", name: "ট্রাঙ্ক ছোট", point: 300, home: 500, type: "simple"},
-    {id: "trunk_medium", name: "ট্রাঙ্ক মাঝারি", point: 550, home: 800, type: "simple"},
-    {id: "trunk_big", name: "ট্রাঙ্ক বড়", point: 1500, home: 2500, type: "simple"},
-    {id: "shallow_machine_mini", name: "শ্যালো মেশিন মিনি", point: 1000, home: 1500, type: "simple"},
-    {id: "shallow_machine_small", name: "শ্যালো মেশিন ছোট", point: 3500, home: 4500, type: "simple"},
-    {id: "shallow_machine_medium", name: "শ্যালো মেশিন মাঝারি", point: 6500, home: 8500, type: "simple"},
-    {id: "power_tiller", name: "পাওয়ার টিলার", point: 16000, home: 20000, type: "simple"},
-    {id: "rice_machine", name: "রাইস মেশিন", point: 1300, home: 1800, type: "simple"},
-    {id: "kitchen_rack_small", name: "কিচেন র‍্যাক ছোট", point: 400, home: 600, type: "simple"},
-    {id: "kitchen_rack_medium", name: "কিচেন র‍্যাক মাঝারি", point: 700, home: 1000, type: "simple"},
-    {id: "kitchen_rack_big", name: "কিচেন র‍্যাক বড়", point: 1000, home: 1500, type: "simple"},
-    {id: "chair_wheel_electric_medium", name: "হুইলচেয়ার ইলেকট্রিক-মাঝারি", point: 1000, home: 1300, type: "simple"},
-    {id: "chair_wheel_electric_big", name: "হুইলচেয়ার ইলেকট্রিক-বড়", point: 1200, home: 1700, type: "simple"},
-    {id: "carrom_board_below_45", name: "ক্যারাম বোর্ড ৪৫” এর নিচে", point: 250, home: 400, type: "simple"},
-    {id: "carrom_board_45", name: "ক্যারাম বোর্ড ৪৫”", point: 300, home: 500, type: "simple"},
-    {id: "carrom_board_50_56", name: "ক্যারাম বোর্ড ৫০-৫৬”", point: 400, home: 600, type: "simple"},
-    {id: "alna_wooden_metal", name: "আলনা (কাঠের/মেটাল)", point: 1000, home: 1300, type: "simple"},
-    {id: "file_cabinet_4_drawers", name: "ফাইল কেবিনেট ৪ ড্রয়ার", point: 1200, home: 1600, type: "simple"},
-    {id: "almira_wood_steel_small", name: "আলমারি কাঠ-স্টিল ছোট", point: 2200, home: 3000, type: "simple"},
-    {id: "almira_wood_steel_standard", name: "আলমারি কাঠ-স্টিল স্ট্যান্ডার্ড", point: 3300, home: 4000, type: "simple"},
-    {id: "almira_wood_steel_double_door", name: "আলমারি কাঠ-স্টিল ডাবল ডোর", point: 4500, home: 6000, type: "simple"},
-    {id: "visiting_chair", name: "ভিজিটিং চেয়ার", point: 150, home: 200, type: "simple"},
-    {id: "general_executive_chair", name: "জেনারেল এক্সিকিউটিভ চেয়ার", point: 200, home: 300, type: "simple"},
-    {id: "executive_chair_revolving", name: "এক্সিকিউটিভ চেয়ার (রিভলভিং)", point: 250, home: 380, type: "simple"},
-    {id: "luxury_boss_chair", name: "লাক্সারি / বস চেয়ার এক্সিকিউটিভ রিভলভিং", point: 800, home: 1100, type: "simple"},
-    {id: "chair_wooden_standard", name: "চেয়ার কাঠের স্ট্যান্ডার্ড", point: 500, home: 700, type: "simple"},
-    {id: "rocking_chair", name: "রকিং চেয়ার", point: 700, home: 900, type: "simple"},
-    {id: "chair_dental", name: "ডেন্টাল চেয়ার", point: 6000, home: 8000, type: "simple"},
-    {id: "chair_dental_with_machine", name: "ডেন্টাল চেয়ার মেশিনসহ", point: 7000, home: 9000, type: "simple"},
-    {id: "salon_chair_with_stand", name: "স্যালন চেয়ার স্ট্যান্ড সহ", point: 700, home: 1200, type: "simple"},
-    {id: "plastic_stool", name: "প্লাস্টিক টুল", point: 100, home: 150, type: "simple"},
-    {id: "steel_tool", name: "স্টিল টুল", point: 150, home: 250, type: "simple"},
-    {id: "normal_foam_sofa_5_seat_no_handle", name: "সাধারণ ফোম সোফা ৫ সিট হাতল ছাড়া", point: 1500, home: 2000, type: "simple"},
-    {id: "normal_foam_sofa_5_seat_with_handle", name: "সাধারণ ফোম সোফা ৫ সিট হাতলসহ", point: 3000, home: 3500, type: "simple"},
-    {id: "luxury_vip_foam_sofa_5_seat", name: "লাক্সারি / ভিআইপি ফোম সোফা ৫ সিট", point: 2000, home: 2500, type: "simple"},
-    {id: "vip_wooden_sofa_5_seat", name: "ভিআইপি কাঠের সোফা ৫ সিট", point: 3500, home: 4200, type: "simple"},
-    {id: "sofa_tea_table", name: "সোফা টি-টেবিল", point: 450, home: 600, type: "simple"},
-    {id: "devine_sofa", name: "বিলাসবহুল সোফা", point: 1800, home: 2200, type: "simple"},
-    {id: "mini_cum_bed", name: "মিনি কাম বেড", point: 550, home: 650, type: "simple"},
-    {id: "single_cum_bed", name: "সিঙ্গেল কাম বেড", point: 750, home: 850, type: "simple"},
-    {id: "double_cum_bed", name: "ডাবল কাম বেড", point: 1000, home: 1100, type: "simple"},
-    {id: "vip_cum_bed", name: "ভিআইপি কাম বেড", point: 1500, home: 1700, type: "simple"},
-    {id: "dining_table_with_4_chairs", name: "ডাইনিং টেবিল ৪ চেয়ারসহ", point: 2800, home: 3500, type: "simple"},
-    {id: "dining_table_with_6_chairs", name: "ডাইনিং টেবিল ৬ চেয়ারসহ", point: 3500, home: 4500, type: "simple"},
-    {id: "book_shelves_small", name: "বুকসেলফ ছোট", point: 500, home: 800, type: "simple"},
-    {id: "book_shelves_medium", name: "বুকসেলফ মাঝারি", point: 1200, home: 1700, type: "simple"},
-    {id: "book_shelves_big", name: "বুকসেলফ বড়", point: 2200, home: 2600, type: "simple"},
-    {id: "wooden_full_box_bed_6_7", name: "কাঠের ফুল বক্স খাট (৬/৭)", point: 4500, home: 6000, type: "simple"},
-    {id: "wooden_full_box_bed_5_7", name: "কাঠের ফুল বক্স খাট (৫/৭)", point: 4000, home: 5000, type: "simple"},
-    {id: "wooden_semi_box_bed_6_7", name: "কাঠের সেমি বক্স খাট (৬/৭)", point: 3500, home: 4000, type: "simple"},
-    {id: "wooden_semi_box_bed_5_7", name: "কাঠের সেমি বক্স খাট (৫/৭)", point: 3000, home: 3500, type: "simple"},
-    {id: "wooden_general_bed_6_7", name: "কাঠের সাধারণ খাট (৬/৭)", point: 2500, home: 3000, type: "simple"},
-    {id: "wooden_general_bed_5_7", name: "কাঠের সাধারণ খাট (৫/৭)", point: 2000, home: 2500, type: "simple"},
-    {id: "wooden_normal_bed_small_medium", name: "কাঠের সাধারণ খাট ছোট/মাঝারি", point: 1200, home: 1800, type: "simple"},
-    {id: "bed_steel_small", name: "স্টিলের খাট ছোট", point: 1600, home: 2300, type: "simple"},
-    {id: "bed_steel_medium", name: "স্টিলের খাট মাঝারি", point: 2500, home: 3000, type: "simple"},
-    {id: "bed_steel_big", name: "স্টিলের খাট বড়", point: 3000, home: 4000, type: "simple"},
-    {id: "ot_bed", name: "ওটি বেড", point: 1500, home: 2000, type: "simple"},
-    {id: "shoe_rack_wood", name: "কাঠের জুতার র‍্যাক", point: 1000, home: 1500, type: "simple"},
-    {id: "shoe_rack_plastic", name: "প্লাস্টিক জুতার র‍্যাক", point: 700, home: 1200, type: "simple"},
-    {id: "dressing_table", name: "ড্রেসিং টেবিল", point: 2000, home: 3000, type: "simple"},
-    {id: "wooden_wardrobe_medium_4_7", name: "কাঠের ওয়ারড্রব মাঝারি (৪/৭)", point: 2500, home: 3500, type: "simple"},
-    {id: "wooden_wardrobe_big_6_7", name: "কাঠের ওয়ারড্রব বড় (৬/৭)", point: 4000, home: 6000, type: "simple"},
-    {id: "plastic_wardrobe_medium", name: "প্লাস্টিক ওয়ারড্রব মাঝারি", point: 1400, home: 1800, type: "simple"},
-    {id: "plastic_wardrobe_big", name: "প্লাস্টিক ওয়ারড্রব বড়", point: 1800, home: 2200, type: "simple"},
-    {id: "ladder_06fit", name: "মই ০৬ ফুট", point: 600, home: 900, type: "simple"},
-    {id: "ladder_10fit", name: "মই ১০ ফুট", point: 1000, home: 1300, type: "simple"},
-    {id: "parlour_bed_small", name: "পার্লার বেড-ছোট", point: 700, home: 1000, type: "simple"},
-    {id: "parlour_bed_standard", name: "পার্লার বেড-স্ট্যান্ডার্ড", point: 1200, home: 1700, type: "simple"},
-    {id: "travelling_luggage_small", name: "ট্র্যাভেলিং লাগেজ ছোট", point: 400, home: 550, type: "simple"},
-    {id: "travelling_luggage_medium", name: "ট্র্যাভেলিং লাগেজ মাঝারি", point: 550, home: 700, type: "simple"},
-    {id: "travelling_luggage_big", name: "ট্র্যাভেলিং লাগেজ বড়", point: 700, home: 900, type: "simple"},
-    {id: "pillow_per_pcs", name: "বালিশ প্রতি পিস", point: 150, home: 220, type: "simple"},
-    {id: "tyre_5.50_13", name: "টায়ার / 5.50-13LT 95/93K SLG N10", point: 120, home: 200, type: "simple"},
-    {id: "tyre_6.50_16", name: "টায়ার / 6.50-16 SUPERMILLER N10 TT", point: 280, home: 350, type: "simple"},
-    {id: "tyre_7.00_15", name: "টায়ার / 7.00-15LT ESTATE N6", point: 200, home: 300, type: "simple"},
-    {id: "tyre_7.50_16", name: "টায়ার / 7.00-15 SLG N12 EXP", point: 300, home: 400, type: "simple"},
-    {id: "tyre_8.25_20", name: "টায়ার / 8.25-20 SML 99 N16", point: 400, home: 500, type: "simple"},
-    {id: "tyre_9.00_20", name: "টায়ার / 9.00-20 M77 N16 Exp", point: 400, home: 500, type: "simple"},
-    {id: "tyre_10.00_20", name: "টায়ার / 10.00-20 SML SED N16", point: 400, home: 500, type: "simple"},
-    {id: "tyre_11r_22.5", name: "টায়ার / 11R 22.5 S1R4 C R 16 TL", point: 700, home: 900, type: "simple"},
-    {id: "tyre_12.00_20", name: "টায়ার / 12.00R 20 S1M4 TTF", point: 800, home: 1000, type: "simple"},
-    {id: "tyre_315_80r_22.5", name: "টায়ার / 315/80R 22.5 S1N4 R18 TL", point: 1000, home: 1200, type: "simple"},
-    {id: "tyre_bike", name: "টায়ার-বাইক", point: 70, home: 100, type: "simple"},
-    {id: "tyre_tractor_13620", name: "ট্রাক্টর টায়ার 13620", point: 200, home: 250, type: "simple"},
-    {id: "ring_car_small", name: "কার রিং-ছোট", point: 200, home: 300, type: "simple"},
-    {id: "ring_car_medium", name: "কার রিং-মাঝারি", point: 280, home: 400, type: "simple"},
-    {id: "ring_car_big", name: "কার রিং-বড়", point: 420, home: 600, type: "simple"},
-    {id: "ring_car_large", name: "কার রিং-লার্জ", point: 550, home: 750, type: "simple"},
-    {id: "car_parts_ctn_small", name: "গাড়ির পার্টস কার্টন-ছোট", point: 250, home: 350, type: "simple"},
-    {id: "car_parts_ctn_medium", name: "গাড়ির পার্টস কার্টন-মাঝারি", point: 300, home: 400, type: "simple"},
-    {id: "car_parts_ctn_big", name: "গাড়ির পার্টস কার্টন-বড়", point: 400, home: 600, type: "simple"},
-    {id: "guitar_up_to_3kg", name: "গিটার ৩ কেজি পর্যন্ত", point: 150, home: 250, type: "simple"},
-    {id: "guitar_up_to_5kg", name: "গিটার ৫ কেজি পর্যন্ত", point: 250, home: 350, type: "simple"},
-    {id: "tabla_small", name: "তবলা-ছোট", point: 220, home: 300, type: "simple"},
-    {id: "tabla_medium", name: "তবলা-মাঝারি", point: 350, home: 500, type: "simple"},
-    {id: "liquid_jar_up_to_20kg", name: "লিকুইড জার ২০ কেজি পর্যন্ত", point: 120, home: 150, type: "simple"},
-    {id: "liquid_jar_up_to_50kg", name: "লিকুইড জার ৫০ কেজি পর্যন্ত", point: 220, home: 250, type: "simple"},
-    {id: "rice_corn_bag_25kg", name: "চাল/ভুট্টা বস্তা ২৫ কেজি পর্যন্ত", point: 125, home: 150, type: "simple"},
-    {id: "rice_corn_bag_50kg", name: "চাল/ভুট্টা বস্তা ৫০ কেজি পর্যন্ত", point: 150, home: 200, type: "simple"},
-    {id: "carton_small_12", name: "কার্টন ছোট ১২*১২*১২ পর্যন্ত", point: 60, home: 80, type: "simple"},
-    {id: "carton_medium_24", name: "কার্টন মাঝারি ২৪*১৮*১৮ পর্যন্ত", point: 200, home: 220, type: "simple"},
-    {id: "carton_big_36", name: "কার্টন বড় ৩৬*২৪*২৪ পর্যন্ত", point: 400, home: 500, type: "simple"},
-    {id: "mixer_machine_small", name: "মিক্সার মেশিন-ছোট", point: 1400, home: 2000, type: "simple"},
-    {id: "mixer_machine_medium", name: "মিক্সার মেশিন-মাঝারি", point: 2400, home: 3000, type: "simple"},
-    {id: "mixer_machine_big", name: "মিক্সার মেশিন-বড়", point: 3000, home: 4000, type: "simple"},
-    {id: "mixer_machine_with_trolley", name: "ট্রলিসহ মিক্সার মেশিন-বড়", point: 5500, home: 7000, type: "simple"},
-    {id: "server_rack_small", name: "সার্ভার র‍্যাক-ছোট", point: 600, home: 900, type: "simple"},
-    {id: "server_rack_medium", name: "সার্ভার র‍্যাক-মাঝারিসাইজ", point: 1200, home: 1700, type: "simple"},
-    {id: "server_rack_big", name: "সার্ভার র‍্যাক-বড়", point: 2200, home: 3000, type: "simple"},
-    {id: "nebulizer_machine_small", name: "নেবুলাইজার মেশিন-ছোট", point: 200, home: 300, type: "simple"},
-    {id: "dolna_mini", name: "দোলনা-মিনি", point: 300, home: 500, type: "simple"},
-    {id: "dolna_small", name: "দোলনা-ছোট", point: 400, home: 700, type: "simple"},
-    {id: "dolna_medium", name: "দোলনা-মাঝারি", point: 600, home: 1000, type: "simple"},
-    {id: "dolna_big", name: "দোলনা-বড়", point: 800, home: 1300, type: "simple"},
-    {id: "water_tank_500_ltr", name: "ওয়াটার ট্যাংক ৫০০ লিটার", point: 3000, home: 4000, type: "simple"},
-    {id: "water_tank_1000_ltr", name: "ওয়াটার ট্যাংক ১০০০ লিটার", point: 6000, home: 7000, type: "simple"},
-    {id: "sewing_machine_with_table", name: "সেলাই মেশিন টেবিলসহ", point: 1200, home: 1800, type: "simple"},
-    {id: "sewing_machine_table_per_piece", name: "সেলাই মেশিন টেবিল প্রতি পিস", point: 600, home: 1000, type: "simple"},
-    {id: "sewing_machine_manual", name: "সেলাই মেশিন ম্যানুয়াল", point: 800, home: 1300, type: "simple"},
-    {id: "sewing_machine_electric", name: "সেলাই মেশিন ইলেকট্রিক", point: 1000, home: 1500, type: "simple"},
-    {id: "sewing_machine_head", name: "সেলাই মেশিন হেড", point: 200, home: 300, type: "simple"},
-    {id: "oxygen_cylinder_small", name: "অক্সিজেন সিলিন্ডার-ছোট", point: 400, home: 600, type: "simple"},
-    {id: "oxygen_cylinder_medium", name: "অক্সিজেন সিলিন্ডার-মাঝারি", point: 500, home: 700, type: "simple"},
-    {id: "oxygen_cylinder_big", name: "অক্সিজেন সিলিন্ডার-বড়", point: 600, home: 800, type: "simple"},
-    {id: "fire_extinguisher_small", name: "অগ্নি নির্বাপক যন্ত্র-ছোট", point: 150, home: 220, type: "simple"},
-    {id: "fire_extinguisher_medium", name: "অগ্নি নির্বাপক যন্ত্র-মাঝারি", point: 220, home: 300, type: "simple"},
-    {id: "fire_extinguisher_big", name: "অগ্নি নির্বাপক যন্ত্র-বড়", point: 320, home: 500, type: "simple"},
-    {id: "compressor_100_ltr", name: "কম্প্রেসার-১০০ লিটার", point: 1500, home: 2000, type: "simple"},
-    {id: "compressor_200_ltr", name: "কম্প্রেসার-২০০ লিটার", point: 3000, home: 4000, type: "simple"},
-    {id: "compressor_300_ltr", name: "কম্প্রেসার-৩০০ লিটার", point: 4000, home: 5000, type: "simple"},
-    {id: "toner_small", name: "টোনার-ছোট", point: 200, home: 300, type: "simple"},
-    {id: "toner_medium", name: "টোনার-মাঝারি", point: 250, home: 350, type: "simple"},
-    {id: "toner_standard", name: "টোনার-স্ট্যান্ডার্ড", point: 350, home: 450, type: "simple"},
-    {id: "xray_film_carton", name: "এক্স-রে ফিল্ম কার্টন", point: 150, home: 250, type: "simple"},
-    {id: "army_bag_small", name: "আর্মি ব্যাগ-ছোট", point: 300, home: 500, type: "simple"},
-    {id: "army_bag_medium", name: "আর্মি ব্যাগ-মাঝারি", point: 400, home: 600, type: "simple"},
-    {id: "army_bag_big", name: "আর্মি ব্যাগ-বড়", point: 450, home: 700, type: "simple"},
-    {id: "army_trunk_small", name: "আর্মি ট্রাঙ্ক-ছোট", point: 700, home: 1000, type: "simple"},
-    {id: "army_trunk_medium", name: "আর্মি ট্রাঙ্ক-মাঝারি", point: 800, home: 1200, type: "simple"},
-    {id: "army_trunk_big", name: "আর্মি ট্রাঙ্ক-বড়", point: 1300, home: 1800, type: "simple"},
-    {id: "cable_drum_per_kg", name: "ক্যাবল ড্রাম প্রতি কেজি", point: 8, home: 9, type: "simple"},
-    {id: "cable_bundle_medium", name: "ক্যাবল বান্ডিল-মাঝারি", point: 1200, home: 2000, type: "simple"},
-    {id: "honey_drum_up_to_30kg", name: "মধুর ড্রাম ৩০ কেজি পর্যন্ত", point: 200, home: 250, type: "simple"},
-    {id: "honey_drum_up_to_50kg", name: "মধুর ড্রাম ৫০ কেজি পর্যন্ত", point: 300, home: 350, type: "simple"},
-    {id: "lubricant_box_12ltr", name: "লুব্রিকেন্ট বক্স ১২ লিটার পর্যন্ত", point: 80, home: 100, type: "simple"},
-    {id: "lubricant_box_24ltr", name: "লুব্রিকেন্ট বক্স ২৪ লিটার পর্যন্ত", point: 140, home: 180, type: "simple"},
-    {id: "fish_feed_25kg", name: "মাছের খাবার ২৫ কেজি", point: 140, home: 160, type: "simple"},
-    {id: "fish_feed_50kg", name: "মাছের খাবার ৫০ কেজি", point: 250, home: 300, type: "simple"},
-    {id: "cattle_feed_25kg", name: "গরুর পশুর খাবার ২৫ কেজি", point: 150, home: 180, type: "simple"},
-    {id: "cattle_feed_50kg", name: "গরুর পশুর খাবার ৫০ কেজি", point: 250, home: 300, type: "simple"},
-    {id: "gas_stove_single", name: "গ্যাস চুলা সিঙ্গেল", point: 60, home: 100, type: "simple"},
-    {id: "gas_stove_double", name: "গ্যাস চুলা ডাবল", point: 90, home: 150, type: "simple"},
-    {id: "gas_stove_single_glass", name: "গ্যাস চুলা সিঙ্গেল গ্লাস", point: 80, home: 120, type: "simple"},
-    {id: "gas_stove_double_glass", name: "গ্যাস চুলা ডাবল গ্লাস", point: 120, home: 200, type: "simple"},
-    {id: "comforter_single", name: "কমফোর্টার সিঙ্গেল", point: 200, home: 300, type: "simple"},
-    {id: "comforter_double", name: "কমফোর্টার ডাবল", point: 300, home: 450, type: "simple"},
-    {id: "paint_bucket_10l", name: "পেইন্ট বালতি ১০ লিটার পর্যন্ত", point: 80, home: 100, type: "simple"},
-    {id: "paint_bucket_20l", name: "পেইন্ট বালতি ২০ লিটার পর্যন্ত", point: 120, home: 150, type: "simple"},
-    {id: "oil_lubricant_drum_220l", name: "তেল/লুব্রিকেন্ট স্টিল ড্রাম ২২০ লিটার", point: 1400, home: 2000, type: "simple"},
-    {id: "carpet_per_cft", name: "কার্পেট প্রতি সিএফটি", point: 150, home: 180, type: "simple"},
-    {id: "mud_pump_small_wooden_box", name: "মাটির পাম্প- কাঠের বক্স সহ ছোট", point: 350, home: 500, type: "simple"},
-    {id: "mud_pump_medium_wooden_box", name: "মাটির পাম্প- কাঠের বক্স সহ মিডিয়াম", point: 800, home: 1000, type: "simple"},
-    {id: "mud_pump_big_wooden_box", name: "মাটির পাম্প- কাঠের বক্স সহ বড়", point: 1300, home: 1600, type: "simple"},
-    {id: "police_ration_bosta_small", name: "পুলিশ রেশন বস্তা-ছোট", point: 150, home: 200, type: "simple"},
-    {id: "police_ration_bosta_medium", name: "পুলিশ রেশন বস্তা-মাঝারি", point: 220, home: 280, type: "simple"},
-    {id: "police_ration_bosta_big", name: "পুলিশ রেশন বস্তা-বড়", point: 400, home: 600, type: "simple"},
-    
-    // Per-unit items
-    {id: "mattress_4_inch", name: "ম্যাট্রেস ৪ ইঞ্চি থিকনেস পর্যন্ত", point: 25, home: 35, type: "unit", unitName: "Sft"},
-    {id: "mattress_up_to_8", name: "ম্যাট্রেস ৬ থেকে ৮ ইঞ্চি থিকনেস", point: 30, home: 40, type: "unit", unitName: "Sft"},
-    {id: "tea_per_kg", name: "চা প্রতি কেজি", point: 5, home: 6, type: "unit", unitName: "KG"},
-    {id: "shutki_dried_fish", name: "শুটকি মাছ প্রতি কেজি (৪০ কেজির বেশি)", point: 6, home: 7, type: "unit", unitName: "KG"},
-    {id: "supari_betul_nut", name: "সুপারি প্রতি কেজি", point: 5, home: 6, type: "unit", unitName: "KG"},
-    {id: "rice_seed_per_kg", name: "ধানের বীজ প্রতি কেজি", point: 6, home: 7, type: "unit", unitName: "KG"},
-    {id: "nut_per_kg", name: "বাদাম প্রতি কেজি", point: 6, home: 7, type: "unit", unitName: "KG"},
-    {id: "rice_per_kg", name: "চাল প্রতি কেজি", point: 6, home: 8, type: "unit", unitName: "KG"},
-    {id: "carton_per_kg", name: "কার্টন প্রতি কেজি", point: 6, home: 8, type: "unit", unitName: "KG"},
-    {id: "solar_panel", name: "সোলার প্যানেল প্রতি ওয়াট", point: 2.5, home: 3, type: "unit", unitName: "Watt"},
-    {id: "internet_cable", name: "ইন্টারনেট কেবল (ড্রাম - প্রতি মিটার)", point: 2, home: 2.5, type: "unit", unitName: "Meter"},
-    {id: "comforter_king", name: "কমফোর্টার কিং সাইজ (৭ ফুট x ৭.৫ ফুট)", point: 20, home: 30, type: "unit", unitName: "Feet"},
-    {id: "floor_mats_per_cft", name: "ফ্লোর ম্যাট প্রতি সিএফটি", point: 20, home: 22, type: "unit", unitName: "CFT"},
+const NORMAL_TSV = `Product type	পন্যের নাম	QoM	SFC Point charge	SFC Home charge
+Button Mobile	বাটন মোবাইল	Piece	100	140
+Smart Mobile /Tab	স্মার্ট মোবাইল / ট্যাব	Piece	150	180
+Laptop	ল্যাপটপ	Piece	300	400
+LED 22"-26" with Wooden Box	এলইডি ২২"-২৬" কাঠের বক্সসহ	Piece	400	600
+LED 28"-32" with Wooden Box	এলইডি ২৮"-৩২" কাঠের বক্সসহ	Piece	600	800
+LED 43"-52" with Wooden Box	এলইডি ৪৩"-৫২" কাঠের বক্সসহ	Piece	850	950
+Monitor 14" with Wooden Box	মনিটর ১৪" কাঠের বক্সসহ	Piece	300	400
+Monitor 19-21" with Wooden Box	মনিটর ১৯" কাঠের বক্সসহ	Piece	350	450
+TV 24-32" with Wooden Box	টিভি ২৭-৩২" কাঠের বক্সসহ	Piece	700	900
+Computer Full Set with Wooden Box	কম্পিউটার ফুল সেট কাঠের বক্সসহ	Piece	700	1000
+Microwave Oven Small	মাইক্রোওয়েভ ওভেন ছোট	Piece	300	400
+Microwave Oven Medium	মাইক্রোওয়েভ ওভেন মাঝারি	Piece	350	450
+Microwave Oven Big	মাইক্রোওয়েভ ওভেন বড়	Piece	600	800
+Rice Cooker Small	রাইস কুকার ছোট	Piece	200	300
+Rice Cooker Medium	রাইস কুকার মাঝারি	Piece	350	450
+Rice Cooker Big	রাইস কুকার বড়	Piece	500	700
+Electric Kettle	বৈদ্যুতিক কেটল	Piece	150	250
+Refrigerator	রেফ্রিজারেটর	1 CFT	180	220
+Deep Fridge- Small	ডিপ ফ্রিজ- ছোট	Piece	1000	1500
+Deep Fridge-Medium	ডিপ ফ্রিজ- মাঝারি	Piece	1500	2000
+Deep Fridge-Big	ডিপ ফ্রিজ- বড়	Piece	2000	3000
+Compressor-Fridge Per Piece	ফ্রিজ কম্প্রেসর প্রতি পিস	Piece	200	350
+Compressor-AC Per Piece	এসি কম্প্রেসর প্রতি পিস	Piece	250	400
+Stabilizer	স্ট্যাবিলাইজার	Piece	200	350
+Air conditioner ( 1 ton to 1.5 Ton)	এয়ার কন্ডিশনার (১ টন থেকে ১.৫ টন)	Piece	1000	1500
+Air conditioner (2 Ton)	এয়ার কন্ডিশনার (২ টন)	Piece	1200	1800
+Air conditioner (3 Ton 4 Ton)	এয়ার কন্ডিশনার (৩ টন থেকে ৪ টন)	Piece	1600	2000
+AC Angle	এসি এঙ্গেল	Piece	300	500
+Washing Machine Small	ওয়াসিং মেসিন ছোট	Piece	450	800
+Washing Machine Mdium	ওয়াসিং মেসিন মিডিয়াম	Piece	900	1200
+Washing Machine Big	ওয়াসিং মেসিন বড়	Piece	1200	1600
+Ceiling Fan	সিলিং ফ্যান	Piece	130	200
+Electric Iron	ইলেকট্রিক আয়রন	Piece	100	150
+Drill Machine Small	ড্রিল মেশিন ছোট	Piece	500	700
+Drill Machine Medium	ড্রিল মেশিন মাঝারি	Piece	800	1000
+Drill Machine Big	ড্রিল মেশিন বড়	Piece	1300	1600
+Grass Cutter with motor	ঘাস কাটার মেশিন মোটরসহ	Piece	700	1200
+Grass Cutter without motor	ঘাস কাটার মেশিন মোটর ছাড়া	Piece	600	1000
+Welding Machine-Small	ওয়েল্ডিং মেশিন ছোট	Piece	400	700
+Welding Machine-Medium	ওয়েল্ডিং মেশিন মাঝারি	Piece	750	1200
+Welding Machine-Big	ওয়েল্ডিং মেশিন বড়	Piece	1200	1800
+Pedestal/ Table Fan Small	প্যাডেস্টাল / টেবিল ফ্যান ছোট	Piece	250	350
+Pedestal/ Table Fan Medium	প্যাডেস্টাল / টেবিল ফ্যান মাঝারি	Piece	400	600
+Pedestal/ Table Fan Big	প্যাডেস্টাল / টেবিল ফ্যান বড়	Piece	700	1000
+Ventilation/ Exhaust Fan Small	ভেন্টিলেশন / এগজস্ট ফ্যান ছোট	Piece	300	400
+Ventilation/ Exhaust Fan Medium	ভেন্টিলেশন / এগজস্ট ফ্যান মাঝারি	Piece	400	600
+Ventilation/ Exhaust Fan Big	ভেন্টিলেশন / এগজস্ট ফ্যান বড়	Piece	700	1000
+Dry Battery-Rickshaw/Van 4pcs	ড্রাই ব্যাটারি-রিকশা/ভ্যান ৪ পিস	Set	220	250
+Dry Battery-Rickshaw/Van 2pcs	ড্রাই ব্যাটারি-রিকশা/ভ্যান ২ পিস	Set	150	300
+Easy Bike/Mishuk battery without water	ইজি বাইক / মিশুক ব্যাটারি পানি ছাড়া	Piece	150	250
+Bike Electric	ইলেকট্রিক বাইক	Piece	2500	3500
+Wheelchair Electric	হুইলচেয়ার ইলেকট্রিক	Piece	1200	1600
+IPS Without Battery-Medium	আইপিএস মাঝারি ব্যাটারি ছাড়া	Piece	230	350
+UPS- Medium	ইউপিএস- মাঝারি	Piece	350	450
+UPS- Big	ইউপিএস- বড়	Piece	700	900
+Transformer	ট্রান্সফরমার	1 KVA	130	150
+IPS Battery	আইপিএস ব্যাটারি	Piece	150	250
+Lithium Battery	লিথিয়াম ব্যাটারি	Piece	250	350
+Electric Vehicle Chrager	ইলেকট্রিক ভেহিকেল চার্জার	Piece	120	200
+Rickshaw/ Van	রিকশা / ভ্যান	Piece	6500	8500
+Easy Bike / Auto	ইজি বাইক / অটো	Piece	8500	10500
+CNG Per PCS	সিএনজি প্রতি পিস	Piece	9000	11000
+Electric Motorcycle / Scooter	ইলেকট্রিক মোটরসাইকেল / স্কুটার	Piece	2500	3000
+Blender / Juicer machine	ব্লেন্ডার / জুসার মেশিন	Piece	220	280
+Fry Pan Set Box	ফ্রাই প্যান সেট বক্স	Piece	250	350
+Blower machine	ব্লোয়ার মেশিন	Piece	200	250
+Camera Small	ক্যামেরা ছোট	Piece	250	350
+Camera Standard	ক্যামেরা স্ট্যান্ডার্ড	Piece	400	600
+Camera DSLR	ক্যামেরা ডিএসএলআর	Piece	1000	1400
+CC Camera	সিসি ক্যামেরা	Piece	120	200
+Router	রাউটার	Piece	180	300
+Coffee Machine-Small	কফি মেশিন-ছোট	Piece	300	500
+Coffee Machine-Medium	কফি মেশিন-মাঝারি	Piece	500	700
+Coffee Machine-Big	কফি মেশিন-বড়	Piece	700	1000
+Electric Motor up to 3HP/KW	ইলেকট্রিক মোটর ৩ এইচপি/কিলোওয়াট পর্যন্ত	Piece	150	250
+Electric Motor up to 5HP/KW	ইলেকট্রিক মোটর ৫ এইচপি/কিলোওয়াট পর্যন্ত	Piece	600	900
+Electric Motor up to 10HP/KW	ইলেকট্রিক মোটর ১০ এইচপি/কিলোওয়াট পর্যন্ত	Piece	1200	1500
+Photocopy Machine Small	ফটোকপি মেশিন ছোট	Piece	700	1000
+Photocopy Machine Medium	ফটোকপি মেশিন মাঝারি	Piece	1000	1300
+Photocopy Machine Big	ফটোকপি মেশিন বড়	Piece	1200	1700
+Printer Small	প্রিন্টার ছোট	Piece	250	350
+Printer Medium	প্রিন্টার মাঝারি	Piece	400	700
+Printer Big	প্রিন্টার বড়	Piece	900	1200
+Laminating Machine-Small	লেমিনেটিং মেশিন-ছোট	Piece	300	450
+Laminating Machine-Medium	লেমিনেটিং মেশিন-মাঝারি	Piece	500	750
+Laminating Machine-Big	লেমিনেটিং মেশিন-বড়	Piece	800	1100
+Speaker-Small	স্পিকার-ছোট	Piece	250	500
+Speaker-Medium	স্পিকার-মাঝারি	Piece	800	1000
+Speaker-Big	স্পিকার-বড়	Piece	1100	1500
+Money Counting Machine	মানি কাউন্টিং মেশিন	Piece	800	1200
+Vending Machine Standard	ভেন্ডিং মেশিন স্ট্যান্ডার্ড	Piece	3300	4000
+Incubator 16''- 27''*22''*16''	ইনকিউবেটর ১৬''- ২৭''*২২''*১৬''	Piece	300	450
+Incubator 30''- 40''*20''*23''	ইনকিউবেটর ৩০''- ৪০''২০''২৩''	Piece	800	1000
+Incubator 50''- 60''*27''*26''	ইনকিউবেটর ৫০''- ৬০''২৭''২৬''	Piece	1500	2000
+Incubator 70''*27''*26''	ইনকিউবেটর ৭০''২৭''২৬''	Piece	2000	3000
+Geyser up to 10ltr	গিজার ১০ লিটার পর্যন্ত	Piece	150	250
+Geyser up to 20ltr	গিজার ২০ লিটার পর্যন্ত	Piece	250	350
+Geyser up to 30ltr	গিজার ৩০ লিটার পর্যন্ত	Piece	350	450
+Pureit Classic Filter	পিউরিট ক্লাসিক ফিল্টার	Piece	250	350
+Pureit RO-UV Filter	পিউরিট আরও-ইউভি ফিল্টার	Piece	300	500
+Pureit Water Tank	পিউরিট ওয়াটার ট্যাংক	Piece	650	900
+Pureit Filter Wooden Box	পিউরিট ফিল্টার কাঠের বক্স	Piece	500	800
+Water Filter-Mini	ওয়াটার ফিল্টার-মিনি	Piece	300	500
+Water Filter-Medium	ওয়াটার ফিল্টার-মাঝারি	Piece	500	800
+Generator Per KVA	জেনারেটর প্রতি কেভিএ	KVA	350	500
+Portable Air Cooler 20L	পোর্টেবল এয়ার কুলার ২০ লিটার	Piece	220	350
+Portable Air Cooler 40L	পোর্টেবল এয়ার কুলার ৪০ লিটার	Piece	300	450
+Portable Air Cooler 60L	পোর্টেবল এয়ার কুলার ৬০ লিটার	Piece	500	800
+Bicycle Small	বাইসাইকেল ছোট	Piece	500	700
+Bicycle Medium	বাইসাইকেল মাঝারি	Piece	700	900
+Bicycle Big	বাইসাইকেল বড়	Piece	900	1200
+Gym Cycle Small	জিম সাইকেল ছোট	Piece	800	1000
+Gym Cycle Medium	জিম সাইকেল মাঝারি	Piece	1200	1600
+Gym Cycle Big	জিম সাইকেল বড়	Piece	1600	2000
+Treadmill-Small	ট্রেডমিল-ছোট	Piece	1400	1800
+Treadmill-Medium	ট্রেডমিল-মাঝারি	Piece	1600	2200
+Treadmill- Big	ট্রেডমিল-বড়	Piece	2500	3500
+Cricket Bat Per PCS	ক্রিকেট ব্যাট	Piece	150	220
+Racket Bat Per PCS	র‍্যাকেট ব্যাট	Piece	110	170
+Motorcycle 80CC to 100CC	মোটরসাইকেল ৮০ সিসি থেকে ১০০ সিসি	Piece	3000	3500
+Motorcycle 120CC to 150CC	মোটরসাইকেল ১২০ সিসি থেকে ১৫০ সিসি	Piece	3500	4500
+Helmet	হেলমেট	Piece	200	280
+Trunk Small	ট্রাঙ্ক ছোট	Piece	300	500
+Trunk Medium	ট্রাঙ্ক মাঝারি	Piece	550	800
+Trunk Big	ট্রাঙ্ক বড়	Piece	1500	2500
+Shallow Machine Mini	শ্যালো মেশিন মিনি	Piece	3000	4000
+Shallow Machine small	শ্যালো মেশিন ছোট	Piece	3500	4500
+Shallow Machine Medium	শ্যালো মেশিন মাঝারি	Piece	6500	8500
+Power Tiller	পাওয়ার টিলার	Piece	16000	20000
+Rice Machine	রাইস মেশিন	Piece	1300	1800
+Kitchen Rack Small	কিচেন র‍্যাক ছোট	Piece	400	600
+Kitchen Rack Medium	কিচেন র‍্যাক মাঝারি	Piece	700	1000
+Kitchen Rack Big	কিচেন র‍্যাক বড়	Piece	1000	1500
+Chair Wheel Electric-Medium	হুইলচেয়ার ইলেকট্রিক-মাঝারি	Piece	1000	1300
+Chair Wheel Electric-Big	হুইলচেয়ার ইলেকট্রিক-বড়	Piece	1200	1700
+Carrom Board Below 45"	ক্যারাম বোর্ড ৪৫" এর নিচে	Piece	250	400
+Carrom Board 45"	ক্যারাম বোর্ড ৪৫"	Piece	300	500
+Carrom Board 50-56"	ক্যারাম বোর্ড ৫০-৫৬"	Piece	400	600
+Alna-(Wooden/Metal)	আলনা কাঠ/মেটাল	Piece	1000	1300
+File Cabinet 4 Drawers	ফাইল কেবিনেট ৪ ড্রয়ার	Piece	1200	1600
+Almira Wood - Steel Small	আলমারি কাঠ-স্টিল ছোট	Piece	2200	3000
+Almira Wood - Steel Standard	আলমারি কাঠ-স্টিল স্ট্যান্ডার্ড	Piece	3300	4000
+Almira Wood - Steel Double door	আলমারি কাঠ-স্টিল ডাবল ডোর	Piece	4500	6000
+Visiting Chair	ভিজিটিং চেয়ার	Piece	150	200
+General Executive Chair (Non movable)	জেনারেল এক্সিকিউটিভ চেয়ার (স্থির)	Piece	200	300
+Executive Chair (Revolving)	এক্সিকিউটিভ চেয়ার (রিভলভিং)	Piece	250	380
+Luxury / Boss Chair Executive Revolving	লাক্সারি / বস চেয়ার এক্সিকিউটিভ রিভলভিং	Piece	800	1100
+Chair Wood-Standard	কাঠের চেয়ার স্ট্যান্ডার্ড	Piece	500	700
+Rocking Chair	রকিং চেয়ার	Piece	700	900
+Chair Dental	ডেন্টাল চেয়ার	Piece	6000	8000
+Chair Dental with Machine	ডেন্টাল চেয়ার মেশিনসহ	Piece	7000	9000
+Salon Chair With Stand	স্ট্যান্ডসহ সেলুন চেয়ার	Piece	700	1200
+Plastic Tool	প্লাস্টিকের টুল	Piece	100	150
+Steel Tool	স্টিলের টুল	Piece	150	250
+Normal Foam Sofa 5 seat Without Handle	সাধারণ ফোম সোফা ৫ সিট হাতল ছাড়া	Seat	1500	2000
+Normal Foam Sofa 5 seat With Handle	সাধারণ ফোম সোফা ৫ সিট হাতলসহ	Seat	3000	3500
+Luxury / VIP Foam Sofa 5 Seat	লাক্সারি / ভিআইপি ফোম সোফা ৫ সিট	Seat	2000	2500
+VIP Wooden Sofa 5 Seat	ভিআইপি কাঠের সোফা ৫ সিট	Seat	3500	4200
+Sofa Tea Table	সোফা টি-টেবিল	Piece	450	600
+Devine Sofa	বিলাসবহুল সোফা	Piece	1800	2200
+Mini Cum Bed	মিনি কাম বেড	Piece	550	650
+Single Cum Bed	সিঙ্গেল কাম বেড	Piece	750	850
+Double Cum Bed	ডাবল কাম বেড	Piece	1000	1100
+VIP Cum Bed	ভিআইপি কাম বেড	Piece	1500	1700
+Dining Table with 4 Chairs	ডাইনিং টেবিল ৪ চেয়ারসহ	Piece	2800	3500
+Dining Table with 6 Chairs	ডাইনিং টেবিল ৬ চেয়ারসহ	Piece	3500	4500
+Book Shelves Small	বুকশেলফ ছোট	Piece	500	800
+Book Shelves Medium	বুকশেলফ মাঝারি	Piece	1200	1700
+Book Shelves Big	বুকশেলফ বড়	Piece	2200	2600
+Wooden Full Box Bed (6/7)	কাঠের ফুল বক্স খাট (৬/৭)	Piece	4500	6000
+Wooden Full Box Bed (5/7)	কাঠের ফুল বক্স খাট (৫/৭)	Piece	4000	5000
+Wooden Semi Box Bed (6/7)	কাঠের সেমি বক্স খাট (৬/৭)	Piece	3500	4000
+Wooden Semi Box Bed (5/7)	কাঠের সেমি বক্স খাট (৫/৭)	Piece	3000	3500
+Wooden General Bed (6/7)	কাঠের সাধারণ খাট (৬/৭)	Piece	2500	3000
+Wooden General Bed (5/7)	কাঠের সাধারণ খাট (৫/৭)	Piece	2000	2500
+Wooden Normal Bed Small/Medium	কাঠের সাধারণ খাট ছোট/মাঝারি	Piece	1200	1800
+Bed Steel Small	স্টিলের খাট ছোট	Piece	1600	2300
+Bed Steel Medium	স্টিলের খাট মাঝারি	Piece	2500	3500
+Bed Steel Big	স্টিলের খাট বড়	Piece	3000	4000
+OT Bed	ওটি বেড	Piece	1500	2000
+Shoe Rack Wood	কাঠের জুতার র‍্যাক	Piece	1000	1500
+Shoe Rack Plastic	প্লাস্টিক জুতার র‍্যাক	Piece	700	1200
+Dressing Table	ড্রেসিং টেবিল	Piece	2000	3000
+Wooden Wardrobe Wood-Medium (4/7)	কাঠের ওয়ারড্রোব মাঝারি (৪/৭)	Piece	2500	3500
+Wooden Wardrobe Wood-Big (6/7)	কাঠের ওয়ারড্রোব মাঝারি (৬/৭)	Piece	4000	6000
+Plastic Wardrobe Medium	প্লাস্টিক ওয়ারড্রোব মাঝারি	Piece	1400	1800
+Plastic Wardrobe Big	প্লাস্টিক ওয়ারড্রোব বড়	Piece	1800	2200
+Ladder-06Fit	মই-০৬ ফুট	Piece	600	900
+Ladder-10 Fit	মই-১০ ফুট	Piece	1000	1300
+Parlour Bed-Small	পার্লার বেড-ছোট	Piece	700	1000
+Parlour Bed-Standard	পার্লার বেড-স্ট্যান্ডার্ড	Piece	1200	1700
+Travelling Luggage Small	ট্রাভেলিং লাগেজ ছোট	Piece	400	550
+Travelling Luggage Medium	ট্রাভেলিং লাগেজ মাঝারি	Piece	550	700
+Travelling Luggage Big	ট্রাভেলিং লাগেজ বড়	Piece	700	900
+Mattress up to 4'' Thickness	ম্যাট্রেস ৪ ইঞ্চি পুরু পর্যন্ত	1 Sft	25	35
+Mattress 5 to 8'' Thickness	ম্যাট্রেস ৫ থেকে ৮ ইঞ্চি পুরু	1 Sft	30	40
+Pillow Per Pcs	বালিশ প্রতি পিস	Piece	150	220
+Tyre / 5.50-13LT 95/93K SLG N10	টায়ার / 5.50-13LT 95/93K SLG N10	Piece	120	200
+Tyre / 6.50-16 SUPERMILLER N10 TT	টায়ার / 6.50-16 SUPERMILLER N10 TT	Piece	280	350
+Tyre / F78-15LT ESTATE N6	টায়ার / F78-15LT ESTATE N6	Piece	200	300
+Tyre / 7.00-15 SLG N12 EXP	টায়ার / 7.00-15 SLG N12 EXP	Piece	350	400
+Tyre / 8.25-20 SML 99 N16	টায়ার / 8.25-20 SML 99 N16	Piece	300	400
+Tyre / 9.00-20 M77 N16 Exp	টায়ার / 9.00-20 M77 N16 Exp	Piece	400	500
+Tyre / 10.00-20 SML SED N16	টায়ার / 10.00-20 SML SED N16	Piece	400	500
+Tyre / 11R 22.5 S1R4 C R 16 TL	টায়ার / 11R 22.5 S1R4 C R 16 TL	Piece	700	900
+Tyre / 12.00R 20 S1M4 TTF	টায়ার / 12.00R 20 S1M4 TTF	Piece	800	1000
+Tyre / 315/80R 22.5 S1N4 R18 TL	টায়ার / 315/80R 22.5 S1N4 R18 TL	Piece	1000	1200
+Tyre-Bike	টায়ার-বাইক	Piece	200	250
+Tyre Tractor 13620	ট্র্যাক্টর টায়ার ১৩৬২০	Piece	700	1200
+Ring Car-Small	কার রিং-ছোট	Piece	200	300
+Ring Car-Medium	কার রিং-মাঝারি	Piece	280	350
+Ring Car-Big	কার রিং-বড়	Piece	420	600
+Ring Car-Large	কার রিং-লার্জ	Piece	550	750
+Car Parts Ctn-Small	গাড়ির পার্টস কার্টন-ছোট	Piece	250	350
+Car Parts Ctn-Medium	গাড়ির পার্টস কার্টন-মাঝারি	Piece	300	400
+Car Parts Ctn-Big	গাড়ির পার্টস কার্টন-বড়	Piece	400	600
+Guitar Up to 3 KG	গিটার ৩ কেজি পর্যন্ত	Piece	250	350
+Guitar Up to 5 KG	গিটার ৫ কেজি পর্যন্ত	Piece	250	350
+Tobla-Small	তবলা-ছোট	Piece	220	300
+Tobla-Medium	তবলা-মাঝারি	Piece	350	500
+Liquid Jar up to 20KG	লিকুইড জার ২০ কেজি পর্যন্ত	Piece	120	150
+Liquid Jar up to 50KG	লিকুইড জার ৫০ কেজি পর্যন্ত	Piece	250	300
+Rice/Corn Bag up to 25KG	চাল/ভুট্টা বস্তা ২৫ কেজি পর্যন্ত	Piece	125	150
+Rice/Corn Bag up to 50KG	চাল/ভুট্টা বস্তা ৫০ কেজি পর্যন্ত	Piece	150	200
+Rice Per KG	চাল প্রতি কেজি	1 KG	6	8
+Carton Small up to 12*12*12	কার্টন ছোট ১২*১২*১২ পর্যন্ত	Piece	60	80
+Carton Medium up to 24*18*18	কার্টন মাঝারি ২৪*১৮*১৮ পর্যন্ত	Piece	200	220
+Carton Big up to 36*24*24	কার্টন বড় ৩৬*২৪*২৪ পর্যন্ত	Piece	400	550
+Mixer Machine-Small	মিক্সার মেশিন-ছোট	Piece	1400	2000
+Mixer Machine-Medium	মিক্সার মেশিন-মাঝারি	Piece	2400	3000
+Mixer Machine Big	মিক্সার মেশিন-বড়	Piece	3000	4000
+Mixer Machine with Trolley-Big	ট্রলিসহ মিক্সার মেশিন-বড়	Piece	5500	7000
+Server Rack-Small	সার্ভার রাক-ছোট	Piece	600	900
+Server Rack-Medium	সার্ভার রাক-মিডিয়াম	Piece	1200	1700
+Server Rack-Big	সার্ভার রাক-বড়	Piece	2200	3000
+Nebulizer Machine-Small	নেবুলাইজার মেশিন-ছোট	Piece	350	500
+Dolna-Mini	দোলনা-মিনি	Piece	300	600
+Dolna-Small	দোলনা-ছোট	Piece	400	700
+Dolna-Medium	দোলনা-মাঝারি	Piece	600	1000
+Dolna-Big	দোলনা-বড়	Piece	800	1300
+Water Tank 500 Ltr	ওয়াটার ট্যাংক ৫০০ লিটার	Piece	3000	4000
+Water Tank 1000 Ltr	ওয়াটার ট্যাংক ১০০০ লিটার	Piece	6000	7000
+Sewing Machine with Table	টেবিলসহ সেলাই মেশিন	Piece	1200	1800
+Sewing Machine Table Per Piece	সেলাই মেশিন টেবিল প্রতি পিস	Piece	600	1000
+Sewing -Selai Machine Manual	সেলাই মেশিন ম্যানুয়াল	Piece	800	1300
+Sewing -Selai Machine Electric	সেলাই মেশিন ইলেকট্রিক	Piece	1000	1500
+Sewing -Selai Machine Head	সেলাই মেশিন হেড	Piece	200	300
+Oxygen Cylinder-Small	অক্সিজেন সিলিন্ডার-ছোট	Piece	400	600
+Oxygen Cylinder-Medium	অক্সিজেন সিলিন্ডার-মাঝারি	Piece	500	700
+Oxygen Cylinder-Big	অক্সিজেন সিলিন্ডার-বড়	Piece	600	800
+Fire Extinguisher-Small	অগ্নি নির্বাপক যন্ত্র-ছোট	Piece	150	220
+Fire Extinguisher-Medium	অগ্নি নির্বাপক যন্ত্র-মাঝারি	Piece	220	320
+Fire Extinguisher-Big	অগ্নি নির্বাপক যন্ত্র-বড়	Piece	320	500
+Compressor-100 Ltr	কম্প্রেসর-১০০ লিটার	Piece	1500	2000
+Compressor-200 Ltr	কম্প্রেসর-২০০ লিটার	Piece	3000	4000
+Compressor-300 Ltr	কম্প্রেসর-৩০০ লিটার	Piece	4000	5000
+Toner-Small	টোনার-ছোট	Piece	200	300
+Toner-Medium	টোনার-মাঝারি	Piece	250	350
+Toner-Standard	টোনার-স্ট্যান্ডার্ড	Piece	350	450
+X-ray Film Carton	এক্স-রে ফিল্ম কার্টন	Piece	150	250
+Army Bag-Small	আর্মি ব্যাগ-ছোট	Piece	300	500
+Army Bag-Medium	আর্মি ব্যাগ-মাঝারি	Piece	400	600
+Army Bag-Big	আর্মি ব্যাগ-বড়	Piece	450	700
+Army Trank-Small	আর্মি ট্রাঙ্ক-ছোট	Piece	700	1000
+Army Trank-Medium	আর্মি ট্রাঙ্ক-মাঝারি	Piece	800	1200
+Army Trunk-Big	আর্মি ট্রাঙ্ক-বড়	Piece	1300	1800
+Internet Cable (Drum – Per Meter)	ইন্টারনেট কেবল ড্রাম প্রতি মিটার	Piece	2	2.5
+Cable Drum-Per KG	কেবল ড্রাম প্রতি কেজি	Piece	8	9
+Cable Bundle-Medium	কেবল বান্ডিল-মাঝারি	Piece	1200	2000
+Tea per-KG	চা প্রতি কেজি	KG	5	6
+Shutki / Dried Fish Per KG (Over 40 KG)	শুটকি মাছ প্রতি কেজি (৪০ কেজির বেশি)	KG	6	7
+Supari / Betel Nut Per KG	সুপারি প্রতি কেজি	KG	5	6
+Rice seed Per KG	ধানের বীজ প্রতি কেজি	KG	6	8
+Nut Per KG	বাদাম প্রতি কেজি	KG	6	7
+SOLAR PANEL Per Watt	সোলার প্যানেল প্রতি ওয়াট	WATT	2.5	3
+Honey drum up to 30KG	মধুর ড্রাম ৩০ কেজি পর্যন্ত	Piece	200	250
+Honey drum up to 50KG	মধুর ড্রাম ৫০ কেজি পর্যন্ত	Piece	300	350
+Lubricant Box Up to 12 Liter	লুব্রিকেন্ট বক্স ১২ লিটার পর্যন্ত	Piece	80	100
+Lubricant Box Up to 24 Liter	লুব্রিকেন্ট বক্স ২৪ লিটার পর্যন্ত	Piece	140	180
+Fish Feed 25 KG	মাছের খাবার ২৫ কেজি	Piece	180	200
+Fish Feed 50 KG	মাছের খাবার ৫০ কেজি	Piece	250	300
+Cattle Feed 25 KG	গবাদি পশুর খাবার ২৫ কেজি	Piece	150	180
+Cattle Feed 50 KG	গবাদি পশুর খাবার ৫০ কেজি	Piece	250	300
+Gas Stove Single	গ্যাস চুলা সিঙ্গেল	Piece	60	100
+Gas Stove Double	গ্যাস চুলা ডাবল	Piece	90	150
+Gas Stove Single Glass	গ্যাস চুলা সিঙ্গেল গ্লাস	Piece	80	120
+Gas Stove Double Glass	গ্যাস চুলা ডাবল গ্লাস	Piece	120	200
+comforter Single	কমফোর্টার সিঙ্গেল	Piece	150	200
+comforter Double	কমফোর্টার ডাবল	Piece	250	350
+Comforter King Size (7 feet x7.5 feet)	কমফোর্টার কিং সাইজ (৭ ফুট x ৭.৫ ফুট)	Feet	20	30
+Paint bucket up to 10 Liter	পেইন্ট বালতি ১০ লিটার পর্যন্ত	Piece	80	100
+Paint bucket up to 20 Liter	পেইন্ট বালতি ২০ লিটার পর্যন্ত	Piece	120	150
+Oil / Lubricant Steel Drum 220 Liter	তেল / লুব্রিকেন্ট স্টিল ড্রাম ২২০ লিটার	Piece	1400	2000
+Floor Mates Per CFT	ফ্লোর মেটস প্রতি সিএফটি	CFT	20	22
+Carpet Per CFT	কার্পেট প্রতি সিএফটি	CFT	150	180
+Mud Pump-Small with Wooden Box	মাটির পাম্প- কাঠের বাক্স সহ ছোট	Piece	350	500
+Mud Pump-Medium with Wooden Box	মাটির পাম্প- কাঠের বাক্স সহ মিডিয়াম	Piece	800	1000
+Mud Pump-Big with Wooden Box	মাটির পাম্প- কাঠের বাক্স সহ বড়	Piece	1300	1600
+Police Ration Bosta-Small	পুলিশ রেশন বোস্তা-ছোট	Piece	150	200
+Police Ration Bosta-Medium	পুলিশ রেশন বোস্তা- মিডিয়াম	Piece	220	280
+Police Ration Bosta-Big	পুলিশ রেশন বোস্তা-ছোট বড়	Piece	400	600`;
 
-    // Location-based items
-    {id: "wooden_door_chawkat_7_3.5", name: "কাঠের দরজার চৌকাঠ (৭ ফুট বাই ৩.৫ ফুট)", point: { zila: 350, upazila: 400 }, home: { zila: 450, upazila: 500 }, type: "location"},
-    {id: "wooden_door_chawkat_3_2.5", name: "কাঠের দরজার চৌকাঠ (৩ ফুট বাই ২.৫ ফুট)", point: { zila: 250, upazila: 300 }, home: { zila: 350, upazila: 400 }, type: "location"},
-    {id: "wooden_door_palla_3_2.5", name: "দরজার পাল্লা (কাঠ) (৩ ফুট বাই ২.৫ ফুট)", point: { zila: 300, upazila: 350 }, home: { zila: 400, upazila: 450 }, type: "location"},
-    {id: "plastic_door_set_7_2.5", name: "প্লাস্টিক দরজা সেট (৭ ফুট বাই ২.৫ ফুট)", point: { zila: 350, upazila: 400 }, home: { zila: 450, upazila: 500 }, type: "location"},
-    {id: "plastic_door_set_3_2.5", name: "প্লাস্টিক দরজা সেট (৩ ফুট বাই ২.৫ ফুট)", point: { zila: 250, upazila: 300 }, home: { zila: 350, upazila: 400 }, type: "location"},
-    {id: "metal_door_set_7_3.5", name: "মেটাল / স্টিল দরজা (৭ ফুট বাই ৩.৫ ফুট)", point: { zila: 800, upazila: 900 }, home: { zila: 1000, upazila: 1100 }, type: "location"},
-    {id: "metal_door_set_7_5", name: "মেটাল / স্টিল দরজা (৭ ফুট বাই ৫ ফুট)", point: { zila: 1500, upazila: 1600 }, home: { zila: 2000, upazila: 2100 }, type: "location"},
-
-    // Tiered items
-    {id: "bubble_roll", name: "বাবল রোল ৫ কেজি ডেলিভারি বুকিং চার্জ", type: "tiered-location"},
-    {id: "plant_booking", name: "গাছের পয়েন্ট ডেলিভারি বুকিং চার্জ", type: "tiered-weight", tiers: [
-        {max: 14, price: 200}, {max: 20, price: 250}, {max: 25, price: 300}, {max: 30, price: 350}
-    ], extraPerKg: 13, extraStartFrom: 30},
-    {id: "grass_seed", name: "ঘাসের বীজ/চারা পয়েন্ট ডেলিভারি বুকিং চার্জ", type: "tiered-weight", tiers: [
-        {max: 5, price: 100}, {max: 10, price: 200}, {max: 35, price: 250}, {max: 50, price: 400}
-    ], extraPerKg: 7, extraStartFrom: 50},
-    {id: "geo_bag", name: "জিও ব্যাগ পয়েন্ট ডেলিভারি বুকিং চার্জ", type: "tiered-weight-special"},
-    {id: "rice_seed_delivery", name: "ধানের বীজের পয়েন্ট ডেলিভারি বুকিং চার্জ", type: "tiered-weight-rice"},
-    {id: "popcorn_delivery", name: "পপকর্ন পয়েন্ট ডেলিভারি বুকিং চার্জ", type: "location-based-simple", zila: 180, upazila: 200},
-    {id: "straw_delivery_25", name: "খড় পয়েন্ট ডেলিভারি বুকিং চার্জ (২৫ কেজি)", type: "location-based-simple", zila: 280, upazila: 300},
-    {id: "straw_delivery_50", name: "খড় পয়েন্ট ডেলিভারি বুকিং চার্জ (৫০ কেজি)", type: "location-based-simple", zila: 450, upazila: 500},
-    {id: "corn_silage_50", name: "ভুট্টা সাইলেজ পয়েন্ট ডেলিভারি বুকিং চার্জ (৫০ কেজি)", type: "location-based-simple", zila: 300, upazila: 350},
-    {id: "empty_bags_30", name: "প্যাকেজিং বস্তা / খালি বস্তা (৩০ কেজি)", type: "location-based-simple", zila: 450, upazila: 500},
-    {id: "tree_booking", name: "গাছের পয়েন্ট ডেলিভারি বুকিং চার্জ (সর্বোচ্চ ৫ ফুট)", type: "tiered-weight", tiers: [
-        {max: 14, price: 200}, {max: 20, price: 250}, {max: 25, price: 300}, {max: 30, price: 350}
-    ], extraPerKg: 13, extraStartFrom: 30}
+const SPECIAL_PRODUCTS = [
+  {id:"door-wood-chowkat-7-35",rule:"areaService",en:"Wooden Door Chowkat (7 feet by 3.5 Feet)",bn:"কাঠের দরজার চৌকাঠ (৭ ফুট বাই ৩.৫ ফুট)",qom:"Piece",rates:{point:{district:350,upazila:400},home:{district:450,upazila:500}}},
+  {id:"door-wood-palla-7-35",rule:"areaService",en:"Wooden Door Palla (7 feet by 3.5 Feet)",bn:"কাঠের দরজার পাল্লা (৭ ফুট বাই ৩.৫ ফুট)",qom:"Piece",rates:{point:{district:350,upazila:400},home:{district:450,upazila:500}}},
+  {id:"door-wood-chowkat-3-25",rule:"areaService",en:"Wooden Door Chowkat (3 feet by 2.5 Feet)",bn:"কাঠের দরজার চৌকাঠ (৩ ফুট বাই ২.৫ ফুট)",qom:"Piece",rates:{point:{district:250,upazila:300},home:{district:350,upazila:400}}},
+  {id:"door-wood-palla-3-25",rule:"areaService",en:"Door Palla (Wood / 3 feet by 2.5 Feet)",bn:"দরজার পাল্লা (কাঠ / ৩ ফুট বাই ২.৫ ফুট)",qom:"Piece",rates:{point:{district:300,upazila:350},home:{district:400,upazila:450}}},
+  {id:"plastic-door-7-25",rule:"areaService",en:"Plastic Door Set (7 feet by 2.5 Feet)",bn:"প্লাস্টিক দরজা সেট (৭ ফুট বাই ২.৫ ফুট)",qom:"Piece",rates:{point:{district:350,upazila:400},home:{district:450,upazila:500}}},
+  {id:"plastic-door-3-25",rule:"areaService",en:"Plastic Door Set (3 feet by 2.5 Feet)",bn:"প্লাস্টিক দরজা সেট (৩ ফুট বাই ২.৫ ফুট)",qom:"Piece",rates:{point:{district:250,upazila:300},home:{district:350,upazila:400}}},
+  {id:"metal-door-7-35",rule:"areaService",en:"Metal / Steel Door (7 feet by 3.5 Feet)",bn:"মেটাল / স্টিল দরজা (৭ ফুট বাই ৩.৫ ফুট)",qom:"Piece",rates:{point:{district:800,upazila:900},home:{district:1000,upazila:1100}}},
+  {id:"metal-door-7-5",rule:"areaService",en:"Metal / Steel Door (7 feet by 5 Feet)",bn:"মেটাল / স্টিল দরজা (৭ ফুট বাই ৫ ফুট)",qom:"Piece",rates:{point:{district:1500,upazila:1600},home:{district:2000,upazila:2100}}},
+  {id:"bubble-roll-5kg",rule:"dhakaService",en:"Bubble Roll (5 kg) Delivery Booking Charge",bn:"বাবল রোল ৫ কেজি ডেলিভারি বুকিং চার্জ",qom:"Booking",rates:{point:{inside:250,outside:400},home:{inside:350,outside:500}}},
+  {id:"plant-booking-point",rule:"weightPlant",pointOnly:true,en:"Plant Booking Charge Point Delivery",bn:"গাছের পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
+  {id:"grass-seed-cutting-point",rule:"weightGrass",pointOnly:true,en:"Grass Seed/Cutting Point Delivery Booking Charge",bn:"ঘাসের বীজ/কাটিং পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
+  {id:"geo-bag-point",rule:"geoBag",pointOnly:true,en:"Geo Bag Point Delivery Booking Charge",bn:"জিও ব্যাগে পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
+  {id:"rice-seed-point",rule:"riceSeed",pointOnly:true,en:"Rice Seed Point Delivery Booking Charge",bn:"ধানের বীজের পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
+  {id:"popcorn-point",rule:"locationFixed",pointOnly:true,en:"Popcorn Point Delivery Booking Charge",bn:"ভুট্টা পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"Booking",rates:{district:180,upazila:200}},
+  {id:"straw-point-25",rule:"locationFixed",pointOnly:true,en:"Straw Point Delivery Booking Charge (Up to 25 kg)",bn:"খড় পয়েন্ট ডেলিভারি বুকিং চার্জ (২৫ কেজি)",qom:"Booking",rates:{district:280,upazila:300}},
+  {id:"straw-point-50",rule:"locationFixed",pointOnly:true,en:"Straw Point Delivery Booking Charge (Up to 50 kg)",bn:"খড় পয়েন্ট ডেলিভারি বুকিং চার্জ (৫০ কেজি)",qom:"Booking",rates:{district:450,upazila:500}},
+  {id:"corn-silage-point",rule:"locationFixed",pointOnly:true,en:"Corn Silage Point Delivery Booking Charge (50 kg)",bn:"ভুট্টা সাইলেজ পয়েন্ট ডেলিভারি বুকিং চার্জ (৫০ কেজি)",qom:"Booking",rates:{district:300,upazila:350}},
+  {id:"packaging-empty-bags-point",rule:"locationFixed",pointOnly:true,en:"Packaging Bags / Empty Bags Point Delivery Booking Charge (30kg)",bn:"প্যাকেজিং বস্তা / খালি বস্তা পয়েন্ট ডেলিভারি বুকিং চার্জ (৩০ কেজি)",qom:"Booking",rates:{district:450,upazila:500}},
+  {id:"trees-point",rule:"weightPlant",pointOnly:true,en:"Point Delivery Booking Charge for Trees (Maximum tree height: 5 feet)",bn:"গাছের পয়েন্ট ডেলিভারি বুকিং চার্জ (গাছের উচ্চতা সর্বোচ্চ ৫ ফুট)",qom:"KG"}
 ];
 
-$(document).ready(function() {
-    products.sort((a, b) => a.name.localeCompare(b.name, 'bn'));
-    
-    const productSelect = $('#product');
-    
-    products.forEach(p => {
-        productSelect.append(new Option(p.name, p.id));
-    });
+const $ = id => document.getElementById(id);
+const money = n => Number(n || 0).toLocaleString("en-US", {maximumFractionDigits:2});
+const service = () => document.querySelector('input[name="service"]:checked').value;
+const serviceLabel = () => service() === "point" ? "SFC Point" : "SFC Home";
+const areaLabel = v => v === "district" ? "জেলা সদর" : "উপজেলা সদর";
+const dhakaLabel = v => v === "inside" ? "ঢাকার মধ্যে" : "ঢাকার বাহিরে";
+const norm = s => String(s || "").toLowerCase().replace(/\s+/g," ").trim();
+const readNum = (id, fallback=0) => {
+  const n = parseFloat($(id)?.value);
+  return Number.isFinite(n) ? n : fallback;
+};
 
-    productSelect.select2({
-        placeholder: "পণ্যের নাম লিখে সার্চ করুন...",
-        allowClear: true,
-        width: '100%',
-        dropdownParent: $('body')
-    });
+function parseNormalData(){
+  return NORMAL_TSV.trim().split(/\r?\n/).slice(1).map((line,idx)=>{
+    const c = line.split("\t");
+    return {
+      id:"n-"+idx,rule:"normal",
+      en:(c[0]||"").trim(),bn:(c[1]||"").trim(),qom:(c[2]||"").trim(),
+      point:parseFloat(c[3]),home:parseFloat(c[4])
+    };
+  }).filter(p => p.en && Number.isFinite(p.point) && Number.isFinite(p.home));
+}
 
-    productSelect.on('change', function() {
-        handleProductChange();
-    });
+const NORMAL_PRODUCTS = parseNormalData();
+const ALL_PRODUCTS = [...NORMAL_PRODUCTS, ...SPECIAL_PRODUCTS];
+let selected = null;
+
+$("productCount").textContent = ALL_PRODUCTS.length;
+
+function productMeta(p){
+  if(p.rule === "normal") return `Point ৳${money(p.point)} • Home ৳${money(p.home)} • ${p.qom}`;
+  if(p.rule === "areaService") return `District/Upazila rate`;
+  if(p.rule === "dhakaService") return `Dhaka Inside/Outside`;
+  if(p.rule === "weightPlant") return `KG range based (Point only)`;
+  if(p.rule === "weightGrass") return `KG range based (Point only)`;
+  if(p.rule === "geoBag") return `KG range + Location`;
+  if(p.rule === "riceSeed") return `KG + Dhaka Inside/Outside`;
+  if(p.rule === "locationFixed") return `জেলা/উপজেলা fixed`;
+  return "Special";
+}
+
+$("searchInput").addEventListener("input", function(){
+  const q = norm(this.value);
+  if(!q){ $("suggestions").classList.remove("show"); return; }
+  const results = ALL_PRODUCTS.filter(p => norm(p.en).includes(q) || norm(p.bn).includes(q)).slice(0,25);
+
+  $("suggestions").innerHTML = results.length ? results.map(p => `
+    <div class="suggestion" onclick="selectProduct('${p.id}')">
+      <b>${p.en}</b><small>${p.bn}</small>
+      <div class="meta">${productMeta(p)}</div>
+    </div>
+  `).join("") : `<div class="suggestion"><b>No product found</b></div>`;
+  $("suggestions").classList.add("show");
 });
 
-function handleProductChange() {
-    const productId = $('#product').val();
-    const product = products.find(p => p.id === productId);
-    const extraInputsDiv = $('#extra-inputs');
-    extraInputsDiv.html('');
-    $('#result').addClass('hidden');
+document.addEventListener("click", e=>{
+  if(!e.target.closest(".search-wrap")) $("suggestions").classList.remove("show");
+});
 
-    if (!product) return;
+document.querySelectorAll('input[name="service"]').forEach(r=>{
+  r.addEventListener("change", ()=>{ if(selected) renderFields(); });
+});
 
-    if (product.type === 'unit') {
-        extraInputsDiv.html(`
-            <div class="form-group">
-                <label>পরিমাণ (${product.unitName})</label>
-                <input type="number" id="quantity" placeholder="যেমন: 10" min="0.1" step="any">
-            </div>
-        `);
-    } else if (product.type === 'location' || product.type === 'location-based-simple') {
-        extraInputsDiv.html(`
-            <div class="form-group">
-                <label>এলাকা</label>
-                <select id="sub_location">
-                    <option value="zila">জেলা সদর</option>
-                    <option value="upazila">উপজেলা</option>
-                </select>
-            </div>
-        `);
-    } else if (product.type === 'tiered-location') {
-         extraInputsDiv.html(`
-            <div class="form-group">
-                <label>এলাকা</label>
-                <select id="sub_location">
-                    <option value="dhaka">ঢাকার মধ্যে</option>
-                    <option value="outside_dhaka">ঢাকার বাইরে</option>
-                </select>
-            </div>
-        `);
-    } else if (product.type.startsWith('tiered-weight')) {
-        extraInputsDiv.html(`
-            <div class="form-group">
-                <label>ওজন (KG)</label>
-                <input type="number" id="weight" placeholder="যেমন: 22" min="0.1" step="any">
-            </div>
-        `);
-    }
+function selectProduct(id){
+  selected = ALL_PRODUCTS.find(p => p.id === id);
+  if(!selected) return;
+  $("searchInput").value = selected.en;
+  $("suggestions").classList.remove("show");
+  renderFields();
 }
 
-function calculateCharge() {
-    const productId = $('#product').val();
-    const deliveryType = $('input[name="deliveryType"]:checked').val();
-    const resultDiv = $('#result');
-
-    if (!productId) {
-        resultDiv.html("⚠️ অনুগ্রহ করে একটি পণ্য সিলেক্ট করুন।").removeClass('hidden').css('border-left-color', '#ffc107');
-        return;
-    }
-
-    const product = products.find(p => p.id === productId);
-    let charge = 0;
-    let description = `${product.name} | ${deliveryType === 'point' ? 'পয়েন্ট' : 'হোম'} ডেলিভারি`;
-
-    try {
-        switch(product.type) {
-            case 'simple':
-                charge = product[deliveryType];
-                break;
-            
-            case 'unit':
-                const quantity = parseFloat($('#quantity').val());
-                if (!quantity || quantity <= 0) throw new Error(`সঠিক পরিমাণ (${product.unitName}) দিন।`);
-                charge = product[deliveryType] * quantity;
-                description += ` | পরিমাণ: ${quantity} ${product.unitName}`;
-                break;
-
-            case 'location':
-                const subLoc = $('#sub_location').val();
-                charge = product[deliveryType][subLoc];
-                description += ` | এলাকা: ${subLoc === 'zila' ? 'জেলা সদর' : 'উপজেলা'}`;
-                break;
-            
-            case 'location-based-simple':
-                const loc = $('#sub_location').val();
-                charge = (loc === 'zila') ? product.zila : product.upazila;
-                description += ` | এলাকা: ${loc === 'zila' ? 'জেলা সদর' : 'উপজেলা'}`;
-                break;
-            
-            case 'tiered-location':
-                const bubbleLoc = $('#sub_location').val();
-                if(deliveryType === 'point') charge = (bubbleLoc === 'dhaka') ? 250 : 400;
-                else charge = (bubbleLoc === 'dhaka') ? 350 : 500;
-                description += ` | এলাকা: ${bubbleLoc === 'dhaka' ? 'ঢাকার মধ্যে' : 'ঢাকার বাইরে'}`;
-                break;
-
-            case 'tiered-weight':
-                const weight = parseFloat($('#weight').val());
-                if (!weight || weight <= 0) throw new Error("সঠিক ওজন (KG) দিন।");
-                description += ` | ওজন: ${weight} KG`;
-                let foundTier = false;
-                for (const tier of product.tiers) {
-                    if (weight <= tier.max) {
-                        charge = tier.price;
-                        foundTier = true;
-                        break;
-                    }
-                }
-                if (!foundTier) {
-                    if(product.extraPerKg && product.extraStartFrom) {
-                         charge = Math.ceil(weight) * product.extraPerKg;
-                    } else {
-                         charge = product.tiers[product.tiers.length - 1].price;
-                    }
-                }
-                break;
-
-            case 'tiered-weight-special':
-                const geoWeight = parseFloat($('#weight').val());
-                if (!geoWeight || geoWeight <= 0) throw new Error("সঠিক ওজন (KG) দিন।");
-                description += ` | ওজন: ${geoWeight} KG`;
-                if(geoWeight <= 5) charge = 100;
-                else if(geoWeight <= 10) charge = 220;
-                else charge = 220 + (Math.ceil(geoWeight - 10) * 25);
-                break;
-            
-            case 'tiered-weight-rice':
-                const riceWeight = parseFloat($('#weight').val());
-                if (!riceWeight || riceWeight <= 0) throw new Error("সঠিক ওজন (KG) দিন।");
-                description += ` | ওজন: ${riceWeight} KG`;
-                if(riceWeight < 25) charge = 150;
-                else charge = 150 + (Math.ceil(riceWeight - 25) * 6);
-                break;
-
-            default:
-                throw new Error("এই পণ্যের জন্য চার্জ হিসাব করা সম্ভব নয়।");
-        }
-        
-        resultDiv.html(`✅ মোট চার্জ: <b>৳${Math.ceil(charge)}</b><br><small>${description}</small>`).removeClass('hidden').css('border-left-color', '#28a745');
-
-    } catch (e) {
-        resultDiv.html(`⚠️ ${e.message}`).removeClass('hidden').css('border-left-color', '#dc3545');
-    }
+function resetSelection(){
+  selected = null;
+  $("searchInput").value = "";
+  $("suggestions").classList.remove("show");
+  renderFields();
+  showEmptyResult();
 }
+
+function showEmptyResult(){
+  $("resultBox").className = "result-box empty-result";
+  $("resultBox").innerHTML = `<div class="label">Charge Amount</div><div class="amount">৳ 0</div>`;
+}
+
+function renderFields(){
+  const box = $("fieldBox");
+  if(!selected){
+    box.innerHTML = `<h3>Product select করুন</h3><p class="bn">Search box থেকে product choose করলে charge calculation দেখাবে।</p>`;
+    showEmptyResult();
+    return;
+  }
+
+  const p = selected;
+  let html = `<h3>${p.en}</h3><p class="bn">${p.bn}</p>`;
+  if(p.pointOnly) html += `<div class="warning">⚠️ এই item শুধু Point Delivery-এর জন্য। SFC Home charge আলাদা নেই।</div>`;
+
+  if(p.rule === "normal"){
+    html += `<div class="form-grid" style="margin-top:14px">
+      <div class="form-group"><label>Quantity (${p.qom})</label><input id="qty" type="number" min="0" step="0.01" value="1"></div>
+      <div class="form-group"><label>Unit Charge (Editable)</label><input id="unitCharge" type="number" min="0" step="0.01" value="${p[service()]}"></div>
+    </div>`;
+  }
+  if(p.rule === "areaService"){
+    html += `<div class="form-grid" style="margin-top:14px">
+      <div class="form-group"><label>Location</label><select id="areaMode"><option value="district">জেলা সদর</option><option value="upazila">উপজেলা সদর</option></select></div>
+      <div class="form-group"><label>Quantity (${p.qom})</label><input id="qty" type="number" min="0" step="1" value="1"></div>
+    </div>`;
+  }
+  if(p.rule === "dhakaService"){
+    html += `<div class="form-grid" style="margin-top:14px">
+      <div class="form-group"><label>Dhaka Location</label><select id="dhakaMode"><option value="inside">ঢাকার মধ্যে</option><option value="outside">ঢাকার বাহিরে</option></select></div>
+      <div class="form-group"><label>Booking Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
+    </div>`;
+  }
+  if(p.rule === "weightPlant" || p.rule === "weightGrass"){
+    html += `<div class="form-grid" style="margin-top:14px">
+      <div class="form-group"><label>Weight (KG)</label><input id="kg" type="number" min="0" step="0.01" value="1"></div>
+      <div class="form-group"><label>Booking Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
+    </div>`;
+  }
+  if(p.rule === "geoBag"){
+    html += `<div class="form-grid" style="margin-top:14px">
+      <div class="form-group"><label>Weight (KG)</label><input id="kg" type="number" min="0" step="0.01" value="1"></div>
+      <div class="form-group"><label>Location (10+ KG)</label><select id="areaMode"><option value="district">জেলা সদর</option><option value="upazila">উপজেলা সদর</option></select></div>
+      <div class="form-group"><label>Website Charge (1-5 KG)</label><input id="websiteCharge" type="number" min="0" step="0.01" value="0"></div>
+      <div class="form-group"><label>Booking Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
+    </div>`;
+  }
+  if(p.rule === "riceSeed"){
+    html += `<div class="form-grid" style="margin-top:14px">
+      <div class="form-group"><label>Weight (KG)</label><input id="kg" type="number" min="0" step="0.01" value="1"></div>
+      <div class="form-group"><label>Dhaka Area</label><select id="dhakaMode"><option value="inside">Inside Dhaka</option><option value="outside">Outside Dhaka</option></select></div>
+      <div class="form-group"><label>Booking Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
+    </div>`;
+  }
+  if(p.rule === "locationFixed"){
+    html += `<div class="form-grid" style="margin-top:14px">
+      <div class="form-group"><label>Location</label><select id="areaMode"><option value="district">জেলা সদর</option><option value="upazila">উপজেলা সদর</option></select></div>
+      <div class="form-group"><label>Booking Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
+    </div>`;
+  }
+
+  box.innerHTML = html;
+  box.querySelectorAll("input,select").forEach(el => {
+    el.addEventListener("input", updateResult);
+    el.addEventListener("change", updateResult);
+  });
+  updateResult();
+}
+
+function calcPlantCharge(kg){
+  if(kg <= 0) throw new Error("KG দিন");
+  if(kg <= 14) return {charge:200, rule:"১-১৪ কেজি"};
+  if(kg <= 20) return {charge:250, rule:"১৫-২০ কেজি"};
+  if(kg <= 25) return {charge:300, rule:"২১-২৫ কেজি"};
+  if(kg <= 30) return {charge:350, rule:"২৬-৩০ কেজি"};
+  return {charge:kg * 13, rule:`৩০+ কেজি: ${kg} × ১৩`};
+}
+function calcGrassCharge(kg){
+  if(kg <= 0) throw new Error("KG দিন");
+  if(kg <= 5) return {charge:150, rule:"১-৫ কেজি"};
+  if(kg <= 10) return {charge:200, rule:"৬-১০ কেজি"};
+  if(kg <= 35) return {charge:250, rule:"১১-৩৫ কেজি"};
+  if(kg <= 50) return {charge:400, rule:"৩৬-৫০ কেজি"};
+  return {charge:kg * 12, rule:`৫০+ কেজি: ${kg} × ১২`};
+}
+
+function calculateSelected(){
+  if(!selected) throw new Error("Product select করুন");
+  const p = selected;
+  const svc = service();
+
+  if(p.rule === "normal"){
+    const qty = readNum("qty",1); const unit = readNum("unitCharge",0);
+    if(qty <= 0) throw new Error("Quantity দিন");
+    return {details:`${serviceLabel()} • ${qty} ${p.qom} × ৳${money(unit)}`, total:qty * unit};
+  }
+  if(p.rule === "areaService"){
+    const area = $("areaMode").value; const qty = readNum("qty",1);
+    const unit = p.rates[svc][area];
+    if(qty <= 0) throw new Error("Quantity দিন");
+    return {details:`${serviceLabel()} • ${areaLabel(area)} • ${qty} × ৳${money(unit)}`, total:unit * qty};
+  }
+  if(p.rule === "dhakaService"){
+    const dhaka = $("dhakaMode").value; const qty = readNum("qty",1);
+    const unit = p.rates[svc][dhaka];
+    if(qty <= 0) throw new Error("Booking quantity দিন");
+    return {details:`${serviceLabel()} • ${dhakaLabel(dhaka)} • ${qty} × ৳${money(unit)}`, total:unit * qty};
+  }
+  if(p.rule === "weightPlant"){
+    const kg = readNum("kg",0); const qty = readNum("qty",1);
+    const r = calcPlantCharge(kg);
+    if(qty <= 0) throw new Error("Booking quantity দিন");
+    return {details:`Point • ${kg} KG • ${r.rule} • Qty ${qty}`, total:r.charge * qty};
+  }
+  if(p.rule === "weightGrass"){
+    const kg = readNum("kg",0); const qty = readNum("qty",1);
+    const r = calcGrassCharge(kg);
+    if(qty <= 0) throw new Error("Booking quantity দিন");
+    return {details:`Point • ${kg} KG • ${r.rule} • Qty ${qty}`, total:r.charge * qty};
+  }
+  if(p.rule === "geoBag"){
+    const kg = readNum("kg",0); const area = $("areaMode").value; const qty = readNum("qty",1);
+    if(kg <= 0) throw new Error("KG দিন");
+    if(qty <= 0) throw new Error("Booking quantity দিন");
+    let unit, ruleText;
+    if(kg <= 5){
+      unit = readNum("websiteCharge",0);
+      if(unit <= 0) throw new Error("Website charge লিখুন");
+      ruleText = "১-৫ KG: Website charge";
+    } else if(kg <= 10){ unit = 220; ruleText = "৬-১০ KG"; }
+    else { const rate = area === "district" ? 25 : 28; unit = kg * rate; ruleText = `১০+ KG: ${areaLabel(area)} • ${kg}×${rate}`; }
+    return {details:`Point • ${kg} KG • ${ruleText} • Qty ${qty}`, total:unit * qty};
+  }
+  if(p.rule === "riceSeed"){
+    const kg = readNum("kg",0); const dhaka = $("dhakaMode").value; const qty = readNum("qty",1);
+    if(kg <= 0) throw new Error("KG দিন");
+    if(qty <= 0) throw new Error("Booking quantity দিন");
+    let unit, ruleText;
+    if(kg < 25){
+      unit = dhaka === "inside" ? 150 : 160;
+      ruleText = `<২৫ KG • ${dhaka === "inside" ? "Inside" : "Outside"} Dhaka`;
+    } else {
+      const rate = dhaka === "inside" ? 6 : 7;
+      unit = kg * rate;
+      ruleText = `২৫+ KG: ${kg}×${rate}`;
+    }
+    return {details:`Point • ${kg} KG • ${ruleText} • Qty ${qty}`, total:unit * qty};
+  }
+  if(p.rule === "locationFixed"){
+    const area = $("areaMode").value; const qty = readNum("qty",1);
+    const unit = p.rates[area];
+    if(qty <= 0) throw new Error("Booking quantity দিন");
+    return {details:`Point • ${areaLabel(area)} • ${qty} × ৳${money(unit)}`, total:unit * qty};
+  }
+  throw new Error("Unknown rule");
+}
+
+function updateResult(){
+  try{
+    const item = calculateSelected();
+    $("resultBox").className = "result-box";
+    $("resultBox").innerHTML = `
+      <div class="label">Charge Amount</div>
+      <div class="amount">৳ ${money(item.total)}</div>
+      <div class="details">${item.details}</div>
+    `;
+  }catch(e){
+    $("resultBox").className = "result-box empty-result";
+    $("resultBox").innerHTML = `
+      <div class="label">Charge Amount</div>
+      <div class="amount">৳ 0</div>
+      <div class="details" style="color:#94a3b8;border-top-color:#e2e8f0">${e.message}</div>
+    `;
+  }
+}
+
+renderFields();
 </script>
-
 </body>
 </html>
