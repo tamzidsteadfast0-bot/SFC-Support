@@ -75,7 +75,7 @@ function renderOptions(){
   const s = document.getElementById('service').value;
   const d = document.getElementById('dynamic');
   if(s==='document'){
-    d.innerHTML = `<p style="margin-top:10px;color:#555;">📄 Document (120GM) সারা বাংলাদেশে — flat 50 টাকা</p>`;
+    d.innerHTML = `<p style="margin-top:10px;color:#555;">📄 Document (120GM) সারা বাংলাদেশে — flat 55 টাকা</p>`;
   } else if(s==='point'){
     d.innerHTML = `<label>Area Type</label>
       <select id="route">
@@ -96,7 +96,7 @@ function calculate(){
   if(!w || w<=0){ res.innerHTML="⚠️ সঠিক weight দিন"; return; }
 
   if(s==='document'){
-    res.innerHTML = `✅ Document Charge: <b>৳50</b> (Up to 120GM)`;
+    res.innerHTML = `✅ Document Charge: <b>৳55</b> (Up to 120GM)`;
     return;
   }
 
