@@ -72,6 +72,13 @@ header::before{
 
 .header-left p{ font-size:13px; opacity:.65; margin-top:3px; }
 
+/* Badges Container */
+.header-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .header-badge{
     background: rgba(255,255,255,0.08);
     backdrop-filter: blur(10px);
@@ -82,15 +89,43 @@ header::before{
     display:flex; align-items:center; gap:8px;
 }
 
-.header-badge .dot{
-    width:8px; height:8px;
-    background:#34d399; border-radius:50%;
-    animation: pulse-dot 2s infinite;
+/* Green Live Online Badge */
+.header-badge.online-badge {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.25);
+    color: #4ade80;
 }
 
-@keyframes pulse-dot{
-    0%,100%{ opacity:1; transform:scale(1); }
-    50%{ opacity:.5; transform:scale(1.3); }
+.header-badge.visitor-badge {
+    background: rgba(56, 189, 248, 0.12);
+    border-color: rgba(56, 189, 248, 0.25);
+    color: #38bdf8;
+}
+
+/* Green Pulse Animation */
+.pulse-green {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    animation: pulse-green 1.5s infinite;
+}
+
+@keyframes pulse-green {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
 }
 
 /* ========== CONTAINER ========== */
@@ -337,6 +372,8 @@ footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
 @media (max-width:600px){
     .header-left h1{ font-size:22px; }
     .cards{ grid-template-columns:1fr; }
+    .header-content { flex-direction: column; align-items: center; text-align: center; }
+    .header-badges { justify-content: center; margin-top: 10px; }
 }
 
 /* ========== ANIMATIONS ========== */
@@ -375,8 +412,14 @@ footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
                 <p>STEADFAST CUSTOMER CARE — INTERNAL TOOLS</p>
             </div>
         </div>
-        <div class="header-badge">
-            <span class="dot"></span> System Online
+        <div class="header-badges">
+            <!-- New: Real-time Active Online Badge -->
+            <div class="header-badge online-badge">
+                <span class="pulse-green"></span> Online Now: <strong id="onlineCount">1</strong>
+            </div>
+            <div class="header-badge visitor-badge">
+                👥 Total Visits: <strong id="visitCount">0</strong>
+            </div>
         </div>
     </div>
 </header>
@@ -457,7 +500,7 @@ footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
 
 <script>
 // =====================================================
-// 🔥 FIREBASE CONFIGURATION (Integrated)
+// 🔥 FIREBASE CONFIGURATION
 // =====================================================
 const firebaseConfig = {
     apiKey: "AIzaSyApJsLg2XaDgIqmB694HRAP3noKty_HjTU",
@@ -468,14 +511,77 @@ const firebaseConfig = {
     appId: "1:589705470778:web:4390bc11624fe36635a603"
 };
 
-// Admin PIN (আপনি চাইলে এখান থেকে পিন পরিবর্তন করতে পারেন)
-const ADMIN_PIN = "4563";
+// Admin PIN (পাসওয়ার্ড চেঞ্জ করতে চাইলে এখানে "1234" পরিবর্তন করুন)
+const ADMIN_PIN = "1234";
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let isAdmin = false;
+
+// Create a unique session ID for this tab
+const mySessionId = Math.random().toString(36).substring(2, 15);
+
+// =====================================================
+// Real-time Visitor Counter & Dynamic Presence Tracker
+// =====================================================
+function trackStatsAndPresence() {
+    const counterDocRef = db.collection("stats").doc("visitor_counter");
+    const presenceDocRef = db.collection("online_users").doc(mySessionId);
+
+    // 1. Total visitor tracking
+    if (!sessionStorage.getItem("visited")) {
+        sessionStorage.setItem("visited", "true");
+        counterDocRef.set({
+            count: firebase.firestore.FieldValue.increment(1)
+        }, { merge: true }).catch(err => console.log("Visitor tracking restricted."));
+    }
+
+    // Read and update total visits HUD
+    counterDocRef.onSnapshot((doc) => {
+        if (doc.exists && doc.data().count !== undefined) {
+            document.getElementById("visitCount").innerText = doc.data().count.toLocaleString();
+        }
+    });
+
+    // 2. Real-time Active Presence Tracking (Online Count)
+    const updatePresence = () => {
+        presenceDocRef.set({
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(err => console.log("Presence tracking restricted."));
+    };
+
+    // Update presence instantly and set interval to pulse heartbeat every 20s
+    updatePresence();
+    const heartbeatInterval = setInterval(updatePresence, 20000);
+
+    // Clean up when leaving page
+    window.addEventListener("beforeunload", () => {
+        clearInterval(heartbeatInterval);
+        presenceDocRef.delete();
+    });
+
+    // Real-time listener for current online users (within last 50 seconds)
+    db.collection("online_users").onSnapshot((snapshot) => {
+        const now = Date.now();
+        let activeCount = 0;
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.timestamp) {
+                const lastActive = data.timestamp.seconds * 1000;
+                // If user pulsed within last 50 seconds, count them as online
+                if (now - lastActive < 50000) {
+                    activeCount++;
+                }
+            }
+        });
+        
+        // Display active count (minimum 1, self)
+        document.getElementById("onlineCount").innerText = Math.max(1, activeCount);
+    });
+}
 
 // =====================================================
 // Real-time Notice Listener (Real-time sync)
@@ -609,6 +715,11 @@ function escapeHTML(str) {
         tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag] || tag)
     );
 }
+
+// Run Trackers on Load
+document.addEventListener("DOMContentLoaded", () => {
+    trackStatsAndPresence();
+});
 </script>
 
 </body>
