@@ -413,10 +413,11 @@ footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
             </div>
         </div>
         <div class="header-badges">
-            <!-- New: Real-time Active Online Badge -->
+            <!-- Real-time Active Online Badge -->
             <div class="header-badge online-badge">
                 <span class="pulse-green"></span> Online Now: <strong id="onlineCount">1</strong>
             </div>
+            <!-- Total Visits Badge -->
             <div class="header-badge visitor-badge">
                 👥 Total Visits: <strong id="visitCount">0</strong>
             </div>
@@ -500,7 +501,7 @@ footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
 
 <script>
 // =====================================================
-// 🔥 FIREBASE CONFIGURATION
+// 🔥 FIREBASE CONFIGURATION (Applied)
 // =====================================================
 const firebaseConfig = {
     apiKey: "AIzaSyApJsLg2XaDgIqmB694HRAP3noKty_HjTU",
@@ -511,7 +512,7 @@ const firebaseConfig = {
     appId: "1:589705470778:web:4390bc11624fe36635a603"
 };
 
-// Admin PIN (পাসওয়ার্ড চেঞ্জ করতে চাইলে এখানে "1234" পরিবর্তন করুন)
+// Admin PIN (পাসওয়ার্ড পরিবর্তন করতে চাইলে এখানে "1234" পরিবর্তন করুন)
 const ADMIN_PIN = "1234";
 
 // Initialize Firebase
@@ -519,66 +520,85 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let isAdmin = false;
-
-// Create a unique session ID for this tab
 const mySessionId = Math.random().toString(36).substring(2, 15);
 
 // =====================================================
-// Real-time Visitor Counter & Dynamic Presence Tracker
+// 👥 Fixed Real-time Visitor Counter & Dynamic Presence Tracker
 // =====================================================
-function trackStatsAndPresence() {
+async function trackStatsAndPresence() {
     const counterDocRef = db.collection("stats").doc("visitor_counter");
     const presenceDocRef = db.collection("online_users").doc(mySessionId);
 
-    // 1. Total visitor tracking
+    // 1. Safe Incrementation of Total Visitors
     if (!sessionStorage.getItem("visited")) {
         sessionStorage.setItem("visited", "true");
-        counterDocRef.set({
-            count: firebase.firestore.FieldValue.increment(1)
-        }, { merge: true }).catch(err => console.log("Visitor tracking restricted."));
+        try {
+            const doc = await counterDocRef.get();
+            if (!doc.exists) {
+                await counterDocRef.set({ count: 1 });
+            } else {
+                await counterDocRef.update({
+                    count: firebase.firestore.FieldValue.increment(1)
+                });
+            }
+        } catch (e) {
+            // Safe Fallback in case of quick multi-requests
+            await counterDocRef.set({ count: 1 }, { merge: true });
+        }
     }
 
-    // Read and update total visits HUD
+    // Real-time Total Visitors HUD listener
     counterDocRef.onSnapshot((doc) => {
         if (doc.exists && doc.data().count !== undefined) {
             document.getElementById("visitCount").innerText = doc.data().count.toLocaleString();
         }
     });
 
-    // 2. Real-time Active Presence Tracking (Online Count)
+    // 2. Real-time Clock Offset Calculation (পিসির ভুল সময় অটো-কারেকশন)
+    let serverOffset = 0;
+
     const updatePresence = () => {
         presenceDocRef.set({
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(err => console.log("Presence tracking restricted."));
+        }).catch(err => console.log("Presence write error."));
     };
 
-    // Update presence instantly and set interval to pulse heartbeat every 20s
     updatePresence();
-    const heartbeatInterval = setInterval(updatePresence, 20000);
+    const heartbeatInterval = setInterval(updatePresence, 20000); // 20s heartbeat
 
-    // Clean up when leaving page
     window.addEventListener("beforeunload", () => {
         clearInterval(heartbeatInterval);
         presenceDocRef.delete();
     });
 
-    // Real-time listener for current online users (within last 50 seconds)
+    // Listen to all online docs and dynamically compute skews
     db.collection("online_users").onSnapshot((snapshot) => {
-        const now = Date.now();
+        // Calculate server clock offset using own document
+        const myDoc = snapshot.docs.find(d => d.id === mySessionId);
+        if (myDoc && myDoc.data().timestamp) {
+            const serverTime = myDoc.data().timestamp.toMillis();
+            serverOffset = serverTime - Date.now();
+        }
+
+        const adjustedNow = Date.now() + serverOffset;
         let activeCount = 0;
 
         snapshot.forEach((doc) => {
             const data = doc.data();
             if (data.timestamp) {
-                const lastActive = data.timestamp.seconds * 1000;
-                // If user pulsed within last 50 seconds, count them as online
-                if (now - lastActive < 50000) {
+                const lastActive = data.timestamp.toMillis();
+                const difference = adjustedNow - lastActive;
+
+                // Active within last 55 seconds
+                if (difference < 55000) {
                     activeCount++;
+                } else if (difference > 180000) {
+                    // Self-healing database: Delete sessions inactive for more than 3 minutes
+                    db.collection("online_users").doc(doc.id).delete().catch(() => {});
                 }
             }
         });
-        
-        // Display active count (minimum 1, self)
+
         document.getElementById("onlineCount").innerText = Math.max(1, activeCount);
     });
 }
