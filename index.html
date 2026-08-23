@@ -3,234 +3,613 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>IR Support Portal</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Firebase SDKs (CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <style>
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
-}
+*{ margin:0; padding:0; box-sizing:border-box; }
 
 body{
-    background:#f5f7fb;
+    font-family:'Inter', sans-serif;
+    background:#f0f2f5;
+    color:#1a1a2e;
+    min-height:100vh;
 }
 
-/* Header */
+/* ========== HEADER ========== */
 
 header{
-    background:#0d6efd;
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 40%, #2c5364 100%);
     color:#fff;
-    text-align:center;
-    padding:25px;
-    box-shadow:0 2px 10px rgba(0,0,0,.15);
+    position:relative;
+    overflow:hidden;
 }
 
-header h1{
-    font-size:34px;
+header::before{
+    content:'';
+    position:absolute;
+    top:-50%; right:-20%;
+    width:500px; height:500px;
+    background: radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%);
+    border-radius:50%;
 }
 
-header p{
-    margin-top:8px;
-    font-size:15px;
-    opacity:.9;
+.header-content{
+    position:relative; z-index:2;
+    max-width:1350px; margin:0 auto;
+    padding:35px 30px 30px;
+    display:flex; align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap; gap:15px;
 }
 
-/* Container */
+.header-left{ display:flex; align-items:center; gap:18px; }
+
+.logo-icon{
+    width:52px; height:52px;
+    background: linear-gradient(135deg, #38bdf8, #6366f1);
+    border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px;
+    box-shadow: 0 4px 15px rgba(99,102,241,0.4);
+}
+
+.header-left h1{ font-size:28px; font-weight:800; letter-spacing:-0.5px; }
+
+.header-left h1 span{
+    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+
+.header-left p{ font-size:13px; opacity:.65; margin-top:3px; }
+
+.header-badge{
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border:1px solid rgba(255,255,255,0.12);
+    padding:8px 18px; border-radius:50px;
+    font-size:12px; font-weight:500;
+    color:rgba(255,255,255,0.8);
+    display:flex; align-items:center; gap:8px;
+}
+
+.header-badge .dot{
+    width:8px; height:8px;
+    background:#34d399; border-radius:50%;
+    animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot{
+    0%,100%{ opacity:1; transform:scale(1); }
+    50%{ opacity:.5; transform:scale(1.3); }
+}
+
+/* ========== CONTAINER ========== */
 
 .container{
-    width:90%;
-    max-width:1200px;
-    margin:40px auto;
+    width:92%; max-width:1350px;
+    margin:30px auto 40px;
 }
 
-/* Cards */
+.portal-layout{
+    display:grid;
+    grid-template-columns:1fr 360px;
+    gap:28px; align-items:start;
+}
+
+.section-title{
+    font-size:18px; font-weight:700;
+    color:#1e293b; margin-bottom:20px;
+    display:flex; align-items:center; gap:10px;
+}
+
+.section-title .line{
+    flex:1; height:1px;
+    background: linear-gradient(90deg, #e2e8f0, transparent);
+}
+
+/* ========== CARDS ========== */
 
 .cards{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:25px;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:18px;
 }
 
 .card{
-    background:#fff;
-    border-radius:15px;
-    padding:30px;
-    text-align:center;
-    box-shadow:0 8px 20px rgba(0,0,0,.08);
-    transition:.3s;
+    background:#fff; border-radius:16px;
+    padding:26px 22px; position:relative;
+    overflow:hidden;
+    border:1px solid rgba(0,0,0,0.04);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+    transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
 }
+
+.card::before{
+    content:''; position:absolute;
+    top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--a1), var(--a2));
+    opacity:0; transition: opacity 0.3s;
+}
+
+.card:hover::before{ opacity:1; }
 
 .card:hover{
-    transform:translateY(-8px);
-    box-shadow:0 15px 35px rgba(0,0,0,.15);
+    transform:translateY(-6px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
 }
 
-.card h2{
-    margin-bottom:20px;
-    color:#333;
-    font-size:24px;
+.card-icon{
+    width:48px; height:48px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; margin-bottom:16px;
+    background: linear-gradient(135deg, var(--a1), var(--a2));
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.card p{
-    color:#666;
-    margin-bottom:25px;
-}
+.card h2{ font-size:17px; font-weight:700; color:#1e293b; margin-bottom:6px; }
+.card p{ color:#94a3b8; font-size:13px; margin-bottom:18px; }
 
 .card a{
-    display:inline-block;
-    text-decoration:none;
-    background:#0d6efd;
-    color:#fff;
-    padding:12px 25px;
-    border-radius:8px;
-    font-weight:bold;
-    transition:.3s;
+    display:inline-flex; align-items:center; gap:6px;
+    text-decoration:none; color: var(--a1);
+    font-weight:600; font-size:13px;
+    padding:8px 16px; border-radius:8px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(56,189,248,0.08));
+    transition: all 0.25s;
 }
 
 .card a:hover{
-    background:#084298;
+    background: linear-gradient(135deg, var(--a1), var(--a2));
+    color:#fff;
 }
 
-/* Footer */
+.card:nth-child(1){ --a1:#f59e0b; --a2:#f97316; }
+.card:nth-child(2){ --a1:#10b981; --a2:#059669; }
+.card:nth-child(3){ --a1:#8b5cf6; --a2:#7c3aed; }
+.card:nth-child(4){ --a1:#ef4444; --a2:#dc2626; }
+.card:nth-child(5){ --a1:#3b82f6; --a2:#2563eb; }
+.card:nth-child(6){ --a1:#06b6d4; --a2:#0891b2; }
+
+/* ========== NOTICE SIDEBAR ========== */
+
+.notice-sidebar{
+    background:#fff; border-radius:16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+    border:1px solid rgba(0,0,0,0.04);
+    position:sticky; top:20px; overflow:hidden;
+}
+
+.notice-top-bar{
+    background: linear-gradient(135deg, #0f2027, #2c5364);
+    padding:18px 20px;
+    display:flex; justify-content:space-between; align-items:center;
+}
+
+.notice-top-bar h2{
+    font-size:16px; font-weight:700; color:#fff;
+    display:flex; align-items:center; gap:8px;
+}
+
+.live-dot{
+    width:7px; height:7px;
+    background:#34d399; border-radius:50%;
+    animation: pulse-dot 1.5s infinite;
+}
+
+.admin-btn{
+    background: rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.15);
+    padding:5px 12px; border-radius:6px;
+    font-size:11px; cursor:pointer;
+    color:#fff; font-weight:600;
+    font-family:inherit; transition:0.2s;
+}
+
+.admin-btn:hover{ background: rgba(255,255,255,0.2); }
+
+/* Admin Panel */
+.admin-panel{
+    display:none;
+    background: linear-gradient(135deg, #f8fafc, #eef2ff);
+    border-bottom:2px dashed #c7d2fe;
+    padding:16px;
+}
+
+.admin-panel h3{
+    font-size:12px; color:#6366f1;
+    margin-bottom:10px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.5px;
+}
+
+.admin-panel input, .admin-panel textarea{
+    width:100%; padding:9px 12px;
+    margin-bottom:8px; border:1px solid #cbd5e1;
+    border-radius:8px; font-size:12px;
+    outline:none; font-family:inherit;
+    transition: border 0.2s;
+}
+
+.admin-panel input:focus, .admin-panel textarea:focus{
+    border-color:#6366f1;
+}
+
+.admin-panel .publish-btn{
+    width:100%; padding:10px;
+    background: linear-gradient(135deg, #6366f1, #3b82f6);
+    color:#fff; border:none; border-radius:8px;
+    font-weight:700; font-size:13px;
+    cursor:pointer; font-family:inherit;
+    transition:0.2s;
+}
+
+.admin-panel .publish-btn:hover{
+    transform:translateY(-1px);
+    box-shadow: 0 4px 15px rgba(99,102,241,0.4);
+}
+
+.admin-panel .publish-btn:disabled{
+    opacity:0.6; cursor:not-allowed;
+    transform:none; box-shadow:none;
+}
+
+/* Notice List */
+.notice-list{
+    max-height:520px; overflow-y:auto; padding:15px;
+}
+
+.notice-list::-webkit-scrollbar{ width:4px; }
+.notice-list::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:10px; }
+
+.notice-item{
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border:1px solid #e2e8f0;
+    border-left:3px solid #3b82f6;
+    padding:14px; border-radius:10px;
+    margin-bottom:10px;
+    transition:0.2s;
+    position:relative;
+}
+
+.notice-item:hover{
+    border-left-color:#6366f1;
+    background: linear-gradient(135deg, #eef2ff, #f0f9ff);
+}
+
+.notice-item:last-child{ margin-bottom:0; }
+
+.notice-title{
+    font-weight:700; color:#1e293b;
+    font-size:13px; margin-bottom:5px;
+    padding-right:25px;
+}
+
+.notice-text{ color:#64748b; font-size:12px; line-height:1.5; }
+
+.notice-time{
+    font-size:10px; color:#94a3b8;
+    margin-top:8px; font-weight:500;
+}
+
+.delete-btn{
+    display:none;
+    position:absolute; right:8px; top:8px;
+    background:#fee2e2; color:#ef4444;
+    border:none; padding:3px 7px;
+    border-radius:5px; font-size:10px;
+    cursor:pointer; font-weight:700;
+    transition:0.2s;
+}
+
+.delete-btn:hover{ background:#ef4444; color:#fff; }
+
+.loading-text{
+    text-align:center; font-size:13px;
+    color:#94a3b8; padding:30px 0;
+}
+
+/* ========== FOOTER ========== */
 
 footer{
-    margin-top:60px;
-    background:#0d6efd;
-    color:white;
-    text-align:center;
-    padding:18px;
-    font-size:14px;
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 40%, #2c5364 100%);
+    color:rgba(255,255,255,0.5);
+    text-align:center; padding:22px; font-size:12px;
 }
 
-</style>
+footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
 
+/* ========== RESPONSIVE ========== */
+
+@media (max-width:992px){
+    .portal-layout{ grid-template-columns:1fr; }
+    .notice-sidebar{ order:-1; position:static; }
+}
+
+@media (max-width:600px){
+    .header-left h1{ font-size:22px; }
+    .cards{ grid-template-columns:1fr; }
+}
+
+/* ========== ANIMATIONS ========== */
+
+@keyframes fadeUp{
+    from{ opacity:0; transform:translateY(20px); }
+    to{ opacity:1; transform:translateY(0); }
+}
+
+.card, .notice-sidebar{ animation: fadeUp 0.5s ease forwards; }
+.card:nth-child(1){ animation-delay:0.05s; }
+.card:nth-child(2){ animation-delay:0.1s; }
+.card:nth-child(3){ animation-delay:0.15s; }
+.card:nth-child(4){ animation-delay:0.2s; }
+.card:nth-child(5){ animation-delay:0.25s; }
+.card:nth-child(6){ animation-delay:0.3s; }
+
+@keyframes fadeIn{
+    from{ opacity:0; transform:translateY(8px); }
+    to{ opacity:1; transform:translateY(0); }
+}
+
+.notice-item{ animation: fadeIn 0.3s ease forwards; }
+
+</style>
 </head>
 
 <body>
 
 <header>
-
-<h1>IR Support Portal</h1>
-
-<p>Steadfast Customer Care Internal Tools</p>
-
+    <div class="header-content">
+        <div class="header-left">
+            <div class="logo-icon">🛡️</div>
+            <div>
+                <h1>IR <span>Support Portal</span></h1>
+                <p>STEADFAST CUSTOMER CARE — INTERNAL TOOLS</p>
+            </div>
+        </div>
+        <div class="header-badge">
+            <span class="dot"></span> System Online
+        </div>
+    </div>
 </header>
 
 <div class="container">
+    <div class="portal-layout">
 
-<div class="cards">
+        <!-- LEFT: Tools -->
+        <div>
+            <div class="section-title">
+                🧰 Quick Access Tools <span class="line"></span>
+            </div>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-icon">💰</div>
+                    <h2>Regular Charge</h2>
+                    <p>Open Regular Charge Calculator</p>
+                    <a href="Regular Charge.html">Open Calculator →</a>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🥭</div>
+                    <h2>Mango Charge</h2>
+                    <p>Open Mango Charge Calculator</p>
+                    <a href="Mango Charge.html">Open Calculator →</a>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📦</div>
+                    <h2>Offline Charge</h2>
+                    <p>Open Offline Charge Calculator</p>
+                    <a href="Offline Charge.html">Open Calculator →</a>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📞</div>
+                    <h2>Hub Contact</h2>
+                    <p>Hub Emergency Contact List</p>
+                    <a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0" target="_blank">Open Sheet →</a>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📅</div>
+                    <h2>Duty Roster</h2>
+                    <p>Open Daily Duty Roster</p>
+                    <a href="https://docs.google.com/spreadsheets/d/1YQQnCBFFJNu7K65TrmSBT0aAJVPlCvNrc_oDUImSgZQ/edit?gid=1425212002#gid=1425212002" target="_blank">Open Sheet →</a>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🌐</div>
+                    <h2>Hub Roadmap</h2>
+                    <p>Hub Support Roadmap</p>
+                    <a href="https://sfccare-files.github.io/sfc-hubs/" target="_blank">Click Here →</a>
+                </div>
+            </div>
+        </div>
 
-<!-- Regular Charge -->
+        <!-- RIGHT: Notice Board -->
+        <aside class="notice-sidebar">
+            <div class="notice-top-bar">
+                <h2>📢 Notices <span class="live-dot"></span></h2>
+                <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 Admin</button>
+            </div>
 
-<div class="card">
+            <div class="admin-panel" id="adminPanel">
+                <h3>🔐 Publish New Notice</h3>
+                <input type="text" id="noticeTitle" placeholder="Notice Title...">
+                <textarea id="noticeContent" rows="3" placeholder="Notice Details..."></textarea>
+                <button class="publish-btn" id="publishBtn" onclick="publishNotice()">🚀 Publish Live</button>
+            </div>
 
-<h2>💰 Regular Charge</h2>
+            <div class="notice-list" id="noticeContainer">
+                <div class="loading-text">⏳ Connecting to real-time server...</div>
+            </div>
+        </aside>
 
-<p>Open Regular Charge Calculator</p>
-
-<a href="Regular Charge.html">
-
-Open Calculator
-
-</a>
-
-</div>
-
-<!-- Mango Charge -->
-
-<div class="card">
-
-<h2>🥭 Mango Charge</h2>
-
-<p>Open Mango Charge Calculator</p>
-
-<a href="Mango Charge.html">
-
-Open Calculator
-
-</a>
-
-</div>
-
-<!-- Offline Charge -->
-
-<div class="card">
-
-<h2>📦 Offline Charge</h2>
-
-<p>Open Offline Charge Calculator</p>
-
-<a href="Offline Charge.html">
-
-Open Calculator
-
-</a>
-
-</div>
-
-<!-- Hub Emergency -->
-
-<div class="card">
-
-<h2>📞 Hub Emergency Contact</h2>
-
-<p>View Hub Emergency Contact List</p>
-
-<a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0"
-target="_blank">
-
-Open Sheet
-
-</a>
-
-</div>
-
-<!-- Duty Roster -->
-
-<div class="card">
-
-<h2>📅 Duty Roster</h2>
-
-<p>Open Daily Duty Roster</p>
-
-<a href="https://docs.google.com/spreadsheets/d/1YQQnCBFFJNu7K65TrmSBT0aAJVPlCvNrc_oDUImSgZQ/edit?gid=1425212002#gid=1425212002"
-target="_blank">
-
-Open Sheet
-
-</a>
-
-</div>
-
-<!-- Duty Roster -->
-
-<div class="card">
-
-<h2>📞 Hub Web All Details</h2>
-
-<p>Hub Support Roadmap</p>
-
-<a href="https://sfccare-files.github.io/sfc-hubs/">
-
-Click Here
-
-</a>
-
-</div>
-
-</div>
-
+    </div>
 </div>
 
 <footer>
-
-© 2026 IR Support Portal | Developed for Steadfast Customer Care
-
+    © 2026 <strong>IR Support Portal</strong> — Developed for Steadfast Customer Care
 </footer>
+
+<script>
+// =====================================================
+// 🔥 FIREBASE CONFIGURATION (Integrated)
+// =====================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyApJsLg2XaDgIqmB694HRAP3noKty_HjTU",
+    authDomain: "ir-support-portal.firebaseapp.com",
+    projectId: "ir-support-portal",
+    storageBucket: "ir-support-portal.firebasestorage.app",
+    messagingSenderId: "589705470778",
+    appId: "1:589705470778:web:4390bc11624fe36635a603"
+};
+
+// Admin PIN (আপনি চাইলে এখান থেকে পিন পরিবর্তন করতে পারেন)
+const ADMIN_PIN = "1234";
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let isAdmin = false;
+
+// =====================================================
+// Real-time Notice Listener (Real-time sync)
+// =====================================================
+db.collection("notices")
+    .orderBy("timestamp", "desc")
+    .onSnapshot((snapshot) => {
+        const container = document.getElementById("noticeContainer");
+
+        if (snapshot.empty) {
+            container.innerHTML = `
+                <div class="notice-item">
+                    <div class="notice-title">Welcome Team! 👋</div>
+                    <div class="notice-text">All important updates and notices will appear here instantly.</div>
+                    <div class="notice-time">🕒 System</div>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = "";
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const timeStr = data.timestamp
+                ? new Date(data.timestamp.seconds * 1000).toLocaleString('en-US', {
+                    day:'numeric', month:'short',
+                    hour:'numeric', minute:'numeric', hour12:true
+                })
+                : "Just now";
+
+            const deleteBtnStyle = isAdmin ? "style='display:block;'" : "";
+
+            container.innerHTML += `
+                <div class="notice-item">
+                    <div class="notice-title">${escapeHTML(data.title)}</div>
+                    <div class="notice-text">${escapeHTML(data.content).replace(/\n/g, '<br>')}</div>
+                    <div class="notice-time">🕒 ${timeStr}</div>
+                    <button class="delete-btn" ${deleteBtnStyle} onclick="deleteNotice('${doc.id}')">✕</button>
+                </div>
+            `;
+        });
+    }, (error) => {
+        console.error("Firestore Error:", error);
+        document.getElementById("noticeContainer").innerHTML = `
+            <div class="notice-item">
+                <div class="notice-title">⚠️ Database Setup Needed</div>
+                <div class="notice-text">Please ensure Firestore Database Rules are set to allow read/write in Firebase Console.</div>
+            </div>
+        `;
+    });
+
+// =====================================================
+// Admin Toggle Function
+// =====================================================
+function toggleAdmin() {
+    const panel = document.getElementById("adminPanel");
+    const btn = document.getElementById("adminBtn");
+
+    if (isAdmin) {
+        isAdmin = false;
+        panel.style.display = "none";
+        btn.innerText = "🔒 Admin";
+        document.querySelectorAll(".delete-btn").forEach(el => el.style.display = "none");
+    } else {
+        const pin = prompt("Enter Admin PIN to manage notices:");
+        if (pin === ADMIN_PIN) {
+            isAdmin = true;
+            panel.style.display = "block";
+            btn.innerText = "🔓 Logout";
+            document.querySelectorAll(".delete-btn").forEach(el => el.style.display = "block");
+        } else if (pin !== null) {
+            alert("❌ Incorrect PIN! Access Denied.");
+        }
+    }
+}
+
+// =====================================================
+// Publish Notice
+// =====================================================
+async function publishNotice() {
+    const title = document.getElementById("noticeTitle").value.trim();
+    const content = document.getElementById("noticeContent").value.trim();
+
+    if (!title || !content) {
+        alert("Please fill in both Title and Details!");
+        return;
+    }
+
+    const btn = document.getElementById("publishBtn");
+    btn.innerText = "⏳ Publishing...";
+    btn.disabled = true;
+
+    try {
+        await db.collection("notices").add({
+            title: title,
+            content: content,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById("noticeTitle").value = "";
+        document.getElementById("noticeContent").value = "";
+
+    } catch (error) {
+        alert("❌ Error: " + error.message);
+        console.error(error);
+    } finally {
+        btn.innerText = "🚀 Publish Live";
+        btn.disabled = false;
+    }
+}
+
+// =====================================================
+// Delete Notice
+// =====================================================
+async function deleteNotice(docId) {
+    if (!confirm("Are you sure you want to delete this notice?")) return;
+
+    try {
+        await db.collection("notices").doc(docId).delete();
+    } catch (error) {
+        alert("❌ Error deleting: " + error.message);
+    }
+}
+
+// =====================================================
+// Security Escape
+// =====================================================
+function escapeHTML(str) {
+    if (!str) return "";
+    return String(str).replace(/[&<>'"]/g,
+        tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag] || tag)
+    );
+}
+</script>
 
 </body>
 </html>
