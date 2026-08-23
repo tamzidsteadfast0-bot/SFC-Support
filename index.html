@@ -501,7 +501,7 @@ footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
 
 <script>
 // =====================================================
-// 🔥 FIREBASE CONFIGURATION (Applied)
+// 🔥 FIREBASE CONFIGURATION
 // =====================================================
 const firebaseConfig = {
     apiKey: "AIzaSyApJsLg2XaDgIqmB694HRAP3noKty_HjTU",
@@ -512,7 +512,7 @@ const firebaseConfig = {
     appId: "1:589705470778:web:4390bc11624fe36635a603"
 };
 
-// Admin PIN (পাসওয়ার্ড পরিবর্তন করতে চাইলে এখানে "1234" পরিবর্তন করুন)
+// Admin PIN
 const ADMIN_PIN = "1234";
 
 // Initialize Firebase
@@ -520,91 +520,83 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let isAdmin = false;
-const mySessionId = Math.random().toString(36).substring(2, 15);
+
+// Unique Session ID for this browser tab
+const mySessionId = 'usr_' + Math.random().toString(36).substring(2, 11);
 
 // =====================================================
-// 👥 Fixed Real-time Visitor Counter & Dynamic Presence Tracker
+// 1. TOTAL VISITS COUNTER (Bulletproof)
 // =====================================================
-async function trackStatsAndPresence() {
-    const counterDocRef = db.collection("stats").doc("visitor_counter");
-    const presenceDocRef = db.collection("online_users").doc(mySessionId);
+function initTotalVisits() {
+    const counterDoc = db.collection("portal_stats").doc("visits");
 
-    // 1. Safe Incrementation of Total Visitors
-    if (!sessionStorage.getItem("visited")) {
-        sessionStorage.setItem("visited", "true");
-        try {
-            const doc = await counterDocRef.get();
-            if (!doc.exists) {
-                await counterDocRef.set({ count: 1 });
-            } else {
-                await counterDocRef.update({
-                    count: firebase.firestore.FieldValue.increment(1)
-                });
-            }
-        } catch (e) {
-            // Safe Fallback in case of quick multi-requests
-            await counterDocRef.set({ count: 1 }, { merge: true });
-        }
+    // Only count once per browser session
+    if (!sessionStorage.getItem("has_counted_visit")) {
+        sessionStorage.setItem("has_counted_visit", "true");
+        
+        counterDoc.set({
+            total: firebase.firestore.FieldValue.increment(1)
+        }, { merge: true }).catch(err => console.error("Visit counter write error:", err));
     }
 
-    // Real-time Total Visitors HUD listener
-    counterDocRef.onSnapshot((doc) => {
-        if (doc.exists && doc.data().count !== undefined) {
-            document.getElementById("visitCount").innerText = doc.data().count.toLocaleString();
+    // Real-time update display
+    counterDoc.onSnapshot((doc) => {
+        if (doc.exists && doc.data().total !== undefined) {
+            document.getElementById("visitCount").innerText = doc.data().total.toLocaleString();
         }
-    });
-
-    // 2. Real-time Clock Offset Calculation (পিসির ভুল সময় অটো-কারেকশন)
-    let serverOffset = 0;
-
-    const updatePresence = () => {
-        presenceDocRef.set({
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(err => console.log("Presence write error."));
-    };
-
-    updatePresence();
-    const heartbeatInterval = setInterval(updatePresence, 20000); // 20s heartbeat
-
-    window.addEventListener("beforeunload", () => {
-        clearInterval(heartbeatInterval);
-        presenceDocRef.delete();
-    });
-
-    // Listen to all online docs and dynamically compute skews
-    db.collection("online_users").onSnapshot((snapshot) => {
-        // Calculate server clock offset using own document
-        const myDoc = snapshot.docs.find(d => d.id === mySessionId);
-        if (myDoc && myDoc.data().timestamp) {
-            const serverTime = myDoc.data().timestamp.toMillis();
-            serverOffset = serverTime - Date.now();
-        }
-
-        const adjustedNow = Date.now() + serverOffset;
-        let activeCount = 0;
-
-        snapshot.forEach((doc) => {
-            const data = doc.data();
-            if (data.timestamp) {
-                const lastActive = data.timestamp.toMillis();
-                const difference = adjustedNow - lastActive;
-
-                // Active within last 55 seconds
-                if (difference < 55000) {
-                    activeCount++;
-                } else if (difference > 180000) {
-                    // Self-healing database: Delete sessions inactive for more than 3 minutes
-                    db.collection("online_users").doc(doc.id).delete().catch(() => {});
-                }
-            }
-        });
-
-        document.getElementById("onlineCount").innerText = Math.max(1, activeCount);
     });
 }
 
 // =====================================================
-// Real-time Notice Listener (Real-time sync)
+// 2. REAL-TIME ONLINE NOW TRACKER (Instant & Accurate)
+// =====================================================
+function initOnlinePresence() {
+    const presenceRef = db.collection("active_presence").doc(mySessionId);
+
+    // Heartbeat function: Write current epoch time
+    const sendHeartbeat = () => {
+        presenceRef.set({
+            last_seen: Date.now()
+        }).catch(err => console.error("Heartbeat error:", err));
+    };
+
+    // Send immediately & repeat every 8 seconds
+    sendHeartbeat();
+    const heartbeatTimer = setInterval(sendHeartbeat, 8000);
+
+    // Delete session on tab close
+    window.addEventListener("beforeunload", () => {
+        clearInterval(heartbeatTimer);
+        presenceRef.delete();
+    });
+
+    // Real-time listener for ALL online tabs
+    db.collection("active_presence").onSnapshot((snapshot) => {
+        const now = Date.now();
+        let currentOnline = 0;
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data && data.last_seen) {
+                // If last heartbeat was within last 20 seconds, user is ONLINE
+                if (now - data.last_seen < 20000) {
+                    currentOnline++;
+                } else {
+                    // Clean up dead sessions older than 45 seconds
+                    if (now - data.last_seen > 45000) {
+                        db.collection("active_presence").doc(doc.id).delete().catch(() => {});
+                    }
+                }
+            }
+        });
+
+        // Always display at least 1 (self)
+        document.getElementById("onlineCount").innerText = Math.max(1, currentOnline);
+    });
+}
+
+// =====================================================
+// 3. REAL-TIME NOTICE BOARD
 // =====================================================
 db.collection("notices")
     .orderBy("timestamp", "desc")
@@ -648,13 +640,13 @@ db.collection("notices")
         document.getElementById("noticeContainer").innerHTML = `
             <div class="notice-item">
                 <div class="notice-title">⚠️ Database Setup Needed</div>
-                <div class="notice-text">Please ensure Firestore Database Rules are set to allow read/write in Firebase Console.</div>
+                <div class="notice-text">Please set Firestore Database Rules to 'allow read, write: if true;' in Firebase Console.</div>
             </div>
         `;
     });
 
 // =====================================================
-// Admin Toggle Function
+// ADMIN FUNCTIONS
 // =====================================================
 function toggleAdmin() {
     const panel = document.getElementById("adminPanel");
@@ -678,9 +670,6 @@ function toggleAdmin() {
     }
 }
 
-// =====================================================
-// Publish Notice
-// =====================================================
 async function publishNotice() {
     const title = document.getElementById("noticeTitle").value.trim();
     const content = document.getElementById("noticeContent").value.trim();
@@ -706,16 +695,12 @@ async function publishNotice() {
 
     } catch (error) {
         alert("❌ Error: " + error.message);
-        console.error(error);
     } finally {
         btn.innerText = "🚀 Publish Live";
         btn.disabled = false;
     }
 }
 
-// =====================================================
-// Delete Notice
-// =====================================================
 async function deleteNotice(docId) {
     if (!confirm("Are you sure you want to delete this notice?")) return;
 
@@ -726,9 +711,6 @@ async function deleteNotice(docId) {
     }
 }
 
-// =====================================================
-// Security Escape
-// =====================================================
 function escapeHTML(str) {
     if (!str) return "";
     return String(str).replace(/[&<>'"]/g,
@@ -736,9 +718,10 @@ function escapeHTML(str) {
     );
 }
 
-// Run Trackers on Load
+// Run Trackers on Page Load
 document.addEventListener("DOMContentLoaded", () => {
-    trackStatsAndPresence();
+    initTotalVisits();
+    initOnlinePresence();
 });
 </script>
 
