@@ -2,39 +2,347 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Courier Charge Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  body { font-family: Arial, sans-serif; background:#f4f6f9; padding:20px; }
-  .container { max-width:600px; margin:auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,.1);}
-  h2 { text-align:center; color:#2c3e50; }
-  label { display:block; margin-top:12px; font-weight:bold; }
-  select, input, button { width:100%; padding:10px; margin-top:6px; border:1px solid #ccc; border-radius:6px; font-size:15px;}
-  button { background:#27ae60; color:#fff; border:none; margin-top:18px; cursor:pointer; font-size:16px;}
-  button:hover { background:#1e8449; }
-  .result { margin-top:18px; padding:15px; background:#ecf0f1; border-left:5px solid #27ae60; border-radius:6px; font-size:17px;}
+  :root{
+    --ink:#16233B;
+    --ink-soft:#4A5670;
+    --paper:#F7F2E7;
+    --paper-deep:#EFE7D6;
+    --card:#FFFDF8;
+    --accent:#0E8F6E;
+    --accent-dark:#0B6E56;
+    --amber:#EDA23B;
+    --line:#D9CFB8;
+    --danger:#C0392B;
+    --radius:14px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Inter', Arial, sans-serif;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(14,143,110,0.07), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(237,162,59,0.10), transparent 45%),
+      var(--paper);
+    color:var(--ink);
+    padding:32px 16px 60px;
+    display:flex;
+    justify-content:center;
+  }
+
+  .sheet{
+    width:100%;
+    max-width:460px;
+  }
+
+  /* ---- Header : dispatch board strip ---- */
+  .brandbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:var(--radius) var(--radius) 0 0;
+    padding:16px 20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .brandbar::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:repeating-linear-gradient(-45deg, rgba(255,255,255,0.035) 0 6px, transparent 6px 12px);
+  }
+  .brandbar .mark{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Archivo', sans-serif;
+    font-weight:800;
+    font-size:15px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    z-index:1;
+  }
+  .brandbar .mark .box{
+    width:30px; height:30px;
+    border-radius:7px;
+    background:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+  }
+  .brandbar .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    color:var(--amber);
+    text-transform:uppercase;
+    z-index:1;
+    border:1px solid rgba(237,162,59,0.5);
+    padding:3px 8px;
+    border-radius:20px;
+  }
+
+  /* ---- Main card ---- */
+  .card{
+    background:var(--card);
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+    padding:26px 22px 22px;
+    box-shadow:0 18px 40px -18px rgba(22,35,59,0.25);
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--accent-dark);
+    margin:0 0 4px;
+  }
+  h1{
+    font-family:'Archivo', sans-serif;
+    font-weight:800;
+    font-size:22px;
+    margin:0 0 20px;
+    color:var(--ink);
+    letter-spacing:-0.01em;
+  }
+
+  fieldset{
+    border:none;
+    margin:0 0 16px;
+    padding:0;
+  }
+
+  label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:7px;
+  }
+  label .num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:16px; height:16px;
+    border-radius:4px;
+    background:var(--paper-deep);
+    color:var(--ink);
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    font-weight:700;
+  }
+
+  select, input{
+    width:100%;
+    padding:12px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-size:15px;
+    font-family:'Inter', sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    transition:border-color .15s ease, box-shadow .15s ease;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1L7 7L13 1' stroke='%234A5670' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    padding-right:36px;
+  }
+  select:focus, input:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(14,143,110,0.15);
+  }
+  input::placeholder{ color:#9AA3B5; }
+
+  #dynamic{ margin:0; }
+
+  .weight-row{
+    position:relative;
+  }
+  .weight-row input{ padding-right:52px; }
+  .weight-row .unit{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+    pointer-events:none;
+  }
+
+  button{
+    width:100%;
+    padding:14px;
+    margin-top:6px;
+    border:none;
+    border-radius:10px;
+    background:var(--accent);
+    color:#fff;
+    font-family:'Archivo', sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  button:hover{ background:var(--accent-dark); }
+  button:active{ transform:scale(0.99); }
+
+  /* ---- Result: waybill stub ---- */
+  .stub-wrap{
+    margin-top:22px;
+  }
+  .stub{
+    position:relative;
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:12px;
+    padding:18px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    min-height:34px;
+  }
+  .stub::before, .stub::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:18px; height:18px;
+    background:var(--paper);
+    border-radius:50%;
+  }
+  .stub::before{ left:-9px; }
+  .stub::after{ right:-9px; }
+  .stub .lbl{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:#A9B4C7;
+    line-height:1.5;
+  }
+  .stub .amount{
+    font-family:'Archivo', sans-serif;
+    font-weight:800;
+    font-size:26px;
+    color:var(--amber);
+    white-space:nowrap;
+  }
+  .stub .meta{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:#8894AB;
+    margin-top:2px;
+  }
+  .stub.idle{
+    background:var(--paper-deep);
+    color:var(--ink-soft);
+  }
+  .stub.idle .lbl{ color:var(--ink-soft); }
+  .stub.idle .amount{ color:var(--ink-soft); font-size:14px; font-weight:600; }
+  .stub.error{ background:#3A1B18; }
+  .stub.error .amount{ color:#F2A79B; font-size:15px; }
+
+  .perforation{
+    height:0;
+    border-top:2px dashed var(--line);
+    margin:0 -22px;
+  }
+
+  .footer-note{
+    text-align:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    color:var(--ink-soft);
+    letter-spacing:0.03em;
+    background:var(--paper-deep);
+    border-radius:0 0 var(--radius) var(--radius);
+    padding:10px 20px;
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    button{ transition:none; }
+  }
 </style>
 </head>
 <body>
-<div class="container">
-  <h2>📦 Courier Charge Calculator</h2>
+<div class="sheet">
 
-  <label>Service Type</label>
-  <select id="service" onchange="renderOptions()">
-    <option value="regular">Regular / Next Day Delivery</option>
-    <option value="pickdrop">Pick and Drop</option>
-    <option value="express">Express Delivery</option>
-    <option value="book">Book</option>
-    <option value="document">Document</option>
-    <option value="point">Point Delivery</option>
-  </select>
+  <div class="brandbar">
+    <div class="mark"><span class="box">📦</span> Courier Rate Desk</div>
+    <div class="tag">Fare Sheet</div>
+  </div>
 
-  <div id="dynamic"></div>
+  <div class="card">
+    <p class="eyebrow">Step 1–3 · Route & Weight</p>
+    <h1>Charge Calculator</h1>
 
-  <label>Weight (KG)</label>
-  <input type="number" id="weight" step="0.01" min="0.1" placeholder="যেমন: 1.5">
+    <fieldset>
+      <label><span class="num">1</span>Service Type</label>
+      <select id="service" onchange="renderOptions()">
+        <option value="regular">Regular / Next Day Delivery</option>
+        <option value="pickdrop">Pick and Drop</option>
+        <option value="express">Express Delivery</option>
+        <option value="book">Book</option>
+        <option value="document">Document</option>
+        <option value="point">Point Delivery</option>
+      </select>
+    </fieldset>
 
-  <button onclick="calculate()">Calculate Charge</button>
-  <div class="result" id="result">এখানে charge দেখাবে...</div>
+    <fieldset>
+      <div id="dynamic"></div>
+    </fieldset>
+
+    <fieldset>
+      <label><span class="num">3</span>Weight</label>
+      <div class="weight-row">
+        <input type="number" id="weight" step="0.01" min="0.1" placeholder="যেমন: 1.5">
+        <span class="unit">KG</span>
+      </div>
+    </fieldset>
+
+    <button onclick="calculate()">Calculate Charge</button>
+
+    <div class="stub-wrap">
+      <div class="perforation"></div>
+      <div class="stub idle" id="result">
+        <div>
+          <div class="lbl">Estimated Charge</div>
+        </div>
+        <div class="amount">এখানে দেখাবে</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">সব ভাড়া আনুমানিক · ওজন ও রুট অনুযায়ী পরিবর্তনযোগ্য</div>
+
 </div>
 
 <script>
@@ -75,9 +383,10 @@ function renderOptions(){
   const s = document.getElementById('service').value;
   const d = document.getElementById('dynamic');
   if(s==='document'){
-    d.innerHTML = `<p style="margin-top:10px;color:#555;">📄 Document (120GM) সারা বাংলাদেশে — flat 55 টাকা</p>`;
+    d.innerHTML = `<label><span class="num">2</span>Route Info</label>
+      <p style="margin:0;padding:12px 14px;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;color:var(--ink-soft);">📄 Document (120GM) সারা বাংলাদেশে — flat <strong style="color:var(--ink);">৳55</strong></p>`;
   } else if(s==='point'){
-    d.innerHTML = `<label>Area Type</label>
+    d.innerHTML = `<label><span class="num">2</span>Area Type</label>
       <select id="route">
         <option value="isd_osd">ISD-OSD / OSD-OSD</option>
         <option value="osd_isd">OSD-ISD</option>
@@ -85,18 +394,27 @@ function renderOptions(){
       </select>`;
   } else {
     let opts = routes[s].map(r=>`<option value="${r.v}">${r.t}</option>`).join('');
-    d.innerHTML = `<label>Route</label><select id="route">${opts}</select>`;
+    d.innerHTML = `<label><span class="num">2</span>Route</label><select id="route">${opts}</select>`;
   }
+}
+
+function setResult(html, cls){
+  const res = document.getElementById('result');
+  res.className = 'stub ' + cls;
+  res.innerHTML = html;
 }
 
 function calculate(){
   const s = document.getElementById('service').value;
   const w = parseFloat(document.getElementById('weight').value);
-  const res = document.getElementById('result');
-  if(!w || w<=0){ res.innerHTML="⚠️ সঠিক weight দিন"; return; }
+
+  if(!w || w<=0){
+    setResult(`<div><div class="lbl">Input Required</div></div><div class="amount">⚠️ সঠিক weight দিন</div>`, 'error');
+    return;
+  }
 
   if(s==='document'){
-    res.innerHTML = `✅ Document Charge: <b>৳55</b> (Up to 120GM)`;
+    setResult(`<div><div class="lbl">Estimated Charge</div><div class="meta">Up to 120GM</div></div><div class="amount">৳55</div>`, '');
     return;
   }
 
@@ -118,7 +436,7 @@ function calculate(){
       const perKg = (route==='isd_isd')?13:12;
       charge = baseCh + Math.ceil(w-36)*perKg;
     }
-    res.innerHTML = `✅ Point Delivery Charge: <b>৳${charge}</b>`;
+    setResult(`<div><div class="lbl">Point Delivery</div><div class="meta">${route.toUpperCase()} · ${w} KG</div></div><div class="amount">৳${charge}</div>`, '');
     return;
   }
 
@@ -134,7 +452,7 @@ function calculate(){
     const extraKg = Math.ceil(w-maxSlab.w);
     charge = maxSlab.p + extraKg*obj.extra;
   }
-  res.innerHTML = `✅ Charge: <b>৳${charge}</b><br><small>Route: ${obj.t} | Weight: ${w} KG</small>`;
+  setResult(`<div><div class="lbl">Estimated Charge</div><div class="meta">${obj.t} · ${w} KG</div></div><div class="amount">৳${charge}</div>`, '');
 }
 
 renderOptions();
