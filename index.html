@@ -180,7 +180,6 @@ header::before{
     top: 20px;
 }
 
-/* Widget General Styles */
 .sidebar-widget {
     background: #1e293b;
     border-radius: 16px;
@@ -254,7 +253,6 @@ header::before{
     cursor: pointer;
 }
 
-/* Notice List Scrollbar */
 .notice-list { 
     max-height: 240px; 
     overflow-y: auto; 
@@ -276,7 +274,6 @@ header::before{
 
 .notice-title { font-weight: 700; color: #f8fafc; font-size: 12px; margin-bottom: 4px; padding-right: 20px;}
 
-/* Truncate long notice text */
 .notice-text { 
     color: #94a3b8; 
     font-size: 11px; 
@@ -361,7 +358,7 @@ header::before{
     gap: 8px;
 }
 
-.compact-inputs input, .compact-inputs select {
+.compact-inputs select {
     background: #1e293b;
     border: 1px solid #334155;
     color: #f8fafc;
@@ -372,7 +369,7 @@ header::before{
     font-family: inherit;
 }
 
-.compact-inputs input:focus, .compact-inputs select:focus { border-color: #f59e0b; }
+.compact-inputs select:focus { border-color: #f59e0b; }
 
 .compact-submit-btn {
     background: #f59e0b;
@@ -441,7 +438,7 @@ header::before{
 .empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 11px; }
 
 /* ===================================================== */
-/* 🔍 NOTICE MODAL / POPUP (বড় নোটিশ দেখার জন্য) */
+/* 🔍 NOTICE MODAL / POPUP */
 /* ===================================================== */
 
 .modal-overlay {
@@ -489,29 +486,9 @@ header::before{
 
 .modal-close-btn:hover { background: #ef4444; }
 
-.modal-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: #f8fafc;
-    margin-bottom: 8px;
-    padding-right: 30px;
-}
-
-.modal-time {
-    font-size: 11px;
-    color: #38bdf8;
-    margin-bottom: 16px;
-    font-weight: 600;
-}
-
-.modal-body {
-    font-size: 13px;
-    color: #cbd5e1;
-    line-height: 1.6;
-    max-height: 350px;
-    overflow-y: auto;
-    white-space: pre-line;
-}
+.modal-title { font-size: 16px; font-weight: 800; color: #f8fafc; margin-bottom: 8px; padding-right: 30px; }
+.modal-time { font-size: 11px; color: #38bdf8; margin-bottom: 16px; font-weight: 600; }
+.modal-body { font-size: 13px; color: #cbd5e1; line-height: 1.6; max-height: 350px; overflow-y: auto; white-space: pre-line; }
 
 footer{
     background: #0f172a;
@@ -617,7 +594,7 @@ footer strong{ color:rgba(255,255,255,0.8); }
                 </div>
             </div>
 
-            <!-- WIDGET 2: Break Approval Portal -->
+            <!-- WIDGET 2: Break Approval Portal (উইজেট) -->
             <div class="sidebar-widget">
                 <div class="widget-top-bar">
                     <h2>☕ ব্রেক অনুমোদন পোর্টাল</h2>
@@ -640,16 +617,42 @@ footer strong{ color:rgba(255,255,255,0.8); }
                         </div>
                     </div>
 
+                    <!-- Compact Request Form with Name Dropdown -->
                     <div class="compact-break-form">
                         <div class="compact-form-title">➕ নতুন ব্রেক রিকোয়েস্ট</div>
                         <div class="compact-inputs">
-                            <input type="text" id="agentNameInput" placeholder="আপনার নাম লিখুন...">
-                            <select id="breakTypeSelect">
-                                <option value="শর্ট ব্রেক">শর্ট ব্রেক (১০ মি:)</option>
-                                <option value="লাঞ্চ ব্রেক">লাঞ্চ ব্রেক (৩০ মি:)</option>
-                                <option value="নামাজের ব্রেক">নামাজের ব্রেক</option>
-                                <option value="ইমার্জেন্সি ব্রেক">ইমার্জেন্সি ব্রেক</option>
+                            <!-- এজেন্টের নামের ড্রপডাউন -->
+                            <select id="agentNameSelect">
+                                <option value="">-- নাম নির্বাচন করুন --</option>
+                                <option value="Md Ezaj Ahmed">Md Ezaj Ahmed</option>
+                                <option value="Md Rabbi">Md Rabbi</option>
+                                <option value="Sahin Hasan Sabbir">Sahin Hasan Sabbir</option>
+                                <option value="Rakibul Islam">Rakibul Islam</option>
+                                <option value="Md Muzahidul Islam Jahid">Md Muzahidul Islam Jahid</option>
+                                <option value="Shoaib Hasan">Shoaib Hasan</option>
+                                <option value="Khayrul Islam">Khayrul Islam</option>
+                                <option value="Md.Omor Faruk">Md.Omor Faruk</option>
+                                <option value="Md. Mehedi Hasan Sohag">Md. Mehedi Hasan Sohag</option>
+                                <option value="Sheikh Md Ebrahim Anu">Sheikh Md Ebrahim Anu</option>
+                                <option value="Latifur Rahman">Latifur Rahman</option>
+                                <option value="Md Rasel">Md Rasel</option>
+                                <option value="Md.Sadikul Islam Rayat">Md.Sadikul Islam Rayat</option>
+                                <option value="Shamiul Bashir Ananno">Shamiul Bashir Ananno</option>
+                                <option value="Jabedul Islam">Jabedul Islam</option>
+                                <option value="Shojon Ahmed">Shojon Ahmed</option>
+                                <option value="Md Sajib Al Mamun">Md Sajib Al Mamun</option>
+                                <option value="Rakib Hossain">Rakib Hossain</option>
+                                <option value="Dipta Roy">Dipta Roy</option>
+                                <option value="Sabbir Ahmed">Sabbir Ahmed</option>
+                                <option value="Dip Shorkar">Dip Shorkar</option>
                             </select>
+
+                            <!-- ব্রেকের ধরনের ড্রপডাউন -->
+                            <select id="breakTypeSelect">
+                                <option value="শর্ট ব্রেক">শর্ট ব্রেক (১০ মিনিট)</option>
+                                <option value="নামাজের ব্রেক">নামাজের ব্রেক</option>
+                            </select>
+
                             <button class="compact-submit-btn" onclick="submitBreakRequest()">কিউতে যোগ করুন</button>
                         </div>
                     </div>
@@ -670,9 +673,7 @@ footer strong{ color:rgba(255,255,255,0.8); }
     </div>
 </div>
 
-<!-- ===================================================== -->
-<!-- 🔍 FULL NOTICE POPUP MODAL (বড় নোটিশের জন্য) -->
-<!-- ===================================================== -->
+<!-- FULL NOTICE POPUP MODAL -->
 <div class="modal-overlay" id="noticeModal">
     <div class="modal-card">
         <button class="modal-close-btn" onclick="closeModal()">✕</button>
@@ -699,7 +700,7 @@ const firebaseConfig = {
     appId: "1:589705470778:web:4390bc11624fe36635a603"
 };
 
-const ADMIN_PIN = "1234";
+const ADMIN_PIN = "4563";
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -718,7 +719,7 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // =====================================================
-// 📢 NOTICE BOARD LOGIC (WITH FULL NOTICE POPUP)
+// 📢 NOTICE BOARD LOGIC
 // =====================================================
 db.collection("notices").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
     const container = document.getElementById("noticeContainer");
@@ -737,7 +738,6 @@ db.collection("notices").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
         const timeStr = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString('en-US', { day:'numeric', month:'short', hour:'numeric', minute:'numeric', hour12:true }) : "Just now";
         const deleteBtnStyle = isAdmin ? "style='display:block;'" : "";
 
-        // Check if content is long (>80 chars) to show 'Read More'
         const isLong = data.content && data.content.length > 80;
         const readMoreHTML = isLong ? `<span class="read-more-btn" onclick="openModal('${docId}')">📖 পুরো নোটিশ দেখুন</span>` : '';
 
@@ -753,7 +753,6 @@ db.collection("notices").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
     });
 });
 
-// Modal Open/Close Functions
 function openModal(docId) {
     const data = noticesDataStore[docId];
     if (!data) return;
@@ -770,7 +769,6 @@ function closeModal() {
     document.getElementById("noticeModal").style.display = "none";
 }
 
-// Close Modal on clicking outside card
 window.onclick = function(event) {
     const modal = document.getElementById("noticeModal");
     if (event.target === modal) {
@@ -782,12 +780,16 @@ window.onclick = function(event) {
 // ☕ BREAK PORTAL LOGIC
 // =====================================================
 async function submitBreakRequest() {
-    const nameInput = document.getElementById("agentNameInput");
+    const nameSelect = document.getElementById("agentNameSelect");
     const typeSelect = document.getElementById("breakTypeSelect");
-    const name = nameInput.value.trim();
+    
+    const name = nameSelect.value;
     const type = typeSelect.value;
 
-    if (!name) return alert("অনুগ্রহ করে আপনার নাম লিখুন!");
+    if (!name) {
+        alert("অনুগ্রহ করে আপনার নাম নির্বাচন করুন!");
+        return;
+    }
 
     try {
         await db.collection("break_requests").add({
@@ -797,7 +799,7 @@ async function submitBreakRequest() {
             requestedAt: Date.now(),
             dateStr: new Date().toISOString().split('T')[0]
         });
-        nameInput.value = "";
+        nameSelect.value = ""; // Reset dropdown
     } catch (e) { alert("ত্রুটি: " + e.message); }
 }
 
