@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IR Support Portal</title>
+<title>IR Support Portal & Break Management</title>
 
 <!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Mina:wght@400;700&display=swap" rel="stylesheet">
 
 <!-- Firebase SDKs (CDN) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -17,9 +17,9 @@
 *{ margin:0; padding:0; box-sizing:border-box; }
 
 body{
-    font-family:'Inter', sans-serif;
-    background:#f0f2f5;
-    color:#1a1a2e;
+    font-family:'Inter', 'Mina', sans-serif;
+    background:#0f172a;
+    color:#f8fafc;
     min-height:100vh;
 }
 
@@ -30,6 +30,7 @@ header{
     color:#fff;
     position:relative;
     overflow:hidden;
+    border-bottom:1px solid rgba(255,255,255,0.1);
 }
 
 header::before{
@@ -44,7 +45,7 @@ header::before{
 .header-content{
     position:relative; z-index:2;
     max-width:1350px; margin:0 auto;
-    padding:35px 30px 30px;
+    padding:25px 30px;
     display:flex; align-items:center;
     justify-content:space-between;
     flex-wrap:wrap; gap:15px;
@@ -61,7 +62,7 @@ header::before{
     box-shadow: 0 4px 15px rgba(99,102,241,0.4);
 }
 
-.header-left h1{ font-size:28px; font-weight:800; letter-spacing:-0.5px; }
+.header-left h1{ font-size:26px; font-weight:800; letter-spacing:-0.5px; }
 
 .header-left h1 span{
     background: linear-gradient(90deg, #38bdf8, #818cf8);
@@ -70,87 +71,52 @@ header::before{
     background-clip:text;
 }
 
-.header-left p{ font-size:13px; opacity:.65; margin-top:3px; }
+.header-left p{ font-size:12px; opacity:.65; margin-top:2px; }
 
-/* Badges Container */
-.header-badges {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
+.header-badges { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .header-badge{
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.06);
     backdrop-filter: blur(10px);
-    border:1px solid rgba(255,255,255,0.12);
-    padding:8px 18px; border-radius:50px;
+    border:1px solid rgba(255,255,255,0.1);
+    padding:8px 16px; border-radius:50px;
     font-size:12px; font-weight:500;
     color:rgba(255,255,255,0.8);
     display:flex; align-items:center; gap:8px;
 }
 
-/* Green Live Online Badge */
-.header-badge.online-badge {
-    background: rgba(34, 197, 94, 0.12);
-    border-color: rgba(34, 197, 94, 0.25);
-    color: #4ade80;
-}
+.header-badge.online-badge { background: rgba(34, 197, 94, 0.12); border-color: rgba(34, 197, 94, 0.25); color: #4ade80; }
+.header-badge.visitor-badge { background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.25); color: #38bdf8; }
 
-.header-badge.visitor-badge {
-    background: rgba(56, 189, 248, 0.12);
-    border-color: rgba(56, 189, 248, 0.25);
-    color: #38bdf8;
-}
-
-/* Green Pulse Animation */
 .pulse-green {
-    width: 8px;
-    height: 8px;
-    background: #22c55e;
-    border-radius: 50%;
-    display: inline-block;
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    width: 8px; height: 8px; background: #22c55e;
+    border-radius: 50%; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
     animation: pulse-green 1.5s infinite;
 }
 
 @keyframes pulse-green {
-    0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-    }
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
-    }
-    100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-    }
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
 }
 
 /* ========== CONTAINER ========== */
 
-.container{
-    width:92%; max-width:1350px;
-    margin:30px auto 40px;
-}
+.container{ width:92%; max-width:1350px; margin:30px auto 40px; }
 
 .portal-layout{
     display:grid;
-    grid-template-columns:1fr 360px;
+    grid-template-columns:1fr 380px;
     gap:28px; align-items:start;
 }
 
 .section-title{
     font-size:18px; font-weight:700;
-    color:#1e293b; margin-bottom:20px;
+    color:#f8fafc; margin-bottom:20px;
     display:flex; align-items:center; gap:10px;
 }
 
-.section-title .line{
-    flex:1; height:1px;
-    background: linear-gradient(90deg, #e2e8f0, transparent);
-}
+.section-title .line{ flex:1; height:1px; background: linear-gradient(90deg, #334155, transparent); }
 
 /* ========== CARDS ========== */
 
@@ -161,52 +127,41 @@ header::before{
 }
 
 .card{
-    background:#fff; border-radius:16px;
-    padding:26px 22px; position:relative;
-    overflow:hidden;
-    border:1px solid rgba(0,0,0,0.04);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+    background:#1e293b; border-radius:16px;
+    padding:24px 20px; position:relative;
+    overflow:hidden; border:1px solid #334155;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
 }
 
 .card::before{
-    content:''; position:absolute;
-    top:0; left:0; right:0; height:3px;
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
     background: linear-gradient(90deg, var(--a1), var(--a2));
     opacity:0; transition: opacity 0.3s;
 }
 
 .card:hover::before{ opacity:1; }
-
-.card:hover{
-    transform:translateY(-6px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
-}
+.card:hover{ transform:translateY(-6px); border-color:#475569; }
 
 .card-icon{
-    width:48px; height:48px; border-radius:12px;
+    width:46px; height:48px; border-radius:12px;
     display:flex; align-items:center; justify-content:center;
-    font-size:22px; margin-bottom:16px;
+    font-size:22px; margin-bottom:14px;
     background: linear-gradient(135deg, var(--a1), var(--a2));
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.card h2{ font-size:17px; font-weight:700; color:#1e293b; margin-bottom:6px; }
-.card p{ color:#94a3b8; font-size:13px; margin-bottom:18px; }
+.card h2{ font-size:16px; font-weight:700; color:#f8fafc; margin-bottom:6px; }
+.card p{ color:#94a3b8; font-size:12px; margin-bottom:16px; }
 
 .card a{
     display:inline-flex; align-items:center; gap:6px;
     text-decoration:none; color: var(--a1);
-    font-weight:600; font-size:13px;
-    padding:8px 16px; border-radius:8px;
-    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(56,189,248,0.08));
-    transition: all 0.25s;
+    font-weight:600; font-size:12px;
+    padding:8px 14px; border-radius:8px;
+    background: rgba(255,255,255,0.05); transition: all 0.25s;
 }
 
-.card a:hover{
-    background: linear-gradient(135deg, var(--a1), var(--a2));
-    color:#fff;
-}
+.card a:hover{ background: linear-gradient(135deg, var(--a1), var(--a2)); color:#fff; }
 
 .card:nth-child(1){ --a1:#f59e0b; --a2:#f97316; }
 .card:nth-child(2){ --a1:#10b981; --a2:#059669; }
@@ -215,188 +170,358 @@ header::before{
 .card:nth-child(5){ --a1:#3b82f6; --a2:#2563eb; }
 .card:nth-child(6){ --a1:#06b6d4; --a2:#0891b2; }
 
-/* ========== NOTICE SIDEBAR ========== */
+/* ========== RIGHT SIDEBAR CONTAINER ========== */
 
-.notice-sidebar{
-    background:#fff; border-radius:16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
-    border:1px solid rgba(0,0,0,0.04);
-    position:sticky; top:20px; overflow:hidden;
+.right-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    position: sticky;
+    top: 20px;
 }
 
-.notice-top-bar{
-    background: linear-gradient(135deg, #0f2027, #2c5364);
-    padding:18px 20px;
-    display:flex; justify-content:space-between; align-items:center;
+/* Widget General Styles */
+.sidebar-widget {
+    background: #1e293b;
+    border-radius: 16px;
+    border: 1px solid #334155;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    overflow: hidden;
 }
 
-.notice-top-bar h2{
-    font-size:16px; font-weight:700; color:#fff;
-    display:flex; align-items:center; gap:8px;
+.widget-top-bar {
+    background: #0f172a;
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
 }
 
-.live-dot{
-    width:7px; height:7px;
-    background:#34d399; border-radius:50%;
-    animation: pulse-dot 1.5s infinite;
+.widget-top-bar h2 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.admin-btn{
-    background: rgba(255,255,255,0.1);
-    border:1px solid rgba(255,255,255,0.15);
-    padding:5px 12px; border-radius:6px;
-    font-size:11px; cursor:pointer;
-    color:#fff; font-weight:600;
-    font-family:inherit; transition:0.2s;
+.admin-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 600;
+    font-family: inherit;
+    transition: 0.2s;
 }
 
-.admin-btn:hover{ background: rgba(255,255,255,0.2); }
+.admin-btn:hover { background: rgba(255,255,255,0.2); }
 
-/* Admin Panel */
-.admin-panel{
-    display:none;
-    background: linear-gradient(135deg, #f8fafc, #eef2ff);
-    border-bottom:2px dashed #c7d2fe;
-    padding:16px;
+/* Notice List Styles */
+.admin-panel {
+    display: none;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+    padding: 14px;
 }
 
-.admin-panel h3{
-    font-size:12px; color:#6366f1;
-    margin-bottom:10px; font-weight:700;
-    text-transform:uppercase; letter-spacing:0.5px;
+.admin-panel input, .admin-panel textarea {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #fff;
+    outline: none;
 }
 
-.admin-panel input, .admin-panel textarea{
-    width:100%; padding:9px 12px;
-    margin-bottom:8px; border:1px solid #cbd5e1;
-    border-radius:8px; font-size:12px;
-    outline:none; font-family:inherit;
-    transition: border 0.2s;
-}
-
-.admin-panel input:focus, .admin-panel textarea:focus{
-    border-color:#6366f1;
-}
-
-.admin-panel .publish-btn{
-    width:100%; padding:10px;
+.admin-panel .publish-btn {
+    width: 100%;
+    padding: 8px;
     background: linear-gradient(135deg, #6366f1, #3b82f6);
-    color:#fff; border:none; border-radius:8px;
-    font-weight:700; font-size:13px;
-    cursor:pointer; font-family:inherit;
-    transition:0.2s;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
 }
 
-.admin-panel .publish-btn:hover{
-    transform:translateY(-1px);
-    box-shadow: 0 4px 15px rgba(99,102,241,0.4);
+/* Notice List Scrollbar */
+.notice-list { 
+    max-height: 240px; 
+    overflow-y: auto; 
+    padding: 12px; 
 }
 
-.admin-panel .publish-btn:disabled{
-    opacity:0.6; cursor:not-allowed;
-    transform:none; box-shadow:none;
+.notice-list::-webkit-scrollbar { width: 4px; }
+.notice-list::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 10px; }
+
+.notice-item {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-left: 3px solid #3b82f6;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    position: relative;
 }
 
-/* Notice List */
-.notice-list{
-    max-height:520px; overflow-y:auto; padding:15px;
+.notice-title { font-weight: 700; color: #f8fafc; font-size: 12px; margin-bottom: 4px; padding-right: 20px;}
+
+/* Truncate long notice text */
+.notice-text { 
+    color: #94a3b8; 
+    font-size: 11px; 
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.notice-list::-webkit-scrollbar{ width:4px; }
-.notice-list::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:10px; }
-
-.notice-item{
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    border:1px solid #e2e8f0;
-    border-left:3px solid #3b82f6;
-    padding:14px; border-radius:10px;
-    margin-bottom:10px;
-    transition:0.2s;
-    position:relative;
+.read-more-btn {
+    color: #38bdf8;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    display: inline-block;
 }
 
-.notice-item:hover{
-    border-left-color:#6366f1;
-    background: linear-gradient(135deg, #eef2ff, #f0f9ff);
+.read-more-btn:hover { text-decoration: underline; }
+
+.notice-time { font-size: 10px; color: #64748b; margin-top: 6px; }
+
+.delete-btn {
+    display: none; position: absolute; right: 6px; top: 6px;
+    background: #ef4444; color: #fff; border: none;
+    padding: 2px 5px; border-radius: 4px; font-size: 9px; cursor: pointer;
 }
 
-.notice-item:last-child{ margin-bottom:0; }
+/* ===================================================== */
+/* ☕ BREAK PORTAL WIDGET STYLES */
+/* ===================================================== */
 
-.notice-title{
-    font-weight:700; color:#1e293b;
-    font-size:13px; margin-bottom:5px;
-    padding-right:25px;
+.break-sidebar-content { padding: 14px; }
+
+.break-mini-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
-.notice-text{ color:#64748b; font-size:12px; line-height:1.5; }
-
-.notice-time{
-    font-size:10px; color:#94a3b8;
-    margin-top:8px; font-weight:500;
+.mini-stat-chip {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 8px 6px;
+    text-align: center;
 }
 
-.delete-btn{
-    display:none;
-    position:absolute; right:8px; top:8px;
-    background:#fee2e2; color:#ef4444;
-    border:none; padding:3px 7px;
-    border-radius:5px; font-size:10px;
-    cursor:pointer; font-weight:700;
-    transition:0.2s;
+.mini-stat-num {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 3px;
 }
 
-.delete-btn:hover{ background:#ef4444; color:#fff; }
+.mini-stat-chip.pending .mini-stat-num { color: #f59e0b; }
+.mini-stat-chip.approved .mini-stat-num { color: #10b981; }
+.mini-stat-chip.rejected .mini-stat-num { color: #ef4444; }
 
-.loading-text{
-    text-align:center; font-size:13px;
-    color:#94a3b8; padding:30px 0;
+.mini-stat-txt { font-size: 9px; color: #94a3b8; white-space: nowrap; }
+
+.compact-break-form {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
 }
 
-/* ========== FOOTER ========== */
+.compact-form-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 8px;
+}
+
+.compact-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.compact-inputs input, .compact-inputs select {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #f8fafc;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    outline: none;
+    font-family: inherit;
+}
+
+.compact-inputs input:focus, .compact-inputs select:focus { border-color: #f59e0b; }
+
+.compact-submit-btn {
+    background: #f59e0b;
+    color: #0f172a;
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.2s;
+}
+
+.compact-submit-btn:hover { background: #d97706; }
+
+.compact-queue-header {
+    font-size: 12px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.compact-queue-list {
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.compact-queue-item {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-left: 3px solid #f59e0b;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.compact-queue-top { display: flex; justify-content: space-between; align-items: center; }
+.compact-agent-info { display: flex; align-items: center; gap: 8px; }
+
+.compact-q-num {
+    width: 20px; height: 20px;
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 10px;
+}
+
+.compact-agent-name { font-size: 12px; font-weight: 700; color: #f8fafc; }
+.compact-type-badge { font-size: 10px; color: #94a3b8; background: #1e293b; padding: 2px 6px; border-radius: 4px; }
+.compact-queue-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #64748b; }
+.compact-wait-time { color: #f59e0b; font-weight: 600; }
+.compact-actions { display: flex; gap: 4px; }
+
+.btn-mini-approve { background: #10b981; color: #fff; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer; }
+.btn-mini-reject { background: #ef4444; color: #fff; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer; }
+.mini-admin-badge { font-size: 9px; color: #64748b; background: #1e293b; padding: 2px 6px; border-radius: 4px; }
+.empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 11px; }
+
+/* ===================================================== */
+/* 🔍 NOTICE MODAL / POPUP (বড় নোটিশ দেখার জন্য) */
+/* ===================================================== */
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    position: relative;
+    animation: modalFadeIn 0.25s ease forwards;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-close-btn {
+    position: absolute;
+    right: 18px; top: 18px;
+    background: #334155;
+    color: #f8fafc;
+    border: none;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.modal-close-btn:hover { background: #ef4444; }
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #f8fafc;
+    margin-bottom: 8px;
+    padding-right: 30px;
+}
+
+.modal-time {
+    font-size: 11px;
+    color: #38bdf8;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.modal-body {
+    font-size: 13px;
+    color: #cbd5e1;
+    line-height: 1.6;
+    max-height: 350px;
+    overflow-y: auto;
+    white-space: pre-line;
+}
 
 footer{
-    background: linear-gradient(135deg, #0f2027 0%, #203a43 40%, #2c5364 100%);
+    background: #0f172a;
+    border-top: 1px solid #334155;
     color:rgba(255,255,255,0.5);
     text-align:center; padding:22px; font-size:12px;
+    margin-top: 40px;
 }
 
-footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
-
-/* ========== RESPONSIVE ========== */
-
-@media (max-width:992px){
-    .portal-layout{ grid-template-columns:1fr; }
-    .notice-sidebar{ order:-1; position:static; }
-}
-
-@media (max-width:600px){
-    .header-left h1{ font-size:22px; }
-    .cards{ grid-template-columns:1fr; }
-    .header-content { flex-direction: column; align-items: center; text-align: center; }
-    .header-badges { justify-content: center; margin-top: 10px; }
-}
-
-/* ========== ANIMATIONS ========== */
-
-@keyframes fadeUp{
-    from{ opacity:0; transform:translateY(20px); }
-    to{ opacity:1; transform:translateY(0); }
-}
-
-.card, .notice-sidebar{ animation: fadeUp 0.5s ease forwards; }
-.card:nth-child(1){ animation-delay:0.05s; }
-.card:nth-child(2){ animation-delay:0.1s; }
-.card:nth-child(3){ animation-delay:0.15s; }
-.card:nth-child(4){ animation-delay:0.2s; }
-.card:nth-child(5){ animation-delay:0.25s; }
-.card:nth-child(6){ animation-delay:0.3s; }
-
-@keyframes fadeIn{
-    from{ opacity:0; transform:translateY(8px); }
-    to{ opacity:1; transform:translateY(0); }
-}
-
-.notice-item{ animation: fadeIn 0.3s ease forwards; }
+footer strong{ color:rgba(255,255,255,0.8); }
 
 </style>
 </head>
@@ -413,11 +538,9 @@ footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
             </div>
         </div>
         <div class="header-badges">
-            <!-- Real-time Active Online Badge -->
             <div class="header-badge online-badge">
                 <span class="pulse-green"></span> Online Now: <strong id="onlineCount">1</strong>
             </div>
-            <!-- Total Visits Badge -->
             <div class="header-badge visitor-badge">
                 👥 Total Visits: <strong id="visitCount">0</strong>
             </div>
@@ -428,7 +551,7 @@ footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
 <div class="container">
     <div class="portal-layout">
 
-        <!-- LEFT: Tools -->
+        <!-- LEFT: Quick Access Tools -->
         <div>
             <div class="section-title">
                 🧰 Quick Access Tools <span class="line"></span>
@@ -473,25 +596,89 @@ footer strong{ color:rgba(255,255,255,0.8); font-weight:600; }
             </div>
         </div>
 
-        <!-- RIGHT: Notice Board -->
-        <aside class="notice-sidebar">
-            <div class="notice-top-bar">
-                <h2>📢 Notices <span class="live-dot"></span></h2>
-                <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 Admin</button>
+        <!-- RIGHT SIDEBAR -->
+        <div class="right-sidebar">
+
+            <!-- WIDGET 1: Notice Board -->
+            <div class="sidebar-widget">
+                <div class="widget-top-bar">
+                    <h2>📢 Notice Board <span class="live-dot"></span></h2>
+                    <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 Admin Login</button>
+                </div>
+
+                <div class="admin-panel" id="adminPanel">
+                    <input type="text" id="noticeTitle" placeholder="Notice Title...">
+                    <textarea id="noticeContent" rows="2" placeholder="Notice Details..."></textarea>
+                    <button class="publish-btn" id="publishBtn" onclick="publishNotice()">🚀 Publish Live</button>
+                </div>
+
+                <div class="notice-list" id="noticeContainer">
+                    <div class="loading-text">⏳ Connecting to real-time server...</div>
+                </div>
             </div>
 
-            <div class="admin-panel" id="adminPanel">
-                <h3>🔐 Publish New Notice</h3>
-                <input type="text" id="noticeTitle" placeholder="Notice Title...">
-                <textarea id="noticeContent" rows="3" placeholder="Notice Details..."></textarea>
-                <button class="publish-btn" id="publishBtn" onclick="publishNotice()">🚀 Publish Live</button>
+            <!-- WIDGET 2: Break Approval Portal -->
+            <div class="sidebar-widget">
+                <div class="widget-top-bar">
+                    <h2>☕ ব্রেক অনুমোদন পোর্টাল</h2>
+                    <span style="font-size:10px; color:#94a3b8;" id="liveTimeDisplay">--:-- PM</span>
+                </div>
+
+                <div class="break-sidebar-content">
+                    <div class="break-mini-stats">
+                        <div class="mini-stat-chip pending">
+                            <div class="mini-stat-num" id="statPendingCount">0</div>
+                            <div class="mini-stat-txt">অপেক্ষমাণ</div>
+                        </div>
+                        <div class="mini-stat-chip approved">
+                            <div class="mini-stat-num" id="statApprovedCount">0</div>
+                            <div class="mini-stat-txt">অনুমোদিত</div>
+                        </div>
+                        <div class="mini-stat-chip rejected">
+                            <div class="mini-stat-num" id="statRejectedCount">0</div>
+                            <div class="mini-stat-txt">বাতিল</div>
+                        </div>
+                    </div>
+
+                    <div class="compact-break-form">
+                        <div class="compact-form-title">➕ নতুন ব্রেক রিকোয়েস্ট</div>
+                        <div class="compact-inputs">
+                            <input type="text" id="agentNameInput" placeholder="আপনার নাম লিখুন...">
+                            <select id="breakTypeSelect">
+                                <option value="শর্ট ব্রেক">শর্ট ব্রেক (১০ মি:)</option>
+                                <option value="লাঞ্চ ব্রেক">লাঞ্চ ব্রেক (৩০ মি:)</option>
+                                <option value="নামাজের ব্রেক">নামাজের ব্রেক</option>
+                                <option value="ইমার্জেন্সি ব্রেক">ইমার্জেন্সি ব্রেক</option>
+                            </select>
+                            <button class="compact-submit-btn" onclick="submitBreakRequest()">কিউতে যোগ করুন</button>
+                        </div>
+                    </div>
+
+                    <div class="compact-queue-header">
+                        <span>📋 অপেক্ষমাণ কিউ</span>
+                        <span style="font-size:10px; color:#f59e0b;" id="queueBadgeCount">0 জন</span>
+                    </div>
+
+                    <div class="compact-queue-list" id="queueContainer">
+                        <div class="empty-compact-q">⏳ ডাটা লোড হচ্ছে...</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="notice-list" id="noticeContainer">
-                <div class="loading-text">⏳ Connecting to real-time server...</div>
-            </div>
-        </aside>
+        </div>
 
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- 🔍 FULL NOTICE POPUP MODAL (বড় নোটিশের জন্য) -->
+<!-- ===================================================== -->
+<div class="modal-overlay" id="noticeModal">
+    <div class="modal-card">
+        <button class="modal-close-btn" onclick="closeModal()">✕</button>
+        <div class="modal-title" id="mTitle">Notice Title</div>
+        <div class="modal-time" id="mTime">Time</div>
+        <div class="modal-body" id="mBody">Notice Content</div>
     </div>
 </div>
 
@@ -512,34 +699,185 @@ const firebaseConfig = {
     appId: "1:589705470778:web:4390bc11624fe36635a603"
 };
 
-// Admin PIN
 const ADMIN_PIN = "1234";
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let isAdmin = false;
-
-// Unique Session ID for this browser tab
 const mySessionId = 'usr_' + Math.random().toString(36).substring(2, 11);
+let noticesDataStore = {};
+
+function updateClock() {
+    const now = new Date();
+    document.getElementById("liveTimeDisplay").innerText = now.toLocaleTimeString('en-US', {
+        hour: '2-digit', minute: '2-digit', hour12: true
+    });
+}
+setInterval(updateClock, 1000);
+updateClock();
 
 // =====================================================
-// 1. TOTAL VISITS COUNTER (Bulletproof)
+// 📢 NOTICE BOARD LOGIC (WITH FULL NOTICE POPUP)
+// =====================================================
+db.collection("notices").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+    const container = document.getElementById("noticeContainer");
+    if (snapshot.empty) {
+        container.innerHTML = `<div class="notice-item"><div class="notice-title">Welcome Team! 👋</div><div class="notice-text">All updates will appear here.</div></div>`;
+        return;
+    }
+    container.innerHTML = "";
+    noticesDataStore = {};
+
+    snapshot.forEach((doc) => {
+        const data = doc.data();
+        const docId = doc.id;
+        noticesDataStore[docId] = data;
+
+        const timeStr = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString('en-US', { day:'numeric', month:'short', hour:'numeric', minute:'numeric', hour12:true }) : "Just now";
+        const deleteBtnStyle = isAdmin ? "style='display:block;'" : "";
+
+        // Check if content is long (>80 chars) to show 'Read More'
+        const isLong = data.content && data.content.length > 80;
+        const readMoreHTML = isLong ? `<span class="read-more-btn" onclick="openModal('${docId}')">📖 পুরো নোটিশ দেখুন</span>` : '';
+
+        container.innerHTML += `
+            <div class="notice-item">
+                <div class="notice-title">${escapeHTML(data.title)}</div>
+                <div class="notice-text">${escapeHTML(data.content).replace(/\n/g, '<br>')}</div>
+                ${readMoreHTML}
+                <div class="notice-time">🕒 ${timeStr}</div>
+                <button class="delete-btn" ${deleteBtnStyle} onclick="deleteNotice('${docId}')">✕</button>
+            </div>
+        `;
+    });
+});
+
+// Modal Open/Close Functions
+function openModal(docId) {
+    const data = noticesDataStore[docId];
+    if (!data) return;
+
+    const timeStr = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString('en-US', { day:'numeric', month:'short', year:'numeric', hour:'numeric', minute:'numeric', hour12:true }) : "Just now";
+
+    document.getElementById("mTitle").innerText = data.title;
+    document.getElementById("mTime").innerText = "🕒 " + timeStr;
+    document.getElementById("mBody").innerText = data.content;
+    document.getElementById("noticeModal").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("noticeModal").style.display = "none";
+}
+
+// Close Modal on clicking outside card
+window.onclick = function(event) {
+    const modal = document.getElementById("noticeModal");
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
+}
+
+// =====================================================
+// ☕ BREAK PORTAL LOGIC
+// =====================================================
+async function submitBreakRequest() {
+    const nameInput = document.getElementById("agentNameInput");
+    const typeSelect = document.getElementById("breakTypeSelect");
+    const name = nameInput.value.trim();
+    const type = typeSelect.value;
+
+    if (!name) return alert("অনুগ্রহ করে আপনার নাম লিখুন!");
+
+    try {
+        await db.collection("break_requests").add({
+            agentName: name,
+            breakType: type,
+            status: "pending",
+            requestedAt: Date.now(),
+            dateStr: new Date().toISOString().split('T')[0]
+        });
+        nameInput.value = "";
+    } catch (e) { alert("ত্রুটি: " + e.message); }
+}
+
+function listenBreakPortal() {
+    db.collection("break_requests")
+        .orderBy("requestedAt", "asc")
+        .onSnapshot((snapshot) => {
+            const queueContainer = document.getElementById("queueContainer");
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            let pendingCount = 0;
+            let approvedToday = 0;
+            let rejectedToday = 0;
+            let queueHTML = "";
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+
+                if (data.status === "pending") {
+                    pendingCount++;
+                    const waitMins = Math.max(0, Math.floor((Date.now() - data.requestedAt) / 60000));
+                    const timeStr = new Date(data.requestedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+                    const actionButtons = isAdmin ? `
+                        <button class="btn-mini-approve" onclick="updateBreakStatus('${doc.id}', 'approved')">✓</button>
+                        <button class="btn-mini-reject" onclick="updateBreakStatus('${doc.id}', 'rejected')">✕</button>
+                    ` : `<span class="mini-admin-badge">🔒 Admin</span>`;
+
+                    queueHTML += `
+                        <div class="compact-queue-item">
+                            <div class="compact-queue-top">
+                                <div class="compact-agent-info">
+                                    <div class="compact-q-num">${pendingCount}</div>
+                                    <div class="compact-agent-name">${escapeHTML(data.agentName)}</div>
+                                </div>
+                                <span class="compact-type-badge">${escapeHTML(data.breakType)}</span>
+                            </div>
+                            <div class="compact-queue-bottom">
+                                <span>🕒 ${timeStr} (<span class="compact-wait-time">${waitMins} মি:</span>)</span>
+                                <div class="compact-actions">${actionButtons}</div>
+                            </div>
+                        </div>
+                    `;
+                } else if (data.dateStr === todayStr) {
+                    if (data.status === "approved") approvedToday++;
+                    if (data.status === "rejected") rejectedToday++;
+                }
+            });
+
+            document.getElementById("statPendingCount").innerText = pendingCount;
+            document.getElementById("statApprovedCount").innerText = approvedToday;
+            document.getElementById("statRejectedCount").innerText = rejectedToday;
+            document.getElementById("queueBadgeCount").innerText = pendingCount + " জন";
+
+            if (pendingCount === 0) {
+                queueContainer.innerHTML = `<div class="empty-compact-q">🎉 কোনো অপেক্ষমাণ ব্রেক রিকোয়েস্ট নেই</div>`;
+            } else {
+                queueContainer.innerHTML = queueHTML;
+            }
+        });
+}
+
+async function updateBreakStatus(docId, newStatus) {
+    if (!isAdmin) return;
+    try {
+        await db.collection("break_requests").doc(docId).update({
+            status: newStatus, processedAt: Date.now()
+        });
+    } catch (e) { alert("Error: " + e.message); }
+}
+
+// =====================================================
+// VISITOR & PRESENCE TRACKERS
 // =====================================================
 function initTotalVisits() {
     const counterDoc = db.collection("portal_stats").doc("visits");
-
-    // Only count once per browser session
     if (!sessionStorage.getItem("has_counted_visit")) {
         sessionStorage.setItem("has_counted_visit", "true");
-        
-        counterDoc.set({
-            total: firebase.firestore.FieldValue.increment(1)
-        }, { merge: true }).catch(err => console.error("Visit counter write error:", err));
+        counterDoc.set({ total: firebase.firestore.FieldValue.increment(1) }, { merge: true });
     }
-
-    // Real-time update display
     counterDoc.onSnapshot((doc) => {
         if (doc.exists && doc.data().total !== undefined) {
             document.getElementById("visitCount").innerText = doc.data().total.toLocaleString();
@@ -547,106 +885,28 @@ function initTotalVisits() {
     });
 }
 
-// =====================================================
-// 2. REAL-TIME ONLINE NOW TRACKER (Instant & Accurate)
-// =====================================================
 function initOnlinePresence() {
     const presenceRef = db.collection("active_presence").doc(mySessionId);
-
-    // Heartbeat function: Write current epoch time
-    const sendHeartbeat = () => {
-        presenceRef.set({
-            last_seen: Date.now()
-        }).catch(err => console.error("Heartbeat error:", err));
-    };
-
-    // Send immediately & repeat every 8 seconds
+    const sendHeartbeat = () => presenceRef.set({ last_seen: Date.now() }).catch(()=>{});
     sendHeartbeat();
-    const heartbeatTimer = setInterval(sendHeartbeat, 8000);
+    setInterval(sendHeartbeat, 8000);
+    window.addEventListener("beforeunload", () => presenceRef.delete());
 
-    // Delete session on tab close
-    window.addEventListener("beforeunload", () => {
-        clearInterval(heartbeatTimer);
-        presenceRef.delete();
-    });
-
-    // Real-time listener for ALL online tabs
     db.collection("active_presence").onSnapshot((snapshot) => {
         const now = Date.now();
         let currentOnline = 0;
-
         snapshot.forEach((doc) => {
             const data = doc.data();
-            if (data && data.last_seen) {
-                // If last heartbeat was within last 20 seconds, user is ONLINE
-                if (now - data.last_seen < 20000) {
-                    currentOnline++;
-                } else {
-                    // Clean up dead sessions older than 45 seconds
-                    if (now - data.last_seen > 45000) {
-                        db.collection("active_presence").doc(doc.id).delete().catch(() => {});
-                    }
-                }
+            if (data && data.last_seen && (now - data.last_seen < 20000)) {
+                currentOnline++;
             }
         });
-
-        // Always display at least 1 (self)
         document.getElementById("onlineCount").innerText = Math.max(1, currentOnline);
     });
 }
 
 // =====================================================
-// 3. REAL-TIME NOTICE BOARD
-// =====================================================
-db.collection("notices")
-    .orderBy("timestamp", "desc")
-    .onSnapshot((snapshot) => {
-        const container = document.getElementById("noticeContainer");
-
-        if (snapshot.empty) {
-            container.innerHTML = `
-                <div class="notice-item">
-                    <div class="notice-title">Welcome Team! 👋</div>
-                    <div class="notice-text">All important updates and notices will appear here instantly.</div>
-                    <div class="notice-time">🕒 System</div>
-                </div>
-            `;
-            return;
-        }
-
-        container.innerHTML = "";
-        snapshot.forEach((doc) => {
-            const data = doc.data();
-            const timeStr = data.timestamp
-                ? new Date(data.timestamp.seconds * 1000).toLocaleString('en-US', {
-                    day:'numeric', month:'short',
-                    hour:'numeric', minute:'numeric', hour12:true
-                })
-                : "Just now";
-
-            const deleteBtnStyle = isAdmin ? "style='display:block;'" : "";
-
-            container.innerHTML += `
-                <div class="notice-item">
-                    <div class="notice-title">${escapeHTML(data.title)}</div>
-                    <div class="notice-text">${escapeHTML(data.content).replace(/\n/g, '<br>')}</div>
-                    <div class="notice-time">🕒 ${timeStr}</div>
-                    <button class="delete-btn" ${deleteBtnStyle} onclick="deleteNotice('${doc.id}')">✕</button>
-                </div>
-            `;
-        });
-    }, (error) => {
-        console.error("Firestore Error:", error);
-        document.getElementById("noticeContainer").innerHTML = `
-            <div class="notice-item">
-                <div class="notice-title">⚠️ Database Setup Needed</div>
-                <div class="notice-text">Please set Firestore Database Rules to 'allow read, write: if true;' in Firebase Console.</div>
-            </div>
-        `;
-    });
-
-// =====================================================
-// ADMIN FUNCTIONS
+// ADMIN TOGGLE & PUBLISH
 // =====================================================
 function toggleAdmin() {
     const panel = document.getElementById("adminPanel");
@@ -655,17 +915,19 @@ function toggleAdmin() {
     if (isAdmin) {
         isAdmin = false;
         panel.style.display = "none";
-        btn.innerText = "🔒 Admin";
+        btn.innerText = "🔒 Admin Login";
         document.querySelectorAll(".delete-btn").forEach(el => el.style.display = "none");
+        listenBreakPortal();
     } else {
-        const pin = prompt("Enter Admin PIN to manage notices:");
+        const pin = prompt("Enter Admin PIN:");
         if (pin === ADMIN_PIN) {
             isAdmin = true;
             panel.style.display = "block";
             btn.innerText = "🔓 Logout";
             document.querySelectorAll(".delete-btn").forEach(el => el.style.display = "block");
+            listenBreakPortal();
         } else if (pin !== null) {
-            alert("❌ Incorrect PIN! Access Denied.");
+            alert("❌ Incorrect PIN!");
         }
     }
 }
@@ -673,56 +935,34 @@ function toggleAdmin() {
 async function publishNotice() {
     const title = document.getElementById("noticeTitle").value.trim();
     const content = document.getElementById("noticeContent").value.trim();
-
-    if (!title || !content) {
-        alert("Please fill in both Title and Details!");
-        return;
-    }
+    if (!title || !content) return alert("Fill in all fields!");
 
     const btn = document.getElementById("publishBtn");
-    btn.innerText = "⏳ Publishing...";
+    btn.innerText = "Publishing...";
     btn.disabled = true;
 
     try {
-        await db.collection("notices").add({
-            title: title,
-            content: content,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
+        await db.collection("notices").add({ title, content, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
         document.getElementById("noticeTitle").value = "";
         document.getElementById("noticeContent").value = "";
-
-    } catch (error) {
-        alert("❌ Error: " + error.message);
-    } finally {
-        btn.innerText = "🚀 Publish Live";
-        btn.disabled = false;
-    }
+    } catch (e) { alert(e.message); }
+    finally { btn.innerText = "🚀 Publish Live"; btn.disabled = false; }
 }
 
 async function deleteNotice(docId) {
-    if (!confirm("Are you sure you want to delete this notice?")) return;
-
-    try {
-        await db.collection("notices").doc(docId).delete();
-    } catch (error) {
-        alert("❌ Error deleting: " + error.message);
-    }
+    if (confirm("Delete this notice?")) await db.collection("notices").doc(docId).delete();
 }
 
 function escapeHTML(str) {
-    if (!str) return "";
-    return String(str).replace(/[&<>'"]/g,
-        tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag] || tag)
-    );
+    return str ? String(str).replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag] || tag)) : "";
 }
 
-// Run Trackers on Page Load
 document.addEventListener("DOMContentLoaded", () => {
     initTotalVisits();
     initOnlinePresence();
+    listenBreakPortal();
 });
+
 </script>
 
 </body>
