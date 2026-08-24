@@ -385,6 +385,7 @@ header::before{
 }
 
 .compact-submit-btn:hover { background: #d97706; }
+.compact-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .compact-queue-header {
     font-size: 12px;
@@ -437,10 +438,7 @@ header::before{
 .mini-admin-badge { font-size: 9px; color: #64748b; background: #1e293b; padding: 2px 6px; border-radius: 4px; }
 .empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 11px; }
 
-/* ===================================================== */
-/* 🔍 NOTICE MODAL / POPUP */
-/* ===================================================== */
-
+/* NOTICE MODAL / POPUP */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -594,7 +592,7 @@ footer strong{ color:rgba(255,255,255,0.8); }
                 </div>
             </div>
 
-            <!-- WIDGET 2: Break Approval Portal (উইজেট) -->
+            <!-- WIDGET 2: Break Approval Portal -->
             <div class="sidebar-widget">
                 <div class="widget-top-bar">
                     <h2>☕ ব্রেক অনুমোদন পোর্টাল</h2>
@@ -617,11 +615,10 @@ footer strong{ color:rgba(255,255,255,0.8); }
                         </div>
                     </div>
 
-                    <!-- Compact Request Form with Name Dropdown -->
+                    <!-- Compact Request Form -->
                     <div class="compact-break-form">
                         <div class="compact-form-title">➕ নতুন ব্রেক রিকোয়েস্ট</div>
                         <div class="compact-inputs">
-                            <!-- এজেন্টের নামের ড্রপডাউন -->
                             <select id="agentNameSelect">
                                 <option value="">-- নাম নির্বাচন করুন --</option>
                                 <option value="Md Ezaj Ahmed">Md Ezaj Ahmed</option>
@@ -647,13 +644,12 @@ footer strong{ color:rgba(255,255,255,0.8); }
                                 <option value="Dip Shorkar">Dip Shorkar</option>
                             </select>
 
-                            <!-- ব্রেকের ধরনের ড্রপডাউন -->
                             <select id="breakTypeSelect">
                                 <option value="শর্ট ব্রেক">শর্ট ব্রেক (১০ মিনিট)</option>
                                 <option value="নামাজের ব্রেক">নামাজের ব্রেক</option>
                             </select>
 
-                            <button class="compact-submit-btn" onclick="submitBreakRequest()">কিউতে যোগ করুন</button>
+                            <button class="compact-submit-btn" id="submitBreakBtn" onclick="submitBreakRequest()">কিউতে যোগ করুন</button>
                         </div>
                     </div>
 
@@ -700,7 +696,7 @@ const firebaseConfig = {
     appId: "1:589705470778:web:4390bc11624fe36635a603"
 };
 
-const ADMIN_PIN = "4563";
+const ADMIN_PIN = "1234";
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -777,11 +773,12 @@ window.onclick = function(event) {
 }
 
 // =====================================================
-// ☕ BREAK PORTAL LOGIC
+// ☕ BREAK PORTAL LOGIC (With Max 2 Break Requests/Day Rule)
 // =====================================================
 async function submitBreakRequest() {
     const nameSelect = document.getElementById("agentNameSelect");
     const typeSelect = document.getElementById("breakTypeSelect");
+    const btn = document.getElementById("submitBreakBtn");
     
     const name = nameSelect.value;
     const type = typeSelect.value;
@@ -791,16 +788,41 @@ async function submitBreakRequest() {
         return;
     }
 
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    btn.innerText = "যাচাই হচ্ছে...";
+    btn.disabled = true;
+
     try {
+        // আজকের দিনে এই এজেন্টের কতটি রিকোয়েস্ট জমা হয়েছে তা চেক করা
+        const snapshot = await db.collection("break_requests")
+            .where("agentName", "==", name)
+            .where("dateStr", "==", todayStr)
+            .get();
+
+        if (snapshot.size >= 2) {
+            alert(`⚠️ ${name}, আপনি আজ ইতোমধ্যে ২ বার ব্রেক রিকোয়েস্ট পাঠিয়েছেন। দিনে সর্বোচ্চ ২ বার রিকোয়েস্ট পাঠানো যাবে!`);
+            return;
+        }
+
+        // ২ বারের কম থাকলে রিকোয়েস্ট জমা হবে
         await db.collection("break_requests").add({
             agentName: name,
             breakType: type,
             status: "pending",
             requestedAt: Date.now(),
-            dateStr: new Date().toISOString().split('T')[0]
+            dateStr: todayStr
         });
+
         nameSelect.value = ""; // Reset dropdown
-    } catch (e) { alert("ত্রুটি: " + e.message); }
+        alert("🎉 আপনার ব্রেক রিকোয়েস্ট সফলভাবে জমা হয়েছে!");
+
+    } catch (e) { 
+        alert("ত্রুটি: " + e.message); 
+    } finally {
+        btn.innerText = "কিউতে যোগ করুন";
+        btn.disabled = false;
+    }
 }
 
 function listenBreakPortal() {
