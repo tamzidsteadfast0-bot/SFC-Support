@@ -639,9 +639,7 @@ footer strong{ color:rgba(255,255,255,0.8); }
                     <h2>Hub Contact</h2>
                     <p>Hub Emergency Contact List</p>
                     <div class="card-actions-row">
-                        <!-- Original Sheet Link -->
                         <a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0" target="_blank">Open Sheet →</a>
-                        <!-- Live Search Opener -->
                         <button class="card-btn" onclick="openHubSearchModal()">🔍 Search</button>
                     </div>
                 </div>
@@ -820,9 +818,9 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // =====================================================
-// 🔍 BULLETPROOF CSV STREAM HUB SEARCH LOGIC
+// 🔍 GOOGLE VISUALIZATION LIVE HUB SEARCH LOGIC (FIXED)
 // =====================================================
-const HUB_SEARCH_SHEET_ID = "1CYaPdRqHlSrhKhz5LBDUaJvhORYfhgTYisC7r-SFb_k";
+const HUB_SEARCH_SHEET_ID = "1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
 let fetchedHubList = [];
 
 async function openHubSearchModal() {
@@ -830,7 +828,6 @@ async function openHubSearchModal() {
     document.getElementById("hubSearchInput").value = "";
     document.getElementById("hubSearchInput").focus();
     
-    // Fetch live search data via direct CSV Stream (Works 100%)
     await fetchHubsFromGoogleSheet();
 }
 
@@ -840,65 +837,59 @@ function closeHubModal() {
 
 async function fetchHubsFromGoogleSheet() {
     const container = document.getElementById("hubResultsContainer");
-    container.innerHTML = `<div style="text-align:center; padding:20px; color:#38bdf8; font-size:12px;">⏳ লাইভ তথ্য লোড হচ্ছে...</div>`;
+    container.innerHTML = `<div style="text-align:center; padding:20px; color:#38bdf8; font-size:12px;">⏳ গুগল শিট থেকে লাইভ তথ্য লোড হচ্ছে...</div>`;
 
-    const url = `https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/export?format=csv`;
+    const url = `https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/gviz/tq?tqx=out:json`;
 
     try {
         const response = await fetch(url);
-        const csvText = await response.text();
+        const text = await response.text();
 
-        const lines = csvText.split(/\r\n|\n/);
+        // Safe JSON parsing from Google Visualization API
+        const jsonStart = text.indexOf('{');
+        const jsonEnd = text.lastIndexOf('}') + 1;
+        const jsonData = JSON.parse(text.substring(jsonStart, jsonEnd));
+        
+        const rows = jsonData.table.rows;
         fetchedHubList = [];
 
-        lines.forEach((line) => {
-            if (!line.trim()) return;
+        if (rows && rows.length > 0) {
+            rows.forEach((row) => {
+                if (row.c && Array.isArray(row.c)) {
+                    const cellTexts = row.c.map(cell => {
+                        if (!cell) return '';
+                        if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
+                        if (cell.f !== null && cell.f !== undefined) return String(cell.f).trim();
+                        return '';
+                    }).filter(t => t.length > 0);
 
-            const cells = parseCSVLine(line);
-            const rowCombinedText = cells.join(' ').trim();
+                    const combinedText = cellTexts.join(' ');
 
-            if (rowCombinedText) {
-                let phoneMatch = '';
-                cells.forEach(c => {
-                    const match = c.match(/01\d{9}/);
-                    if (match) phoneMatch = match[0];
-                });
+                    // Auto-detect phone numbers (e.g. 01XXXXXXXXX)
+                    let phoneMatch = '';
+                    cellTexts.forEach(txt => {
+                        const match = txt.match(/01\d{9}/);
+                        if (match) phoneMatch = match[0];
+                    });
 
-                fetchedHubList.push({
-                    title: cells[0] || "Hub Detail",
-                    details: cells.slice(1).filter(c => c && c !== phoneMatch).join(" — "),
-                    fullInfo: rowCombinedText,
-                    phone: phoneMatch
-                });
-            }
-        });
+                    if (combinedText.length > 0) {
+                        fetchedHubList.push({
+                            title: cellTexts[0] || "Hub Detail",
+                            details: cellTexts.slice(1).filter(c => c !== phoneMatch).join(" — "),
+                            fullInfo: combinedText.toLowerCase(),
+                            phone: phoneMatch
+                        });
+                    }
+                }
+            });
+        }
 
         renderHubResults(fetchedHubList);
 
     } catch (error) {
         console.error("Google Sheet Fetch Error:", error);
-        container.innerHTML = `<div style="text-align:center; padding:20px; color:#ef4444; font-size:12px;">❌ ডাটা লোড করতে সমস্যা হয়েছে। দয়া করে 'Open Sheet' ব্যবহার করুন।</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:#ef4444; font-size:12px;">❌ ডাটা লোড করতে সমস্যা হয়েছে। গুগল শিটের এক্সেস চেক করুন।</div>`;
     }
-}
-
-// CSV Line Parser Helper
-function parseCSVLine(text) {
-    const result = [];
-    let cell = '';
-    let inQuotes = false;
-    for (let i = 0; i < text.length; i++) {
-        const c = text[i];
-        if (c === '"') {
-            inQuotes = !inQuotes;
-        } else if (c === ',' && !inQuotes) {
-            result.push(cell.trim().replace(/^"|"$/g, ''));
-            cell = '';
-        } else {
-            cell += c;
-        }
-    }
-    result.push(cell.trim().replace(/^"|"$/g, ''));
-    return result;
 }
 
 function filterHubs() {
@@ -909,7 +900,7 @@ function filterHubs() {
     }
 
     const filtered = fetchedHubList.filter(item => 
-        item.fullInfo.toLowerCase().includes(query)
+        item.fullInfo.includes(query)
     );
 
     renderHubResults(filtered);
