@@ -153,15 +153,22 @@ header::before{
 .card h2{ font-size:16px; font-weight:700; color:#f8fafc; margin-bottom:6px; }
 .card p{ color:#94a3b8; font-size:12px; margin-bottom:16px; }
 
-.card a{
+.card-actions-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.card a, .card button.card-btn {
     display:inline-flex; align-items:center; gap:6px;
     text-decoration:none; color: var(--a1);
     font-weight:600; font-size:12px;
-    padding:8px 14px; border-radius:8px;
+    padding:8px 12px; border-radius:8px;
     background: rgba(255,255,255,0.05); transition: all 0.25s;
+    border: none; cursor: pointer; font-family: inherit;
 }
 
-.card a:hover{ background: linear-gradient(135deg, var(--a1), var(--a2)); color:#fff; }
+.card a:hover, .card button.card-btn:hover { background: linear-gradient(135deg, var(--a1), var(--a2)); color:#fff; }
 
 .card:nth-child(1){ --a1:#f59e0b; --a2:#f97316; }
 .card:nth-child(2){ --a1:#10b981; --a2:#059669; }
@@ -438,7 +445,10 @@ header::before{
 .mini-admin-badge { font-size: 9px; color: #64748b; background: #1e293b; padding: 2px 6px; border-radius: 4px; }
 .empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 11px; }
 
-/* NOTICE MODAL / POPUP */
+/* ===================================================== */
+/* 🔍 MODAL OVERLAYS (NOTICE & HUB SEARCH) */
+/* ===================================================== */
+
 .modal-overlay {
     display: none;
     position: fixed;
@@ -457,7 +467,7 @@ header::before{
     border: 1px solid #334155;
     border-radius: 16px;
     width: 100%;
-    max-width: 500px;
+    max-width: 580px;
     padding: 24px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     position: relative;
@@ -487,6 +497,90 @@ header::before{
 .modal-title { font-size: 16px; font-weight: 800; color: #f8fafc; margin-bottom: 8px; padding-right: 30px; }
 .modal-time { font-size: 11px; color: #38bdf8; margin-bottom: 16px; font-weight: 600; }
 .modal-body { font-size: 13px; color: #cbd5e1; line-height: 1.6; max-height: 350px; overflow-y: auto; white-space: pre-line; }
+
+/* HUB SEARCH MODAL STYLES */
+.hub-search-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: #0f172a;
+    border: 1px solid #ef4444;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+    margin-bottom: 15px;
+    font-family: inherit;
+}
+
+.hub-search-input:focus {
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+}
+
+.hub-results-list {
+    max-height: 340px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
+}
+
+.hub-results-list::-webkit-scrollbar { width: 4px; }
+.hub-results-list::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
+
+.hub-card-item {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.hub-info h4 {
+    font-size: 13px;
+    color: #f8fafc;
+    font-weight: 700;
+    margin-bottom: 3px;
+}
+
+.hub-info p {
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.4;
+}
+
+.hub-btn-copy {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.hub-btn-copy:hover {
+    background: #ef4444;
+    color: #fff;
+}
+
+.sheet-link-note {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.sheet-link-note a {
+    color: #38bdf8;
+    text-decoration: underline;
+}
 
 footer{
     background: #0f172a;
@@ -550,12 +644,21 @@ footer strong{ color:rgba(255,255,255,0.8); }
                     <p>Open Offline Charge Calculator</p>
                     <a href="Offline Charge.html">Open Calculator →</a>
                 </div>
+
+                <!-- HUB CONTACT CARD: ORIGINAL SHEET LINK RESTORED + SEARCH BUTTON -->
                 <div class="card">
                     <div class="card-icon">📞</div>
                     <h2>Hub Contact</h2>
                     <p>Hub Emergency Contact List</p>
-                    <a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0" target="_blank">Open Sheet →</a>
+                    <div class="card-actions-row">
+                        <!-- 1. ORIGINAL SHEET LINK (RESTORED EXACTLY) -->
+                        <a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0" target="_blank">Open Sheet →</a>
+                        
+                        <!-- 2. SEARCH BUTTON (FETCHES LIVE FROM NEW SHEET) -->
+                        <button class="card-btn" onclick="openHubSearchModal()">🔍 Search</button>
+                    </div>
                 </div>
+
                 <div class="card">
                     <div class="card-icon">📅</div>
                     <h2>Duty Roster</h2>
@@ -669,13 +772,32 @@ footer strong{ color:rgba(255,255,255,0.8); }
     </div>
 </div>
 
-<!-- FULL NOTICE POPUP MODAL -->
+<!-- 1. FULL NOTICE POPUP MODAL -->
 <div class="modal-overlay" id="noticeModal">
     <div class="modal-card">
         <button class="modal-close-btn" onclick="closeModal()">✕</button>
         <div class="modal-title" id="mTitle">Notice Title</div>
         <div class="modal-time" id="mTime">Time</div>
         <div class="modal-body" id="mBody">Notice Content</div>
+    </div>
+</div>
+
+<!-- 2. HUB CONTACT LIVE SEARCH MODAL (SEARCHES FROM NEW SHEET) -->
+<div class="modal-overlay" id="hubSearchModal">
+    <div class="modal-card">
+        <button class="modal-close-btn" onclick="closeHubModal()">✕</button>
+        <div class="modal-title">🔍 Hub Emergency Contact Search</div>
+        <div class="modal-time">লাইভ ডাটাবেজ থেকে হাবের তথ্য খোঁজা হচ্ছে...</div>
+
+        <input type="text" class="hub-search-input" id="hubSearchInput" onkeyup="filterHubs()" placeholder="হাবের নাম, এলাকা বা ইনচার্জের নাম টাইপ করুন..." autofocus>
+
+        <div class="hub-results-list" id="hubResultsContainer">
+            <div style="text-align:center; padding:20px; color:#94a3b8; font-size:12px;">⏳ ডাটা লোড হচ্ছে...</div>
+        </div>
+
+        <div class="sheet-link-note">
+            মূল গুগল শিট দেখতে চাইলে <a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0" target="_blank">এখানে ক্লিক করে শিট ওপেন করুন ↗</a>
+        </div>
     </div>
 </div>
 
@@ -713,6 +835,116 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
+
+// =====================================================
+// 🔍 SEARCH FETCHES FROM THE NEW GOOGLE SHEET ID
+// =====================================================
+const HUB_SEARCH_SHEET_ID = "1CYaPdRqHlSrhKhz5LBDUaJvhORYfhgTYisC7r-SFb_k";
+let fetchedHubList = [];
+
+async function openHubSearchModal() {
+    document.getElementById("hubSearchModal").style.display = "flex";
+    document.getElementById("hubSearchInput").value = "";
+    document.getElementById("hubSearchInput").focus();
+    
+    // Fetch live search data strictly from the NEW Sheet ID
+    await fetchHubsFromGoogleSheet();
+}
+
+function closeHubModal() {
+    document.getElementById("hubSearchModal").style.display = "none";
+}
+
+async function fetchHubsFromGoogleSheet() {
+    const container = document.getElementById("hubResultsContainer");
+    container.innerHTML = `<div style="text-align:center; padding:20px; color:#38bdf8; font-size:12px;">⏳ লাইভ তথ্য লোড হচ্ছে...</div>`;
+
+    const url = `https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/gviz/tq?tqx=out:json`;
+
+    try {
+        const response = await fetch(url);
+        const text = await response.text();
+        
+        const json = JSON.parse(text.substring(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        fetchedHubList = [];
+
+        rows.forEach(row => {
+            if (row.c) {
+                const cellTexts = row.c.map(cell => cell ? String(cell.v || cell.f || '').trim() : '');
+                const rowCombinedText = cellTexts.filter(t => t !== '').join(' ');
+
+                let phoneMatch = '';
+                cellTexts.forEach(txt => {
+                    const match = txt.match(/01\d{9}/);
+                    if (match) phoneMatch = match[0];
+                });
+
+                if (rowCombinedText.length > 0) {
+                    fetchedHubList.push({
+                        fullInfo: rowCombinedText,
+                        phone: phoneMatch,
+                        cells: cellTexts.filter(t => t !== '')
+                    });
+                }
+            }
+        });
+
+        renderHubResults(fetchedHubList);
+
+    } catch (error) {
+        console.error("Google Sheet Fetch Error:", error);
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:#ef4444; font-size:12px;">❌ ডাটা লোড করতে সমস্যা হয়েছে। দয়া করে 'Open Sheet' ব্যবহার করুন।</div>`;
+    }
+}
+
+function filterHubs() {
+    const query = document.getElementById("hubSearchInput").value.toLowerCase().trim();
+    if (query === "") {
+        renderHubResults(fetchedHubList);
+        return;
+    }
+
+    const filtered = fetchedHubList.filter(item => 
+        item.fullInfo.toLowerCase().includes(query)
+    );
+
+    renderHubResults(filtered);
+}
+
+function renderHubResults(list) {
+    const container = document.getElementById("hubResultsContainer");
+    if (list.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b; font-size:12px;">❌ কোনো হাব পাওয়া যায়নি</div>`;
+        return;
+    }
+
+    container.innerHTML = "";
+    list.forEach(item => {
+        const title = item.cells[0] || "Hub Detail";
+        const details = item.cells.slice(1).join(" — ");
+
+        container.innerHTML += `
+            <div class="hub-card-item">
+                <div class="hub-info">
+                    <h4>🏢 ${escapeHTML(title)}</h4>
+                    ${details ? `<p>${escapeHTML(details)}</p>` : ''}
+                </div>
+                ${item.phone ? `
+                    <div>
+                        <button class="hub-btn-copy" onclick="copyNumber('${escapeHTML(item.phone)}')">📋 ${escapeHTML(item.phone)} কপি</button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+}
+
+function copyNumber(phone) {
+    navigator.clipboard.writeText(phone);
+    alert(`📋 নম্বর কপি হয়েছে: ${phone}`);
+}
 
 // =====================================================
 // 📢 NOTICE BOARD LOGIC
@@ -766,14 +998,14 @@ function closeModal() {
 }
 
 window.onclick = function(event) {
-    const modal = document.getElementById("noticeModal");
-    if (event.target === modal) {
-        modal.style.display = "none";
-    }
+    const nModal = document.getElementById("noticeModal");
+    const hModal = document.getElementById("hubSearchModal");
+    if (event.target === nModal) nModal.style.display = "none";
+    if (event.target === hModal) hModal.style.display = "none";
 }
 
 // =====================================================
-// ☕ BREAK PORTAL LOGIC (With Max 2 Break Requests/Day Rule)
+// ☕ BREAK PORTAL LOGIC
 // =====================================================
 async function submitBreakRequest() {
     const nameSelect = document.getElementById("agentNameSelect");
@@ -794,7 +1026,6 @@ async function submitBreakRequest() {
     btn.disabled = true;
 
     try {
-        // আজকের দিনে এই এজেন্টের কতটি রিকোয়েস্ট জমা হয়েছে তা চেক করা
         const snapshot = await db.collection("break_requests")
             .where("agentName", "==", name)
             .where("dateStr", "==", todayStr)
@@ -805,7 +1036,6 @@ async function submitBreakRequest() {
             return;
         }
 
-        // ২ বারের কম থাকলে রিকোয়েস্ট জমা হবে
         await db.collection("break_requests").add({
             agentName: name,
             breakType: type,
@@ -814,7 +1044,7 @@ async function submitBreakRequest() {
             dateStr: todayStr
         });
 
-        nameSelect.value = ""; // Reset dropdown
+        nameSelect.value = "";
         alert("🎉 আপনার ব্রেক রিকোয়েস্ট সফলভাবে জমা হয়েছে!");
 
     } catch (e) { 
