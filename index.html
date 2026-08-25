@@ -446,7 +446,7 @@ header::before{
 .empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 11px; }
 
 /* ===================================================== */
-/* 🔍 MODAL OVERLAYS (NOTICE & STRUCTURED HUB SEARCH) */
+/* 🔍 MODAL OVERLAYS (NOTICE & LIGHTWEIGHT HUB SEARCH) */
 /* ===================================================== */
 
 .modal-overlay {
@@ -498,10 +498,7 @@ header::before{
 .modal-time { font-size: 11px; color: #38bdf8; margin-bottom: 16px; font-weight: 600; }
 .modal-body { font-size: 13px; color: #cbd5e1; line-height: 1.6; max-height: 350px; overflow-y: auto; white-space: pre-line; }
 
-/* ===================================================== */
-/* 🏢 STRUCTURED HUB DETAILS CARD (AS REQUESTED) */
-/* ===================================================== */
-
+/* HUB SEARCH MODAL STYLES */
 .hub-search-input {
     width: 100%;
     padding: 12px 16px;
@@ -806,17 +803,17 @@ footer strong{ color:rgba(255,255,255,0.8); }
     </div>
 </div>
 
-<!-- 2. HUB CONTACT LIVE SEARCH MODAL (STRUCTURED UI) -->
+<!-- 2. HUB CONTACT LIVE SEARCH MODAL (OPTIMIZED & LIGHTWEIGHT) -->
 <div class="modal-overlay" id="hubSearchModal">
     <div class="modal-card">
         <button class="modal-close-btn" onclick="closeHubModal()">✕</button>
         <div class="modal-title">🔍 Hub Emergency Contact Search</div>
-        <div class="modal-time">গুগল শিট থেকে লাইভ হাব সার্চ করা হচ্ছে...</div>
+        <div class="modal-time">টাইপ করে যেকোনো হাবের তথ্য সার্চ করুন</div>
 
-        <input type="text" class="hub-search-input" id="hubSearchInput" onkeyup="filterHubs()" placeholder="হাবের নাম, ইনচার্জ বা নম্বর লিখুন (যেমন: Dhanmondi, Rangpur)..." autofocus>
+        <input type="text" class="hub-search-input" id="hubSearchInput" oninput="handleHubSearchDebounced()" placeholder="হাবের নাম বা জেলা টাইপ করুন (যেমন: Dhanmondi, Rangpur, Rajshahi)..." autofocus>
 
         <div class="hub-structured-wrapper" id="hubResultsContainer">
-            <div style="text-align:center; padding:20px; color:#94a3b8; font-size:12px;">⏳ ডাটা লোড হচ্ছে...</div>
+            <div style="text-align:center; padding:30px; color:#94a3b8; font-size:12px;">🔍 হাবের নাম টাইপ করা শুরু করুন...</div>
         </div>
     </div>
 </div>
@@ -857,17 +854,25 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // =====================================================
-// 🔍 STRUCTURED HUB DETAILS SEARCH LOGIC
+// ⚡ ULTRA-FAST LIGHTWEIGHT HUB SEARCH LOGIC (0% LAG)
 // =====================================================
 const HUB_SEARCH_SHEET_ID = "1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
-let fetchedHubObjects = [];
+let hubCacheList = null;
+let searchDebounceTimer = null;
 
 async function openHubSearchModal() {
     document.getElementById("hubSearchModal").style.display = "flex";
-    document.getElementById("hubSearchInput").value = "";
-    document.getElementById("hubSearchInput").focus();
+    const input = document.getElementById("hubSearchInput");
+    input.value = "";
+    input.focus();
     
-    await fetchHubsFromGoogleSheet();
+    // Default prompt message (Fast opening)
+    renderHubResults([], "🔍 হাবের নাম বা জেলা টাইপ করুন (যেমন: Dhanmondi, Rangpur)...");
+
+    // Pre-fetch in background if cache is empty
+    if (!hubCacheList) {
+        fetchHubsFromGoogleSheet();
+    }
 }
 
 function closeHubModal() {
@@ -875,9 +880,6 @@ function closeHubModal() {
 }
 
 async function fetchHubsFromGoogleSheet() {
-    const container = document.getElementById("hubResultsContainer");
-    container.innerHTML = `<div style="text-align:center; padding:20px; color:#38bdf8; font-size:12px;">⏳ গুগল শিট থেকে লাইভ তথ্য লোড হচ্ছে...</div>`;
-
     const url = `https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/gviz/tq?tqx=out:json`;
 
     try {
@@ -889,7 +891,7 @@ async function fetchHubsFromGoogleSheet() {
         const jsonData = JSON.parse(text.substring(jsonStart, jsonEnd));
         
         const rows = jsonData.table.rows;
-        fetchedHubObjects = [];
+        hubCacheList = [];
 
         if (rows && rows.length > 0) {
             rows.forEach((row) => {
@@ -902,13 +904,12 @@ async function fetchHubsFromGoogleSheet() {
                         return '';
                     };
 
-                    // Extract values dynamically across row
                     const cells = row.c.map((_, i) => getCellVal(i));
                     const fullText = cells.join(' ').toLowerCase();
 
                     if (fullText.length > 0) {
-                        fetchedHubObjects.push({
-                            fullText: fullText,
+                        hubCacheList.push({
+                            searchStr: fullText,
                             name: cells[0] || 'N/A',
                             address: cells[1] || 'N/A',
                             hubId: cells[2] || 'N/A',
@@ -917,55 +918,71 @@ async function fetchHubsFromGoogleSheet() {
                             division: cells[5] || 'N/A',
                             policeStation: cells[6] || 'N/A',
                             zonalManager: cells[7] || 'N/A',
-                            zonalPhone: cells[8] || 'N/A',
-                            coordinates: cells[9] || 'N/A',
+                            zonalPhone: cells[8] || '',
+                            coordinates: cells[9] || '',
                             hubIp: cells[10] || 'N/A',
-                            hubPhone: cells[11] || 'N/A',
+                            hubPhone: cells[11] || '',
                             manager: cells[12] || 'N/A',
-                            managerPhone: cells[13] || 'N/A',
+                            managerPhone: cells[13] || '',
                             asstManager: cells[14] || 'N/A',
-                            asstPhone: cells[15] || 'N/A',
+                            asstPhone: cells[15] || '',
                             teamLeader: cells[16] || 'N/A',
-                            teamLeaderPhone: cells[17] || 'N/A',
+                            teamLeaderPhone: cells[17] || '',
                             rawCells: cells
                         });
                     }
                 }
             });
         }
-
-        renderHubResults(fetchedHubObjects);
-
     } catch (error) {
         console.error("Google Sheet Fetch Error:", error);
-        container.innerHTML = `<div style="text-align:center; padding:20px; color:#ef4444; font-size:12px;">❌ ডাটা লোড করতে সমস্যা হয়েছে। গুগল শিটের এক্সেস চেক করুন।</div>`;
     }
+}
+
+function handleHubSearchDebounced() {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+        filterHubs();
+    }, 150); // 150ms Debounce prevents DOM freeze while typing
 }
 
 function filterHubs() {
     const query = document.getElementById("hubSearchInput").value.toLowerCase().trim();
-    if (query === "") {
-        renderHubResults(fetchedHubObjects);
+    
+    if (query.length === 0) {
+        renderHubResults([], "🔍 হাবের নাম বা জেলা টাইপ করুন (যেমন: Dhanmondi, Rangpur)...");
         return;
     }
 
-    const filtered = fetchedHubObjects.filter(item => 
-        item.fullText.includes(query)
-    );
+    if (!hubCacheList) {
+        renderHubResults([], "⏳ লাইভ ডাটা লোড হচ্ছে, ১ সেকেন্ড অপেক্ষা করুন...");
+        fetchHubsFromGoogleSheet().then(() => filterHubs());
+        return;
+    }
 
+    const filtered = hubCacheList.filter(item => item.searchStr.includes(query));
     renderHubResults(filtered);
 }
 
-function renderHubResults(list) {
+function renderHubResults(list, promptMsg) {
     const container = document.getElementById("hubResultsContainer");
-    if (list.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:25px; color:#64748b; font-size:13px;">❌ কোনো হাব পাওয়া যায়নি</div>`;
+    
+    if (promptMsg) {
+        container.innerHTML = `<div style="text-align:center; padding:35px; color:#94a3b8; font-size:12px;">${promptMsg}</div>`;
         return;
     }
 
-    container.innerHTML = "";
-    list.forEach(item => {
-        // Fallback row mapping for flexible sheet structures
+    if (!list || list.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:35px; color:#ef4444; font-size:12px;">❌ কোনো মিল পাওয়া যায়নি</div>`;
+        return;
+    }
+
+    // CRITICAL FIX: Limit DOM rendering to top 5 matches to keep UI lightning fast
+    const LIMIT = 5;
+    const displayList = list.slice(0, LIMIT);
+
+    let html = "";
+    displayList.forEach(item => {
         const c = item.rawCells;
         const hName = item.name !== 'N/A' ? item.name : (c[0] || 'N/A');
         const hAddr = item.address !== 'N/A' ? item.address : (c[1] || 'N/A');
@@ -986,45 +1003,32 @@ function renderHubResults(list) {
         const hTL = c[16] || 'N/A';
         const hTLPhone = c[17] || '';
 
-        container.innerHTML += `
-            <!-- STRUCTURED HUB CARD AS REQUESTED -->
+        html += `
             <div class="hub-sec-box">
                 <div class="hub-sec-header">Hub Details</div>
                 
-                <!-- Name -->
                 <div class="hub-grid-2 full-width">
-                    <div class="hub-pill">
-                        <div><span class="lbl">Name:</span> <span class="val">${escapeHTML(hName)}</span></div>
-                    </div>
+                    <div class="hub-pill"><div><span class="lbl">Name:</span> <span class="val">${escapeHTML(hName)}</span></div></div>
                 </div>
 
-                <!-- Address -->
                 <div class="hub-grid-2 full-width">
-                    <div class="hub-pill">
-                        <div><span class="lbl">Address:</span> <span class="val">${escapeHTML(hAddr)}</span></div>
-                    </div>
+                    <div class="hub-pill"><div><span class="lbl">Address:</span> <span class="val">${escapeHTML(hAddr)}</span></div></div>
                 </div>
 
-                <!-- Hub ID & Distance -->
                 <div class="hub-grid-2">
                     <div class="hub-pill"><div><span class="lbl">Hub ID:</span> <span class="val">${escapeHTML(hId)}</span></div></div>
                     <div class="hub-pill"><div><span class="lbl">Distance:</span> <span class="val">${escapeHTML(hDist)}</span></div></div>
                 </div>
 
-                <!-- District & Division -->
                 <div class="hub-grid-2">
                     <div class="hub-pill"><div><span class="lbl">District:</span> <span class="val">${escapeHTML(hDistrict)}</span></div></div>
                     <div class="hub-pill"><div><span class="lbl">Division:</span> <span class="val">${escapeHTML(hDivision)}</span></div></div>
                 </div>
 
-                <!-- Police Station -->
                 <div class="hub-grid-2 full-width">
-                    <div class="hub-pill">
-                        <div><span class="lbl">Police Station:</span> <span class="val">${escapeHTML(hThana)}</span></div>
-                    </div>
+                    <div class="hub-pill"><div><span class="lbl">Police Station:</span> <span class="val">${escapeHTML(hThana)}</span></div></div>
                 </div>
 
-                <!-- Zonal Manager & Phone -->
                 <div class="hub-grid-2">
                     <div class="hub-pill"><div><span class="lbl">Zonal Manager:</span> <span class="val">${escapeHTML(hZM)}</span></div></div>
                     <div class="hub-pill">
@@ -1033,7 +1037,6 @@ function renderHubResults(list) {
                     </div>
                 </div>
 
-                <!-- Coordinates -->
                 <div class="hub-grid-2 full-width">
                     <div class="hub-pill">
                         <div><span class="lbl">Coordinates:</span> <span class="val">${escapeHTML(hCoord)}</span></div>
@@ -1043,7 +1046,6 @@ function renderHubResults(list) {
 
                 <div class="hub-sec-header" style="margin-top:20px;">Contact Details</div>
 
-                <!-- Hub IP & Hub Phone -->
                 <div class="hub-grid-2">
                     <div class="hub-pill"><div><span class="lbl">Hub IP:</span> <span class="val">${escapeHTML(hIP)}</span></div></div>
                     <div class="hub-pill">
@@ -1052,7 +1054,6 @@ function renderHubResults(list) {
                     </div>
                 </div>
 
-                <!-- Manager & Phone -->
                 <div class="hub-grid-2">
                     <div class="hub-pill"><div><span class="lbl">Manager:</span> <span class="val">${escapeHTML(hManager)}</span></div></div>
                     <div class="hub-pill">
@@ -1061,7 +1062,6 @@ function renderHubResults(list) {
                     </div>
                 </div>
 
-                <!-- Asst. Manager & Phone -->
                 <div class="hub-grid-2">
                     <div class="hub-pill"><div><span class="lbl">Asst. Manager:</span> <span class="val">${escapeHTML(hAsst)}</span></div></div>
                     <div class="hub-pill">
@@ -1070,7 +1070,6 @@ function renderHubResults(list) {
                     </div>
                 </div>
 
-                <!-- Team Leader & Phone -->
                 <div class="hub-grid-2">
                     <div class="hub-pill"><div><span class="lbl">Team Leader:</span> <span class="val">${escapeHTML(hTL)}</span></div></div>
                     <div class="hub-pill">
@@ -1078,10 +1077,15 @@ function renderHubResults(list) {
                         ${hTLPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hTLPhone)}')">📄</button>` : ''}
                     </div>
                 </div>
-
             </div>
         `;
     });
+
+    if (list.length > LIMIT) {
+        html += `<div style="text-align:center; padding:10px; color:#38bdf8; font-size:11px;">ℹ️ আরও ${list.length - LIMIT} টি রেজাল্ট পাওয়া গেছে। সঠিক হাব পাওয়ার জন্য নামটি আর একটু নির্দিষ্ট করুন।</div>`;
+    }
+
+    container.innerHTML = html;
 }
 
 function copyNumber(text) {
