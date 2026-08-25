@@ -446,7 +446,7 @@ header::before{
 .empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 11px; }
 
 /* ===================================================== */
-/* 🔍 MODAL OVERLAYS (NOTICE & LIGHTWEIGHT HUB SEARCH) */
+/* 🔍 MODAL OVERLAYS (NOTICE & ULTRA-FAST HUB SEARCH) */
 /* ===================================================== */
 
 .modal-overlay {
@@ -803,14 +803,14 @@ footer strong{ color:rgba(255,255,255,0.8); }
     </div>
 </div>
 
-<!-- 2. HUB CONTACT LIVE SEARCH MODAL (OPTIMIZED & LIGHTWEIGHT) -->
+<!-- 2. HUB CONTACT LIVE SEARCH MODAL -->
 <div class="modal-overlay" id="hubSearchModal">
     <div class="modal-card">
         <button class="modal-close-btn" onclick="closeHubModal()">✕</button>
         <div class="modal-title">🔍 Hub Emergency Contact Search</div>
-        <div class="modal-time">টাইপ করে যেকোনো হাবের তথ্য সার্চ করুন</div>
+        <div class="modal-time" id="hubModalSubTitle">গুগল শিট থেকে লাইভ হাব সার্চ করা হচ্ছে...</div>
 
-        <input type="text" class="hub-search-input" id="hubSearchInput" oninput="handleHubSearchDebounced()" placeholder="হাবের নাম বা জেলা টাইপ করুন (যেমন: Dhanmondi, Rangpur, Rajshahi)..." autofocus>
+        <input type="text" class="hub-search-input" id="hubSearchInput" oninput="handleHubSearchDebounced()" placeholder="হাবের নাম, ইনচার্জ বা নম্বর লিখুন (যেমন: Dhanmondi, Rangpur)..." autofocus>
 
         <div class="hub-structured-wrapper" id="hubResultsContainer">
             <div style="text-align:center; padding:30px; color:#94a3b8; font-size:12px;">🔍 হাবের নাম টাইপ করা শুরু করুন...</div>
@@ -854,10 +854,11 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // =====================================================
-// ⚡ ULTRA-FAST LIGHTWEIGHT HUB SEARCH LOGIC (0% LAG)
+// ⚡ LIGHTWEIGHT NON-BLOCKING GOOGLE SHEET SEARCH ENGINE
 // =====================================================
 const HUB_SEARCH_SHEET_ID = "1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
-let hubCacheList = null;
+let hubCacheList = [];
+let isFetchingSheet = false;
 let searchDebounceTimer = null;
 
 async function openHubSearchModal() {
@@ -866,11 +867,9 @@ async function openHubSearchModal() {
     input.value = "";
     input.focus();
     
-    // Default prompt message (Fast opening)
-    renderHubResults([], "🔍 হাবের নাম বা জেলা টাইপ করুন (যেমন: Dhanmondi, Rangpur)...");
+    renderHubResults([], "🔍 হাবের নাম বা এলাকা টাইপ করুন (যেমন: Dhanmondi, Rangpur, Rajshahi)...");
 
-    // Pre-fetch in background if cache is empty
-    if (!hubCacheList) {
+    if (hubCacheList.length === 0 && !isFetchingSheet) {
         fetchHubsFromGoogleSheet();
     }
 }
@@ -880,6 +879,10 @@ function closeHubModal() {
 }
 
 async function fetchHubsFromGoogleSheet() {
+    isFetchingSheet = true;
+    const subTitle = document.getElementById("hubModalSubTitle");
+    if(subTitle) subTitle.innerText = "⏳ ব্যাকগ্রাউন্ডে গুগল শিট লোড হচ্ছে...";
+
     const url = `https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/gviz/tq?tqx=out:json`;
 
     try {
@@ -896,7 +899,7 @@ async function fetchHubsFromGoogleSheet() {
         if (rows && rows.length > 0) {
             rows.forEach((row) => {
                 if (row.c && Array.isArray(row.c)) {
-                    const getCellVal = (idx) => {
+                    const getVal = (idx) => {
                         if (!row.c[idx]) return '';
                         const cell = row.c[idx];
                         if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
@@ -904,38 +907,33 @@ async function fetchHubsFromGoogleSheet() {
                         return '';
                     };
 
-                    const cells = row.c.map((_, i) => getCellVal(i));
+                    const cells = row.c.map((_, i) => getVal(i));
                     const fullText = cells.join(' ').toLowerCase();
 
                     if (fullText.length > 0) {
                         hubCacheList.push({
-                            searchStr: fullText,
-                            name: cells[0] || 'N/A',
-                            address: cells[1] || 'N/A',
-                            hubId: cells[2] || 'N/A',
-                            distance: cells[3] || 'Not available',
-                            district: cells[4] || 'N/A',
-                            division: cells[5] || 'N/A',
-                            policeStation: cells[6] || 'N/A',
-                            zonalManager: cells[7] || 'N/A',
-                            zonalPhone: cells[8] || '',
-                            coordinates: cells[9] || '',
-                            hubIp: cells[10] || 'N/A',
-                            hubPhone: cells[11] || '',
-                            manager: cells[12] || 'N/A',
-                            managerPhone: cells[13] || '',
-                            asstManager: cells[14] || 'N/A',
-                            asstPhone: cells[15] || '',
-                            teamLeader: cells[16] || 'N/A',
-                            teamLeaderPhone: cells[17] || '',
-                            rawCells: cells
+                            searchStr: fullText.replace(/[^a-z0-9]/gi, ''), // Normalized search string
+                            rawText: fullText,
+                            cells: cells
                         });
                     }
                 }
             });
         }
+
+        if(subTitle) subTitle.innerText = "✅ লাইভ ডাটা লোড সম্পন্ন! টাইপ করে খুঁজুন।";
+        
+        // Trigger filter if user already typed something while loading
+        const currentInput = document.getElementById("hubSearchInput").value;
+        if(currentInput.trim().length > 0) {
+            filterHubs();
+        }
+
     } catch (error) {
         console.error("Google Sheet Fetch Error:", error);
+        if(subTitle) subTitle.innerText = "⚠️ লাইভ কানেকশনে কিছুটা সমস্যা হচ্ছে।";
+    } finally {
+        isFetchingSheet = false;
     }
 }
 
@@ -943,24 +941,29 @@ function handleHubSearchDebounced() {
     clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(() => {
         filterHubs();
-    }, 150); // 150ms Debounce prevents DOM freeze while typing
+    }, 120); // 150ms debounce prevents CPU spiking
 }
 
 function filterHubs() {
-    const query = document.getElementById("hubSearchInput").value.toLowerCase().trim();
+    const rawQuery = document.getElementById("hubSearchInput").value.trim().toLowerCase();
     
-    if (query.length === 0) {
-        renderHubResults([], "🔍 হাবের নাম বা জেলা টাইপ করুন (যেমন: Dhanmondi, Rangpur)...");
+    if (rawQuery.length === 0) {
+        renderHubResults([], "🔍 হাবের নাম বা এলাকা টাইপ করুন (যেমন: Dhanmondi, Rangpur, Rajshahi)...");
         return;
     }
 
-    if (!hubCacheList) {
-        renderHubResults([], "⏳ লাইভ ডাটা লোড হচ্ছে, ১ সেকেন্ড অপেক্ষা করুন...");
-        fetchHubsFromGoogleSheet().then(() => filterHubs());
+    if (hubCacheList.length === 0) {
+        renderHubResults([], "⏳ গুগল শিট থেকে তথ্য লোড হচ্ছে, এক সেকেন্ড অপেক্ষা করুন...");
+        if(!isFetchingSheet) fetchHubsFromGoogleSheet();
         return;
     }
 
-    const filtered = hubCacheList.filter(item => item.searchStr.includes(query));
+    const cleanQuery = rawQuery.replace(/[^a-z0-9]/gi, '');
+
+    const filtered = hubCacheList.filter(item => 
+        item.rawText.includes(rawQuery) || (cleanQuery.length > 0 && item.searchStr.includes(cleanQuery))
+    );
+
     renderHubResults(filtered);
 }
 
@@ -973,19 +976,20 @@ function renderHubResults(list, promptMsg) {
     }
 
     if (!list || list.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:35px; color:#ef4444; font-size:12px;">❌ কোনো মিল পাওয়া যায়নি</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:35px; color:#ef4444; font-size:12px;">❌ কোনো হাব বা তথ্য পাওয়া যায়নি</div>`;
         return;
     }
 
-    // CRITICAL FIX: Limit DOM rendering to top 5 matches to keep UI lightning fast
-    const LIMIT = 5;
-    const displayList = list.slice(0, LIMIT);
+    // CRITICAL: Max 3 items rendered per query to guarantee ZERO lag
+    const MAX_ITEMS = 3;
+    const displayList = list.slice(0, MAX_ITEMS);
 
     let html = "";
     displayList.forEach(item => {
-        const c = item.rawCells;
-        const hName = item.name !== 'N/A' ? item.name : (c[0] || 'N/A');
-        const hAddr = item.address !== 'N/A' ? item.address : (c[1] || 'N/A');
+        const c = item.cells;
+        
+        const hName = c[0] || 'N/A';
+        const hAddr = c[1] || 'N/A';
         const hId = c[2] || 'N/A';
         const hDist = c[3] || 'Not available';
         const hDistrict = c[4] || 'N/A';
@@ -1081,8 +1085,8 @@ function renderHubResults(list, promptMsg) {
         `;
     });
 
-    if (list.length > LIMIT) {
-        html += `<div style="text-align:center; padding:10px; color:#38bdf8; font-size:11px;">ℹ️ আরও ${list.length - LIMIT} টি রেজাল্ট পাওয়া গেছে। সঠিক হাব পাওয়ার জন্য নামটি আর একটু নির্দিষ্ট করুন।</div>`;
+    if (list.length > MAX_ITEMS) {
+        html += `<div style="text-align:center; padding:10px; color:#38bdf8; font-size:11px;">ℹ️ আরও ${list.length - MAX_ITEMS} টি হাবের সাথে মিলেছে। নির্দিষ্ট হাব দেখতে পুরো নাম লিখুন।</div>`;
     }
 
     container.innerHTML = html;
