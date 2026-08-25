@@ -853,8 +853,26 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
+// Helper: BD Phone Number Formatter (Restores leading 0)
+function formatPhoneNumber(val) {
+    if (!val) return '';
+    let str = String(val).trim();
+    let digits = str.replace(/\D/g, '');
+    
+    if (digits.length === 10 && digits.startsWith('1')) {
+        return '0' + digits;
+    }
+    if (digits.length === 11 && digits.startsWith('01')) {
+        return digits;
+    }
+    if (digits.length === 12 && digits.startsWith('8801')) {
+        return '0' + digits.substring(2);
+    }
+    return str;
+}
+
 // =====================================================
-// 🔍 DYNAMIC HEADER MAPPER (FIXES MISPLACED DATA)
+// 🔍 DYNAMIC HEADER MAPPER + POSITIONAL FALLBACK
 // =====================================================
 const HUB_SEARCH_SHEET_ID = "1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
 let hubCacheList = [];
@@ -895,7 +913,6 @@ async function fetchHubsFromGoogleSheet() {
         
         const rows = jsonData.table.rows;
         
-        // Extract headers from cols or rows[0]
         let headers = [];
         if (jsonData.table.cols) {
             headers = jsonData.table.cols.map(c => c && c.label ? String(c.label).toLowerCase().trim() : '');
@@ -907,13 +924,12 @@ async function fetchHubsFromGoogleSheet() {
         let startRowIdx = 0;
         if (row0IsHeader || headers.every(h => !h)) {
             headers = firstRowVals;
-            startRowIdx = 1; // Row 0 is header, data starts at Row 1
+            startRowIdx = 1;
         }
 
-        // Helper matcher
         const findColIdx = (predicate) => headers.findIndex(predicate);
 
-        // Smart Map column indices by headers
+        // Smart Map column indices by headers with fallback
         const colMap = {
             name: findColIdx(h => (h.includes('hub') && h.includes('name')) || h === 'name' || h === 'hub name' || h === 'hub'),
             address: findColIdx(h => h.includes('address') || h.includes('location')),
@@ -948,46 +964,49 @@ async function fetchHubsFromGoogleSheet() {
                 const row = rows[i];
                 if (row.c && Array.isArray(row.c)) {
                     const getCellVal = (colIdx) => {
-                        if (colIdx === -1 || !row.c[colIdx]) return '';
+                        if (colIdx === -1 || colIdx === undefined || !row.c[colIdx]) return '';
                         const cell = row.c[colIdx];
-                        if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
                         if (cell.f !== null && cell.f !== undefined) return String(cell.f).trim();
+                        if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
                         return '';
                     };
 
-                    const allRowCells = row.c.map(c => c ? String(c.v || c.f || '').trim() : '');
+                    const allRowCells = row.c.map(c => c ? String(c.f || c.v || '').trim() : '');
                     const fullText = allRowCells.join(' ').toLowerCase();
 
                     if (fullText.length > 0) {
+                        // Positional fallbacks based on exact standard sheet layout if header detection failed for phone
+                        const zmIdx = colMap.zonalManager !== -1 ? colMap.zonalManager : 7;
+                        const zmPhoneIdx = colMap.zonalPhone !== -1 ? colMap.zonalPhone : (zmIdx + 1);
+
                         hubCacheList.push({
                             searchStr: fullText.replace(/[^a-z0-9]/gi, ''),
                             rawText: fullText,
                             
-                            // Dynamically assigned fields by Header!
                             name: getCellVal(colMap.name) || allRowCells[0] || 'N/A',
                             address: getCellVal(colMap.address) || allRowCells[1] || 'N/A',
-                            hubId: getCellVal(colMap.hubId) || 'N/A',
-                            distance: getCellVal(colMap.distance) || 'Not available',
-                            district: getCellVal(colMap.district) || 'N/A',
-                            division: getCellVal(colMap.division) || 'N/A',
-                            policeStation: getCellVal(colMap.policeStation) || 'N/A',
+                            hubId: getCellVal(colMap.hubId) || allRowCells[2] || 'N/A',
+                            distance: getCellVal(colMap.distance) || allRowCells[3] || 'Not available',
+                            district: getCellVal(colMap.district) || allRowCells[4] || 'N/A',
+                            division: getCellVal(colMap.division) || allRowCells[5] || 'N/A',
+                            policeStation: getCellVal(colMap.policeStation) || allRowCells[6] || 'N/A',
                             
-                            zonalManager: getCellVal(colMap.zonalManager) || 'N/A',
-                            zonalPhone: getCellVal(colMap.zonalPhone) || '',
+                            zonalManager: getCellVal(colMap.zonalManager) || allRowCells[7] || 'N/A',
+                            zonalPhone: formatPhoneNumber(getCellVal(colMap.zonalPhone) || allRowCells[8]),
                             
-                            coordinates: getCellVal(colMap.coordinates) || '',
+                            coordinates: getCellVal(colMap.coordinates) || allRowCells[9] || '',
                             
-                            hubIp: getCellVal(colMap.hubIp) || 'N/A',
-                            hubPhone: getCellVal(colMap.hubPhone) || '',
+                            hubIp: getCellVal(colMap.hubIp) || allRowCells[10] || 'N/A',
+                            hubPhone: formatPhoneNumber(getCellVal(colMap.hubPhone) || allRowCells[11]),
                             
-                            manager: getCellVal(colMap.manager) || 'N/A',
-                            managerPhone: getCellVal(colMap.managerPhone) || '',
+                            manager: getCellVal(colMap.manager) || allRowCells[12] || 'N/A',
+                            managerPhone: formatPhoneNumber(getCellVal(colMap.managerPhone) || allRowCells[13]),
                             
-                            asstManager: getCellVal(colMap.asstManager) || 'N/A',
-                            asstPhone: getCellVal(colMap.asstPhone) || '',
+                            asstManager: getCellVal(colMap.asstManager) || allRowCells[14] || 'N/A',
+                            asstPhone: formatPhoneNumber(getCellVal(colMap.asstPhone) || allRowCells[15]),
                             
-                            teamLeader: getCellVal(colMap.teamLeader) || 'N/A',
-                            teamLeaderPhone: getCellVal(colMap.teamLeaderPhone) || ''
+                            teamLeader: getCellVal(colMap.teamLeader) || allRowCells[16] || 'N/A',
+                            teamLeaderPhone: formatPhoneNumber(getCellVal(colMap.teamLeaderPhone) || allRowCells[17])
                         });
                     }
                 }
@@ -1136,7 +1155,7 @@ function renderHubResults(list, promptMsg) {
     });
 
     if (list.length > MAX_ITEMS) {
-        html += `<div style="text-align:center; padding:10px; color:#38bdf8; font-size:11px;">ℹ️ আরও ${list.length - MAX_ITEMS} টি হাবের সাথে মিলেছে। সঠিক হাব দেখতে পুরো নাম লিখুন।</div>`;
+        html += `<div style="text-align:center; padding:10px; color:#38bdf8; font-size:11px;">ℹ️ আরও ${list.length - MAX_ITEMS} টি হাবের সাথে মিলেছে। নির্দিষ্ট হাব দেখতে পুরো নাম লিখুন।</div>`;
     }
 
     container.innerHTML = html;
