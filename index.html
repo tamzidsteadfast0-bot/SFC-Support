@@ -835,7 +835,7 @@ const firebaseConfig = {
     appId: "1:589705470778:web:4390bc11624fe36635a603"
 };
 
-const ADMIN_PIN = "4563";
+const ADMIN_PIN = "1234";
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -872,7 +872,7 @@ function formatPhoneNumber(val) {
 }
 
 // =====================================================
-// 🔍 DYNAMIC HEADER MAPPER + POSITIONAL FALLBACK
+// 🔍 DYNAMIC HEADER MAPPER (EXACT FIELD MATCHING)
 // =====================================================
 const HUB_SEARCH_SHEET_ID = "1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
 let hubCacheList = [];
@@ -915,11 +915,14 @@ async function fetchHubsFromGoogleSheet() {
         
         let headers = [];
         if (jsonData.table.cols) {
-            headers = jsonData.table.cols.map(c => c && c.label ? String(c.label).toLowerCase().trim() : '');
+            headers = jsonData.table.cols.map(c => c && (c.label || c.id) ? String(c.label || c.id).trim() : '');
         }
 
-        let firstRowVals = (rows && rows[0] && rows[0].c) ? rows[0].c.map(c => c ? String(c.v || c.f || '').toLowerCase().trim() : '') : [];
-        let row0IsHeader = firstRowVals.some(v => v.includes('name') || v.includes('address') || v.includes('district') || v.includes('manager') || v.includes('phone') || v.includes('hub'));
+        let firstRowVals = (rows && rows[0] && rows[0].c) ? rows[0].c.map(c => c ? String(c.v || c.f || '').trim() : '') : [];
+        let row0IsHeader = firstRowVals.some(v => {
+            const low = v.toLowerCase();
+            return low.includes('name') || low.includes('address') || low.includes('manager') || low.includes('phone') || low.includes('hub');
+        });
 
         let startRowIdx = 0;
         if (row0IsHeader || headers.every(h => !h)) {
@@ -927,34 +930,46 @@ async function fetchHubsFromGoogleSheet() {
             startRowIdx = 1;
         }
 
-        const findColIdx = (predicate) => headers.findIndex(predicate);
+        const normHeaders = headers.map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
 
-        // Smart Map column indices by headers with fallback
+        // Helper to match EXACT or best header aliases
+        const getColIndex = (exactNames) => {
+            for (let name of exactNames) {
+                const idx = normHeaders.indexOf(name);
+                if (idx !== -1) return idx;
+            }
+            for (let name of exactNames) {
+                const idx = normHeaders.findIndex(h => h.includes(name));
+                if (idx !== -1) return idx;
+            }
+            return -1;
+        };
+
         const colMap = {
-            name: findColIdx(h => (h.includes('hub') && h.includes('name')) || h === 'name' || h === 'hub name' || h === 'hub'),
-            address: findColIdx(h => h.includes('address') || h.includes('location')),
-            hubId: findColIdx(h => h.includes('id') || h.includes('code')),
-            distance: findColIdx(h => h.includes('distance')),
-            district: findColIdx(h => h.includes('district') || h.includes('জেলা')),
-            division: findColIdx(h => h.includes('division') || h.includes('বিভাগ')),
-            policeStation: findColIdx(h => h.includes('police') || h.includes('thana') || h.includes('ps') || h.includes('থানা')),
+            name: getColIndex(['hubname', 'name', 'hub']),
+            address: getColIndex(['address', 'hubaddress', 'location']),
+            hubId: getColIndex(['hubid', 'id', 'code']),
+            distance: getColIndex(['distance']),
+            district: getColIndex(['district']),
+            division: getColIndex(['division']),
+            policeStation: getColIndex(['policestation', 'thana', 'ps', 'policestationthana']),
             
-            zonalManager: findColIdx(h => (h.includes('zonal') || h.includes('zm')) && !h.includes('phone') && !h.includes('mobile') && !h.includes('contact') && !h.includes('number')),
-            zonalPhone: findColIdx(h => (h.includes('zonal') || h.includes('zm')) && (h.includes('phone') || h.includes('mobile') || h.includes('contact') || h.includes('number') || h.includes('no'))),
+            zonalPhone: getColIndex(['zonalphone', 'zmphone', 'zonalmobile', 'zonalcontact', 'zonalnumber']),
+            zonalManager: getColIndex(['zonalmanager', 'zmname', 'zm']),
             
-            coordinates: findColIdx(h => h.includes('coord') || h.includes('lat') || h.includes('map') || h.includes('link')),
+            coordinates: getColIndex(['coordinates', 'coordinate', 'latlong', 'map']),
             
-            hubIp: findColIdx(h => h.includes('ip')),
-            hubPhone: findColIdx(h => (h.includes('hub') && (h.includes('phone') || h.includes('mobile') || h.includes('contact') || h.includes('number') || h.includes('no'))) && !h.includes('zm') && !h.includes('zonal') && !h.includes('manager')),
+            hubIp: getColIndex(['hubip', 'ip']),
+            hubPhone: getColIndex(['hubphone', 'hubmobile', 'hubnumber', 'hubcontact', 'emergencynumber']),
             
-            manager: findColIdx(h => h.includes('manager') && !h.includes('zonal') && !h.includes('zm') && !h.includes('asst') && !h.includes('assistant') && !h.includes('phone') && !h.includes('mobile') && !h.includes('contact') && !h.includes('number')),
-            managerPhone: findColIdx(h => h.includes('manager') && !h.includes('zonal') && !h.includes('zm') && !h.includes('asst') && !h.includes('assistant') && (h.includes('phone') || h.includes('mobile') || h.includes('contact') || h.includes('number') || h.includes('no'))),
+            managerPhone: getColIndex(['managerphone', 'managermobile', 'managercontact']),
+            manager: getColIndex(['manager', 'managername', 'hubmanager']),
             
-            asstManager: findColIdx(h => (h.includes('asst') || h.includes('assistant')) && !h.includes('phone') && !h.includes('mobile') && !h.includes('contact') && !h.includes('number')),
-            asstPhone: findColIdx(h => (h.includes('asst') || h.includes('assistant')) && (h.includes('phone') || h.includes('mobile') || h.includes('contact') || h.includes('number') || h.includes('no'))),
+            asstPhone: getColIndex(['asstphone', 'asstmanagerphone', 'assistantmanagerphone', 'asstmobile']),
+            asstManager: getColIndex(['asstmanager', 'assistantmanager', 'asstmanagername']),
             
-            teamLeader: findColIdx(h => (h.includes('team') || h.includes('tl')) && !h.includes('phone') && !h.includes('mobile') && !h.includes('contact') && !h.includes('number')),
-            teamLeaderPhone: findColIdx(h => (h.includes('team') || h.includes('tl')) && (h.includes('phone') || h.includes('mobile') || h.includes('contact') || h.includes('number') || h.includes('no')))
+            teamLeaderPhone: getColIndex(['teamleaderphone', 'tlphone', 'tlmobile']),
+            teamLeader: getColIndex(['teamleader', 'tlname', 'tl'])
         };
 
         hubCacheList = [];
@@ -975,38 +990,34 @@ async function fetchHubsFromGoogleSheet() {
                     const fullText = allRowCells.join(' ').toLowerCase();
 
                     if (fullText.length > 0) {
-                        // Positional fallbacks based on exact standard sheet layout if header detection failed for phone
-                        const zmIdx = colMap.zonalManager !== -1 ? colMap.zonalManager : 7;
-                        const zmPhoneIdx = colMap.zonalPhone !== -1 ? colMap.zonalPhone : (zmIdx + 1);
-
                         hubCacheList.push({
                             searchStr: fullText.replace(/[^a-z0-9]/gi, ''),
                             rawText: fullText,
                             
-                            name: getCellVal(colMap.name) || allRowCells[0] || 'N/A',
-                            address: getCellVal(colMap.address) || allRowCells[1] || 'N/A',
-                            hubId: getCellVal(colMap.hubId) || allRowCells[2] || 'N/A',
-                            distance: getCellVal(colMap.distance) || allRowCells[3] || 'Not available',
-                            district: getCellVal(colMap.district) || allRowCells[4] || 'N/A',
-                            division: getCellVal(colMap.division) || allRowCells[5] || 'N/A',
-                            policeStation: getCellVal(colMap.policeStation) || allRowCells[6] || 'N/A',
+                            name: getCellVal(colMap.name) || 'N/A',
+                            address: getCellVal(colMap.address) || 'N/A',
+                            hubId: getCellVal(colMap.hubId) || 'N/A',
+                            distance: getCellVal(colMap.distance) || 'Not available',
+                            district: getCellVal(colMap.district) || 'N/A',
+                            division: getCellVal(colMap.division) || 'N/A',
+                            policeStation: getCellVal(colMap.policeStation) || 'N/A',
                             
-                            zonalManager: getCellVal(colMap.zonalManager) || allRowCells[7] || 'N/A',
-                            zonalPhone: formatPhoneNumber(getCellVal(colMap.zonalPhone) || allRowCells[8]),
+                            zonalManager: getCellVal(colMap.zonalManager) || 'N/A',
+                            zonalPhone: formatPhoneNumber(getCellVal(colMap.zonalPhone)),
                             
-                            coordinates: getCellVal(colMap.coordinates) || allRowCells[9] || '',
+                            coordinates: getCellVal(colMap.coordinates) || 'N/A',
                             
-                            hubIp: getCellVal(colMap.hubIp) || allRowCells[10] || 'N/A',
-                            hubPhone: formatPhoneNumber(getCellVal(colMap.hubPhone) || allRowCells[11]),
+                            hubIp: getCellVal(colMap.hubIp) || 'N/A',
+                            hubPhone: formatPhoneNumber(getCellVal(colMap.hubPhone)),
                             
-                            manager: getCellVal(colMap.manager) || allRowCells[12] || 'N/A',
-                            managerPhone: formatPhoneNumber(getCellVal(colMap.managerPhone) || allRowCells[13]),
+                            manager: getCellVal(colMap.manager) || 'N/A',
+                            managerPhone: formatPhoneNumber(getCellVal(colMap.managerPhone)),
                             
-                            asstManager: getCellVal(colMap.asstManager) || allRowCells[14] || 'N/A',
-                            asstPhone: formatPhoneNumber(getCellVal(colMap.asstPhone) || allRowCells[15]),
+                            asstManager: getCellVal(colMap.asstManager) || 'N/A',
+                            asstPhone: formatPhoneNumber(getCellVal(colMap.asstPhone)),
                             
-                            teamLeader: getCellVal(colMap.teamLeader) || allRowCells[16] || 'N/A',
-                            teamLeaderPhone: formatPhoneNumber(getCellVal(colMap.teamLeaderPhone) || allRowCells[17])
+                            teamLeader: getCellVal(colMap.teamLeader) || 'N/A',
+                            teamLeaderPhone: formatPhoneNumber(getCellVal(colMap.teamLeaderPhone))
                         });
                     }
                 }
