@@ -446,7 +446,7 @@ header::before{
 .empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 11px; }
 
 /* ===================================================== */
-/* 🔍 MODAL OVERLAYS (NOTICE & ULTRA-FAST HUB SEARCH) */
+/* 🔍 MODAL OVERLAYS (NOTICE & STRUCTURED HUB SEARCH) */
 /* ===================================================== */
 
 .modal-overlay {
@@ -808,7 +808,7 @@ footer strong{ color:rgba(255,255,255,0.8); }
     <div class="modal-card">
         <button class="modal-close-btn" onclick="closeHubModal()">✕</button>
         <div class="modal-title">🔍 Hub Emergency Contact Search</div>
-        <div class="modal-time" id="hubModalSubTitle">গুগল শিট থেকে লাইভ হাব সার্চ করা হচ্ছে...</div>
+        <div class="modal-time" id="hubModalSubTitle">টাইপ করে যেকোনো হাবের তথ্য সার্চ করুন</div>
 
         <input type="text" class="hub-search-input" id="hubSearchInput" oninput="handleHubSearchDebounced()" placeholder="হাবের নাম, ইনচার্জ বা নম্বর লিখুন (যেমন: Dhanmondi, Rangpur)..." autofocus>
 
@@ -854,7 +854,7 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // =====================================================
-// ⚡ LIGHTWEIGHT NON-BLOCKING GOOGLE SHEET SEARCH ENGINE
+// 🔍 DYNAMIC HEADER MAPPER (FIXES MISPLACED DATA)
 // =====================================================
 const HUB_SEARCH_SHEET_ID = "1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
 let hubCacheList = [];
@@ -894,36 +894,108 @@ async function fetchHubsFromGoogleSheet() {
         const jsonData = JSON.parse(text.substring(jsonStart, jsonEnd));
         
         const rows = jsonData.table.rows;
+        
+        // Extract headers from cols or rows[0]
+        let headers = [];
+        if (jsonData.table.cols) {
+            headers = jsonData.table.cols.map(c => c && c.label ? String(c.label).toLowerCase().trim() : '');
+        }
+
+        let firstRowVals = (rows && rows[0] && rows[0].c) ? rows[0].c.map(c => c ? String(c.v || c.f || '').toLowerCase().trim() : '') : [];
+        let row0IsHeader = firstRowVals.some(v => v.includes('name') || v.includes('address') || v.includes('district') || v.includes('manager') || v.includes('phone') || v.includes('hub'));
+
+        let startRowIdx = 0;
+        if (row0IsHeader || headers.every(h => !h)) {
+            headers = firstRowVals;
+            startRowIdx = 1; // Row 0 is header, data starts at Row 1
+        }
+
+        // Helper matcher
+        const findColIdx = (predicate) => headers.findIndex(predicate);
+
+        // Smart Map column indices by headers
+        const colMap = {
+            name: findColIdx(h => (h.includes('hub') && h.includes('name')) || h === 'name' || h === 'hub name' || h === 'hub'),
+            address: findColIdx(h => h.includes('address') || h.includes('location')),
+            hubId: findColIdx(h => h.includes('id') || h.includes('code')),
+            distance: findColIdx(h => h.includes('distance')),
+            district: findColIdx(h => h.includes('district') || h.includes('জেলা')),
+            division: findColIdx(h => h.includes('division') || h.includes('বিভাগ')),
+            policeStation: findColIdx(h => h.includes('police') || h.includes('thana') || h.includes('ps') || h.includes('থানা')),
+            
+            zonalManager: findColIdx(h => (h.includes('zonal') || h.includes('zm')) && !h.includes('phone') && !h.includes('mobile') && !h.includes('contact') && !h.includes('number')),
+            zonalPhone: findColIdx(h => (h.includes('zonal') || h.includes('zm')) && (h.includes('phone') || h.includes('mobile') || h.includes('contact') || h.includes('number') || h.includes('no'))),
+            
+            coordinates: findColIdx(h => h.includes('coord') || h.includes('lat') || h.includes('map') || h.includes('link')),
+            
+            hubIp: findColIdx(h => h.includes('ip')),
+            hubPhone: findColIdx(h => (h.includes('hub') && (h.includes('phone') || h.includes('mobile') || h.includes('contact') || h.includes('number') || h.includes('no'))) && !h.includes('zm') && !h.includes('zonal') && !h.includes('manager')),
+            
+            manager: findColIdx(h => h.includes('manager') && !h.includes('zonal') && !h.includes('zm') && !h.includes('asst') && !h.includes('assistant') && !h.includes('phone') && !h.includes('mobile') && !h.includes('contact') && !h.includes('number')),
+            managerPhone: findColIdx(h => h.includes('manager') && !h.includes('zonal') && !h.includes('zm') && !h.includes('asst') && !h.includes('assistant') && (h.includes('phone') || h.includes('mobile') || h.includes('contact') || h.includes('number') || h.includes('no'))),
+            
+            asstManager: findColIdx(h => (h.includes('asst') || h.includes('assistant')) && !h.includes('phone') && !h.includes('mobile') && !h.includes('contact') && !h.includes('number')),
+            asstPhone: findColIdx(h => (h.includes('asst') || h.includes('assistant')) && (h.includes('phone') || h.includes('mobile') || h.includes('contact') || h.includes('number') || h.includes('no'))),
+            
+            teamLeader: findColIdx(h => (h.includes('team') || h.includes('tl')) && !h.includes('phone') && !h.includes('mobile') && !h.includes('contact') && !h.includes('number')),
+            teamLeaderPhone: findColIdx(h => (h.includes('team') || h.includes('tl')) && (h.includes('phone') || h.includes('mobile') || h.includes('contact') || h.includes('number') || h.includes('no')))
+        };
+
         hubCacheList = [];
 
-        if (rows && rows.length > 0) {
-            rows.forEach((row) => {
+        if (rows && rows.length > startRowIdx) {
+            for (let i = startRowIdx; i < rows.length; i++) {
+                const row = rows[i];
                 if (row.c && Array.isArray(row.c)) {
-                    const getVal = (idx) => {
-                        if (!row.c[idx]) return '';
-                        const cell = row.c[idx];
+                    const getCellVal = (colIdx) => {
+                        if (colIdx === -1 || !row.c[colIdx]) return '';
+                        const cell = row.c[colIdx];
                         if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
                         if (cell.f !== null && cell.f !== undefined) return String(cell.f).trim();
                         return '';
                     };
 
-                    const cells = row.c.map((_, i) => getVal(i));
-                    const fullText = cells.join(' ').toLowerCase();
+                    const allRowCells = row.c.map(c => c ? String(c.v || c.f || '').trim() : '');
+                    const fullText = allRowCells.join(' ').toLowerCase();
 
                     if (fullText.length > 0) {
                         hubCacheList.push({
-                            searchStr: fullText.replace(/[^a-z0-9]/gi, ''), // Normalized search string
+                            searchStr: fullText.replace(/[^a-z0-9]/gi, ''),
                             rawText: fullText,
-                            cells: cells
+                            
+                            // Dynamically assigned fields by Header!
+                            name: getCellVal(colMap.name) || allRowCells[0] || 'N/A',
+                            address: getCellVal(colMap.address) || allRowCells[1] || 'N/A',
+                            hubId: getCellVal(colMap.hubId) || 'N/A',
+                            distance: getCellVal(colMap.distance) || 'Not available',
+                            district: getCellVal(colMap.district) || 'N/A',
+                            division: getCellVal(colMap.division) || 'N/A',
+                            policeStation: getCellVal(colMap.policeStation) || 'N/A',
+                            
+                            zonalManager: getCellVal(colMap.zonalManager) || 'N/A',
+                            zonalPhone: getCellVal(colMap.zonalPhone) || '',
+                            
+                            coordinates: getCellVal(colMap.coordinates) || '',
+                            
+                            hubIp: getCellVal(colMap.hubIp) || 'N/A',
+                            hubPhone: getCellVal(colMap.hubPhone) || '',
+                            
+                            manager: getCellVal(colMap.manager) || 'N/A',
+                            managerPhone: getCellVal(colMap.managerPhone) || '',
+                            
+                            asstManager: getCellVal(colMap.asstManager) || 'N/A',
+                            asstPhone: getCellVal(colMap.asstPhone) || '',
+                            
+                            teamLeader: getCellVal(colMap.teamLeader) || 'N/A',
+                            teamLeaderPhone: getCellVal(colMap.teamLeaderPhone) || ''
                         });
                     }
                 }
-            });
+            }
         }
 
         if(subTitle) subTitle.innerText = "✅ লাইভ ডাটা লোড সম্পন্ন! টাইপ করে খুঁজুন।";
         
-        // Trigger filter if user already typed something while loading
         const currentInput = document.getElementById("hubSearchInput").value;
         if(currentInput.trim().length > 0) {
             filterHubs();
@@ -931,7 +1003,7 @@ async function fetchHubsFromGoogleSheet() {
 
     } catch (error) {
         console.error("Google Sheet Fetch Error:", error);
-        if(subTitle) subTitle.innerText = "⚠️ লাইভ কানেকশনে কিছুটা সমস্যা হচ্ছে।";
+        if(subTitle) subTitle.innerText = "⚠️ লাইভ ডাটা লোড করতে সমস্যা হয়েছে।";
     } finally {
         isFetchingSheet = false;
     }
@@ -941,7 +1013,7 @@ function handleHubSearchDebounced() {
     clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(() => {
         filterHubs();
-    }, 120); // 150ms debounce prevents CPU spiking
+    }, 120);
 }
 
 function filterHubs() {
@@ -980,105 +1052,83 @@ function renderHubResults(list, promptMsg) {
         return;
     }
 
-    // CRITICAL: Max 3 items rendered per query to guarantee ZERO lag
     const MAX_ITEMS = 3;
     const displayList = list.slice(0, MAX_ITEMS);
 
     let html = "";
     displayList.forEach(item => {
-        const c = item.cells;
-        
-        const hName = c[0] || 'N/A';
-        const hAddr = c[1] || 'N/A';
-        const hId = c[2] || 'N/A';
-        const hDist = c[3] || 'Not available';
-        const hDistrict = c[4] || 'N/A';
-        const hDivision = c[5] || 'N/A';
-        const hThana = c[6] || 'N/A';
-        const hZM = c[7] || 'N/A';
-        const hZMPhone = c[8] || '';
-        const hCoord = c[9] || '';
-        const hIP = c[10] || 'N/A';
-        const hPhone = c[11] || '';
-        const hManager = c[12] || 'N/A';
-        const hMPhone = c[13] || '';
-        const hAsst = c[14] || 'N/A';
-        const hAPhone = c[15] || '';
-        const hTL = c[16] || 'N/A';
-        const hTLPhone = c[17] || '';
-
         html += `
             <div class="hub-sec-box">
                 <div class="hub-sec-header">Hub Details</div>
                 
                 <div class="hub-grid-2 full-width">
-                    <div class="hub-pill"><div><span class="lbl">Name:</span> <span class="val">${escapeHTML(hName)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Name:</span> <span class="val">${escapeHTML(item.name)}</span></div></div>
                 </div>
 
                 <div class="hub-grid-2 full-width">
-                    <div class="hub-pill"><div><span class="lbl">Address:</span> <span class="val">${escapeHTML(hAddr)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Address:</span> <span class="val">${escapeHTML(item.address)}</span></div></div>
                 </div>
 
                 <div class="hub-grid-2">
-                    <div class="hub-pill"><div><span class="lbl">Hub ID:</span> <span class="val">${escapeHTML(hId)}</span></div></div>
-                    <div class="hub-pill"><div><span class="lbl">Distance:</span> <span class="val">${escapeHTML(hDist)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Hub ID:</span> <span class="val">${escapeHTML(item.hubId)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Distance:</span> <span class="val">${escapeHTML(item.distance)}</span></div></div>
                 </div>
 
                 <div class="hub-grid-2">
-                    <div class="hub-pill"><div><span class="lbl">District:</span> <span class="val">${escapeHTML(hDistrict)}</span></div></div>
-                    <div class="hub-pill"><div><span class="lbl">Division:</span> <span class="val">${escapeHTML(hDivision)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">District:</span> <span class="val">${escapeHTML(item.district)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Division:</span> <span class="val">${escapeHTML(item.division)}</span></div></div>
                 </div>
 
                 <div class="hub-grid-2 full-width">
-                    <div class="hub-pill"><div><span class="lbl">Police Station:</span> <span class="val">${escapeHTML(hThana)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Police Station:</span> <span class="val">${escapeHTML(item.policeStation)}</span></div></div>
                 </div>
 
                 <div class="hub-grid-2">
-                    <div class="hub-pill"><div><span class="lbl">Zonal Manager:</span> <span class="val">${escapeHTML(hZM)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Zonal Manager:</span> <span class="val">${escapeHTML(item.zonalManager)}</span></div></div>
                     <div class="hub-pill">
-                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(hZMPhone)}</span></div>
-                        ${hZMPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hZMPhone)}')">📄</button>` : ''}
+                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(item.zonalPhone || 'N/A')}</span></div>
+                        ${item.zonalPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(item.zonalPhone)}')">📄</button>` : ''}
                     </div>
                 </div>
 
                 <div class="hub-grid-2 full-width">
                     <div class="hub-pill">
-                        <div><span class="lbl">Coordinates:</span> <span class="val">${escapeHTML(hCoord)}</span></div>
-                        ${hCoord ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hCoord)}')">📄</button>` : ''}
+                        <div><span class="lbl">Coordinates:</span> <span class="val">${escapeHTML(item.coordinates || 'N/A')}</span></div>
+                        ${item.coordinates ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(item.coordinates)}')">📄</button>` : ''}
                     </div>
                 </div>
 
                 <div class="hub-sec-header" style="margin-top:20px;">Contact Details</div>
 
                 <div class="hub-grid-2">
-                    <div class="hub-pill"><div><span class="lbl">Hub IP:</span> <span class="val">${escapeHTML(hIP)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Hub IP:</span> <span class="val">${escapeHTML(item.hubIp)}</span></div></div>
                     <div class="hub-pill">
-                        <div><span class="lbl">Hub Phone:</span> <span class="val">${escapeHTML(hPhone)}</span></div>
-                        ${hPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hPhone)}')">📄</button>` : ''}
+                        <div><span class="lbl">Hub Phone:</span> <span class="val">${escapeHTML(item.hubPhone || 'N/A')}</span></div>
+                        ${item.hubPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(item.hubPhone)}')">📄</button>` : ''}
                     </div>
                 </div>
 
                 <div class="hub-grid-2">
-                    <div class="hub-pill"><div><span class="lbl">Manager:</span> <span class="val">${escapeHTML(hManager)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Manager:</span> <span class="val">${escapeHTML(item.manager)}</span></div></div>
                     <div class="hub-pill">
-                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(hMPhone)}</span></div>
-                        ${hMPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hMPhone)}')">📄</button>` : ''}
+                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(item.managerPhone || 'N/A')}</span></div>
+                        ${item.managerPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(item.managerPhone)}')">📄</button>` : ''}
                     </div>
                 </div>
 
                 <div class="hub-grid-2">
-                    <div class="hub-pill"><div><span class="lbl">Asst. Manager:</span> <span class="val">${escapeHTML(hAsst)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Asst. Manager:</span> <span class="val">${escapeHTML(item.asstManager)}</span></div></div>
                     <div class="hub-pill">
-                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(hAPhone)}</span></div>
-                        ${hAPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hAPhone)}')">📄</button>` : ''}
+                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(item.asstPhone || 'N/A')}</span></div>
+                        ${item.asstPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(item.asstPhone)}')">📄</button>` : ''}
                     </div>
                 </div>
 
                 <div class="hub-grid-2">
-                    <div class="hub-pill"><div><span class="lbl">Team Leader:</span> <span class="val">${escapeHTML(hTL)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Team Leader:</span> <span class="val">${escapeHTML(item.teamLeader)}</span></div></div>
                     <div class="hub-pill">
-                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(hTLPhone)}</span></div>
-                        ${hTLPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hTLPhone)}')">📄</button>` : ''}
+                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(item.teamLeaderPhone || 'N/A')}</span></div>
+                        ${item.teamLeaderPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(item.teamLeaderPhone)}')">📄</button>` : ''}
                     </div>
                 </div>
             </div>
@@ -1086,7 +1136,7 @@ function renderHubResults(list, promptMsg) {
     });
 
     if (list.length > MAX_ITEMS) {
-        html += `<div style="text-align:center; padding:10px; color:#38bdf8; font-size:11px;">ℹ️ আরও ${list.length - MAX_ITEMS} টি হাবের সাথে মিলেছে। নির্দিষ্ট হাব দেখতে পুরো নাম লিখুন।</div>`;
+        html += `<div style="text-align:center; padding:10px; color:#38bdf8; font-size:11px;">ℹ️ আরও ${list.length - MAX_ITEMS} টি হাবের সাথে মিলেছে। সঠিক হাব দেখতে পুরো নাম লিখুন।</div>`;
     }
 
     container.innerHTML = html;
