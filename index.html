@@ -517,7 +517,7 @@ header::before{
 }
 
 .hub-results-list {
-    max-height: 340px;
+    max-height: 350px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -568,18 +568,6 @@ header::before{
 .hub-btn-copy:hover {
     background: #ef4444;
     color: #fff;
-}
-
-.sheet-link-note {
-    text-align: center;
-    margin-top: 15px;
-    font-size: 11px;
-    color: #64748b;
-}
-
-.sheet-link-note a {
-    color: #38bdf8;
-    text-decoration: underline;
 }
 
 footer{
@@ -645,16 +633,15 @@ footer strong{ color:rgba(255,255,255,0.8); }
                     <a href="Offline Charge.html">Open Calculator →</a>
                 </div>
 
-                <!-- HUB CONTACT CARD: ORIGINAL SHEET LINK RESTORED + SEARCH BUTTON -->
+                <!-- HUB CONTACT CARD -->
                 <div class="card">
                     <div class="card-icon">📞</div>
                     <h2>Hub Contact</h2>
                     <p>Hub Emergency Contact List</p>
                     <div class="card-actions-row">
-                        <!-- 1. ORIGINAL SHEET LINK (RESTORED EXACTLY) -->
+                        <!-- Original Sheet Link -->
                         <a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0" target="_blank">Open Sheet →</a>
-                        
-                        <!-- 2. SEARCH BUTTON (FETCHES LIVE FROM NEW SHEET) -->
+                        <!-- Live Search Opener -->
                         <button class="card-btn" onclick="openHubSearchModal()">🔍 Search</button>
                     </div>
                 </div>
@@ -782,7 +769,7 @@ footer strong{ color:rgba(255,255,255,0.8); }
     </div>
 </div>
 
-<!-- 2. HUB CONTACT LIVE SEARCH MODAL (SEARCHES FROM NEW SHEET) -->
+<!-- 2. HUB CONTACT LIVE SEARCH MODAL -->
 <div class="modal-overlay" id="hubSearchModal">
     <div class="modal-card">
         <button class="modal-close-btn" onclick="closeHubModal()">✕</button>
@@ -793,10 +780,6 @@ footer strong{ color:rgba(255,255,255,0.8); }
 
         <div class="hub-results-list" id="hubResultsContainer">
             <div style="text-align:center; padding:20px; color:#94a3b8; font-size:12px;">⏳ ডাটা লোড হচ্ছে...</div>
-        </div>
-
-        <div class="sheet-link-note">
-            মূল গুগল শিট দেখতে চাইলে <a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0" target="_blank">এখানে ক্লিক করে শিট ওপেন করুন ↗</a>
         </div>
     </div>
 </div>
@@ -837,7 +820,7 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // =====================================================
-// 🔍 SEARCH FETCHES FROM THE NEW GOOGLE SHEET ID
+// 🔍 BULLETPROOF CSV STREAM HUB SEARCH LOGIC
 // =====================================================
 const HUB_SEARCH_SHEET_ID = "1CYaPdRqHlSrhKhz5LBDUaJvhORYfhgTYisC7r-SFb_k";
 let fetchedHubList = [];
@@ -847,7 +830,7 @@ async function openHubSearchModal() {
     document.getElementById("hubSearchInput").value = "";
     document.getElementById("hubSearchInput").focus();
     
-    // Fetch live search data strictly from the NEW Sheet ID
+    // Fetch live search data via direct CSV Stream (Works 100%)
     await fetchHubsFromGoogleSheet();
 }
 
@@ -859,35 +842,34 @@ async function fetchHubsFromGoogleSheet() {
     const container = document.getElementById("hubResultsContainer");
     container.innerHTML = `<div style="text-align:center; padding:20px; color:#38bdf8; font-size:12px;">⏳ লাইভ তথ্য লোড হচ্ছে...</div>`;
 
-    const url = `https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/gviz/tq?tqx=out:json`;
+    const url = `https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/export?format=csv`;
 
     try {
         const response = await fetch(url);
-        const text = await response.text();
-        
-        const json = JSON.parse(text.substring(47).slice(0, -2));
-        const rows = json.table.rows;
+        const csvText = await response.text();
 
+        const lines = csvText.split(/\r\n|\n/);
         fetchedHubList = [];
 
-        rows.forEach(row => {
-            if (row.c) {
-                const cellTexts = row.c.map(cell => cell ? String(cell.v || cell.f || '').trim() : '');
-                const rowCombinedText = cellTexts.filter(t => t !== '').join(' ');
+        lines.forEach((line) => {
+            if (!line.trim()) return;
 
+            const cells = parseCSVLine(line);
+            const rowCombinedText = cells.join(' ').trim();
+
+            if (rowCombinedText) {
                 let phoneMatch = '';
-                cellTexts.forEach(txt => {
-                    const match = txt.match(/01\d{9}/);
+                cells.forEach(c => {
+                    const match = c.match(/01\d{9}/);
                     if (match) phoneMatch = match[0];
                 });
 
-                if (rowCombinedText.length > 0) {
-                    fetchedHubList.push({
-                        fullInfo: rowCombinedText,
-                        phone: phoneMatch,
-                        cells: cellTexts.filter(t => t !== '')
-                    });
-                }
+                fetchedHubList.push({
+                    title: cells[0] || "Hub Detail",
+                    details: cells.slice(1).filter(c => c && c !== phoneMatch).join(" — "),
+                    fullInfo: rowCombinedText,
+                    phone: phoneMatch
+                });
             }
         });
 
@@ -897,6 +879,26 @@ async function fetchHubsFromGoogleSheet() {
         console.error("Google Sheet Fetch Error:", error);
         container.innerHTML = `<div style="text-align:center; padding:20px; color:#ef4444; font-size:12px;">❌ ডাটা লোড করতে সমস্যা হয়েছে। দয়া করে 'Open Sheet' ব্যবহার করুন।</div>`;
     }
+}
+
+// CSV Line Parser Helper
+function parseCSVLine(text) {
+    const result = [];
+    let cell = '';
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') {
+            inQuotes = !inQuotes;
+        } else if (c === ',' && !inQuotes) {
+            result.push(cell.trim().replace(/^"|"$/g, ''));
+            cell = '';
+        } else {
+            cell += c;
+        }
+    }
+    result.push(cell.trim().replace(/^"|"$/g, ''));
+    return result;
 }
 
 function filterHubs() {
@@ -922,14 +924,11 @@ function renderHubResults(list) {
 
     container.innerHTML = "";
     list.forEach(item => {
-        const title = item.cells[0] || "Hub Detail";
-        const details = item.cells.slice(1).join(" — ");
-
         container.innerHTML += `
             <div class="hub-card-item">
                 <div class="hub-info">
-                    <h4>🏢 ${escapeHTML(title)}</h4>
-                    ${details ? `<p>${escapeHTML(details)}</p>` : ''}
+                    <h4>🏢 ${escapeHTML(item.title)}</h4>
+                    ${item.details ? `<p>${escapeHTML(item.details)}</p>` : ''}
                 </div>
                 ${item.phone ? `
                     <div>
