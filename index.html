@@ -446,7 +446,7 @@ header::before{
 .empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 11px; }
 
 /* ===================================================== */
-/* 🔍 MODAL OVERLAYS (NOTICE & HUB SEARCH) */
+/* 🔍 MODAL OVERLAYS (NOTICE & STRUCTURED HUB SEARCH) */
 /* ===================================================== */
 
 .modal-overlay {
@@ -454,8 +454,8 @@ header::before{
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(6px);
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(8px);
     z-index: 9999;
     align-items: center;
     justify-content: center;
@@ -467,9 +467,9 @@ header::before{
     border: 1px solid #334155;
     border-radius: 16px;
     width: 100%;
-    max-width: 580px;
+    max-width: 650px;
     padding: 24px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.6);
     position: relative;
     animation: modalFadeIn 0.25s ease forwards;
 }
@@ -498,12 +498,15 @@ header::before{
 .modal-time { font-size: 11px; color: #38bdf8; margin-bottom: 16px; font-weight: 600; }
 .modal-body { font-size: 13px; color: #cbd5e1; line-height: 1.6; max-height: 350px; overflow-y: auto; white-space: pre-line; }
 
-/* HUB SEARCH MODAL STYLES */
+/* ===================================================== */
+/* 🏢 STRUCTURED HUB DETAILS CARD (AS REQUESTED) */
+/* ===================================================== */
+
 .hub-search-input {
     width: 100%;
     padding: 12px 16px;
     background: #0f172a;
-    border: 1px solid #ef4444;
+    border: 1px solid #38bdf8;
     border-radius: 10px;
     color: #fff;
     font-size: 13px;
@@ -513,61 +516,97 @@ header::before{
 }
 
 .hub-search-input:focus {
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
 }
 
-.hub-results-list {
-    max-height: 350px;
+.hub-structured-wrapper {
+    max-height: 480px;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
     padding-right: 4px;
 }
 
-.hub-results-list::-webkit-scrollbar { width: 4px; }
-.hub-results-list::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
+.hub-structured-wrapper::-webkit-scrollbar { width: 4px; }
+.hub-structured-wrapper::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 10px; }
 
-.hub-card-item {
-    background: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    padding: 12px 14px;
+/* Structured Section Box */
+.hub-sec-box {
+    background: #eef2f6;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 15px;
+    color: #1e293b;
+}
+
+.hub-sec-header {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #334155;
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #cbd5e1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hub-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.hub-grid-2.full-width {
+    grid-template-columns: 1fr;
+}
+
+.hub-pill {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #334155;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
 }
 
-.hub-info h4 {
-    font-size: 13px;
-    color: #f8fafc;
+.hub-pill .lbl {
     font-weight: 700;
-    margin-bottom: 3px;
+    color: #475569;
+    margin-right: 5px;
 }
 
-.hub-info p {
-    font-size: 11px;
-    color: #94a3b8;
-    line-height: 1.4;
-}
-
-.hub-btn-copy {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 11px;
+.hub-pill .val {
     font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-    white-space: nowrap;
+    color: #0f172a;
+    word-break: break-word;
 }
 
-.hub-btn-copy:hover {
-    background: #ef4444;
+.copy-icon-btn {
+    background: #e2e8f0;
+    color: #0f172a;
+    border: none;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.copy-icon-btn:hover {
+    background: #38bdf8;
     color: #fff;
+}
+
+@media (max-width: 600px) {
+    .hub-grid-2 { grid-template-columns: 1fr; }
 }
 
 footer{
@@ -767,16 +806,16 @@ footer strong{ color:rgba(255,255,255,0.8); }
     </div>
 </div>
 
-<!-- 2. HUB CONTACT LIVE SEARCH MODAL -->
+<!-- 2. HUB CONTACT LIVE SEARCH MODAL (STRUCTURED UI) -->
 <div class="modal-overlay" id="hubSearchModal">
     <div class="modal-card">
         <button class="modal-close-btn" onclick="closeHubModal()">✕</button>
         <div class="modal-title">🔍 Hub Emergency Contact Search</div>
-        <div class="modal-time">লাইভ ডাটাবেজ থেকে হাবের তথ্য খোঁজা হচ্ছে...</div>
+        <div class="modal-time">গুগল শিট থেকে লাইভ হাব সার্চ করা হচ্ছে...</div>
 
-        <input type="text" class="hub-search-input" id="hubSearchInput" onkeyup="filterHubs()" placeholder="হাবের নাম, এলাকা বা ইনচার্জের নাম টাইপ করুন..." autofocus>
+        <input type="text" class="hub-search-input" id="hubSearchInput" onkeyup="filterHubs()" placeholder="হাবের নাম, ইনচার্জ বা নম্বর লিখুন (যেমন: Dhanmondi, Rangpur)..." autofocus>
 
-        <div class="hub-results-list" id="hubResultsContainer">
+        <div class="hub-structured-wrapper" id="hubResultsContainer">
             <div style="text-align:center; padding:20px; color:#94a3b8; font-size:12px;">⏳ ডাটা লোড হচ্ছে...</div>
         </div>
     </div>
@@ -818,10 +857,10 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // =====================================================
-// 🔍 GOOGLE VISUALIZATION LIVE HUB SEARCH LOGIC (FIXED)
+// 🔍 STRUCTURED HUB DETAILS SEARCH LOGIC
 // =====================================================
 const HUB_SEARCH_SHEET_ID = "1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
-let fetchedHubList = [];
+let fetchedHubObjects = [];
 
 async function openHubSearchModal() {
     document.getElementById("hubSearchModal").style.display = "flex";
@@ -845,46 +884,57 @@ async function fetchHubsFromGoogleSheet() {
         const response = await fetch(url);
         const text = await response.text();
 
-        // Safe JSON parsing from Google Visualization API
         const jsonStart = text.indexOf('{');
         const jsonEnd = text.lastIndexOf('}') + 1;
         const jsonData = JSON.parse(text.substring(jsonStart, jsonEnd));
         
         const rows = jsonData.table.rows;
-        fetchedHubList = [];
+        fetchedHubObjects = [];
 
         if (rows && rows.length > 0) {
             rows.forEach((row) => {
                 if (row.c && Array.isArray(row.c)) {
-                    const cellTexts = row.c.map(cell => {
-                        if (!cell) return '';
+                    const getCellVal = (idx) => {
+                        if (!row.c[idx]) return '';
+                        const cell = row.c[idx];
                         if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
                         if (cell.f !== null && cell.f !== undefined) return String(cell.f).trim();
                         return '';
-                    }).filter(t => t.length > 0);
+                    };
 
-                    const combinedText = cellTexts.join(' ');
+                    // Extract values dynamically across row
+                    const cells = row.c.map((_, i) => getCellVal(i));
+                    const fullText = cells.join(' ').toLowerCase();
 
-                    // Auto-detect phone numbers (e.g. 01XXXXXXXXX)
-                    let phoneMatch = '';
-                    cellTexts.forEach(txt => {
-                        const match = txt.match(/01\d{9}/);
-                        if (match) phoneMatch = match[0];
-                    });
-
-                    if (combinedText.length > 0) {
-                        fetchedHubList.push({
-                            title: cellTexts[0] || "Hub Detail",
-                            details: cellTexts.slice(1).filter(c => c !== phoneMatch).join(" — "),
-                            fullInfo: combinedText.toLowerCase(),
-                            phone: phoneMatch
+                    if (fullText.length > 0) {
+                        fetchedHubObjects.push({
+                            fullText: fullText,
+                            name: cells[0] || 'N/A',
+                            address: cells[1] || 'N/A',
+                            hubId: cells[2] || 'N/A',
+                            distance: cells[3] || 'Not available',
+                            district: cells[4] || 'N/A',
+                            division: cells[5] || 'N/A',
+                            policeStation: cells[6] || 'N/A',
+                            zonalManager: cells[7] || 'N/A',
+                            zonalPhone: cells[8] || 'N/A',
+                            coordinates: cells[9] || 'N/A',
+                            hubIp: cells[10] || 'N/A',
+                            hubPhone: cells[11] || 'N/A',
+                            manager: cells[12] || 'N/A',
+                            managerPhone: cells[13] || 'N/A',
+                            asstManager: cells[14] || 'N/A',
+                            asstPhone: cells[15] || 'N/A',
+                            teamLeader: cells[16] || 'N/A',
+                            teamLeaderPhone: cells[17] || 'N/A',
+                            rawCells: cells
                         });
                     }
                 }
             });
         }
 
-        renderHubResults(fetchedHubList);
+        renderHubResults(fetchedHubObjects);
 
     } catch (error) {
         console.error("Google Sheet Fetch Error:", error);
@@ -895,12 +945,12 @@ async function fetchHubsFromGoogleSheet() {
 function filterHubs() {
     const query = document.getElementById("hubSearchInput").value.toLowerCase().trim();
     if (query === "") {
-        renderHubResults(fetchedHubList);
+        renderHubResults(fetchedHubObjects);
         return;
     }
 
-    const filtered = fetchedHubList.filter(item => 
-        item.fullInfo.includes(query)
+    const filtered = fetchedHubObjects.filter(item => 
+        item.fullText.includes(query)
     );
 
     renderHubResults(filtered);
@@ -909,31 +959,134 @@ function filterHubs() {
 function renderHubResults(list) {
     const container = document.getElementById("hubResultsContainer");
     if (list.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b; font-size:12px;">❌ কোনো হাব পাওয়া যায়নি</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:25px; color:#64748b; font-size:13px;">❌ কোনো হাব পাওয়া যায়নি</div>`;
         return;
     }
 
     container.innerHTML = "";
     list.forEach(item => {
+        // Fallback row mapping for flexible sheet structures
+        const c = item.rawCells;
+        const hName = item.name !== 'N/A' ? item.name : (c[0] || 'N/A');
+        const hAddr = item.address !== 'N/A' ? item.address : (c[1] || 'N/A');
+        const hId = c[2] || 'N/A';
+        const hDist = c[3] || 'Not available';
+        const hDistrict = c[4] || 'N/A';
+        const hDivision = c[5] || 'N/A';
+        const hThana = c[6] || 'N/A';
+        const hZM = c[7] || 'N/A';
+        const hZMPhone = c[8] || '';
+        const hCoord = c[9] || '';
+        const hIP = c[10] || 'N/A';
+        const hPhone = c[11] || '';
+        const hManager = c[12] || 'N/A';
+        const hMPhone = c[13] || '';
+        const hAsst = c[14] || 'N/A';
+        const hAPhone = c[15] || '';
+        const hTL = c[16] || 'N/A';
+        const hTLPhone = c[17] || '';
+
         container.innerHTML += `
-            <div class="hub-card-item">
-                <div class="hub-info">
-                    <h4>🏢 ${escapeHTML(item.title)}</h4>
-                    ${item.details ? `<p>${escapeHTML(item.details)}</p>` : ''}
-                </div>
-                ${item.phone ? `
-                    <div>
-                        <button class="hub-btn-copy" onclick="copyNumber('${escapeHTML(item.phone)}')">📋 ${escapeHTML(item.phone)} কপি</button>
+            <!-- STRUCTURED HUB CARD AS REQUESTED -->
+            <div class="hub-sec-box">
+                <div class="hub-sec-header">Hub Details</div>
+                
+                <!-- Name -->
+                <div class="hub-grid-2 full-width">
+                    <div class="hub-pill">
+                        <div><span class="lbl">Name:</span> <span class="val">${escapeHTML(hName)}</span></div>
                     </div>
-                ` : ''}
+                </div>
+
+                <!-- Address -->
+                <div class="hub-grid-2 full-width">
+                    <div class="hub-pill">
+                        <div><span class="lbl">Address:</span> <span class="val">${escapeHTML(hAddr)}</span></div>
+                    </div>
+                </div>
+
+                <!-- Hub ID & Distance -->
+                <div class="hub-grid-2">
+                    <div class="hub-pill"><div><span class="lbl">Hub ID:</span> <span class="val">${escapeHTML(hId)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Distance:</span> <span class="val">${escapeHTML(hDist)}</span></div></div>
+                </div>
+
+                <!-- District & Division -->
+                <div class="hub-grid-2">
+                    <div class="hub-pill"><div><span class="lbl">District:</span> <span class="val">${escapeHTML(hDistrict)}</span></div></div>
+                    <div class="hub-pill"><div><span class="lbl">Division:</span> <span class="val">${escapeHTML(hDivision)}</span></div></div>
+                </div>
+
+                <!-- Police Station -->
+                <div class="hub-grid-2 full-width">
+                    <div class="hub-pill">
+                        <div><span class="lbl">Police Station:</span> <span class="val">${escapeHTML(hThana)}</span></div>
+                    </div>
+                </div>
+
+                <!-- Zonal Manager & Phone -->
+                <div class="hub-grid-2">
+                    <div class="hub-pill"><div><span class="lbl">Zonal Manager:</span> <span class="val">${escapeHTML(hZM)}</span></div></div>
+                    <div class="hub-pill">
+                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(hZMPhone)}</span></div>
+                        ${hZMPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hZMPhone)}')">📄</button>` : ''}
+                    </div>
+                </div>
+
+                <!-- Coordinates -->
+                <div class="hub-grid-2 full-width">
+                    <div class="hub-pill">
+                        <div><span class="lbl">Coordinates:</span> <span class="val">${escapeHTML(hCoord)}</span></div>
+                        ${hCoord ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hCoord)}')">📄</button>` : ''}
+                    </div>
+                </div>
+
+                <div class="hub-sec-header" style="margin-top:20px;">Contact Details</div>
+
+                <!-- Hub IP & Hub Phone -->
+                <div class="hub-grid-2">
+                    <div class="hub-pill"><div><span class="lbl">Hub IP:</span> <span class="val">${escapeHTML(hIP)}</span></div></div>
+                    <div class="hub-pill">
+                        <div><span class="lbl">Hub Phone:</span> <span class="val">${escapeHTML(hPhone)}</span></div>
+                        ${hPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hPhone)}')">📄</button>` : ''}
+                    </div>
+                </div>
+
+                <!-- Manager & Phone -->
+                <div class="hub-grid-2">
+                    <div class="hub-pill"><div><span class="lbl">Manager:</span> <span class="val">${escapeHTML(hManager)}</span></div></div>
+                    <div class="hub-pill">
+                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(hMPhone)}</span></div>
+                        ${hMPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hMPhone)}')">📄</button>` : ''}
+                    </div>
+                </div>
+
+                <!-- Asst. Manager & Phone -->
+                <div class="hub-grid-2">
+                    <div class="hub-pill"><div><span class="lbl">Asst. Manager:</span> <span class="val">${escapeHTML(hAsst)}</span></div></div>
+                    <div class="hub-pill">
+                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(hAPhone)}</span></div>
+                        ${hAPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hAPhone)}')">📄</button>` : ''}
+                    </div>
+                </div>
+
+                <!-- Team Leader & Phone -->
+                <div class="hub-grid-2">
+                    <div class="hub-pill"><div><span class="lbl">Team Leader:</span> <span class="val">${escapeHTML(hTL)}</span></div></div>
+                    <div class="hub-pill">
+                        <div><span class="lbl">Phone:</span> <span class="val">${escapeHTML(hTLPhone)}</span></div>
+                        ${hTLPhone ? `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(hTLPhone)}')">📄</button>` : ''}
+                    </div>
+                </div>
+
             </div>
         `;
     });
 }
 
-function copyNumber(phone) {
-    navigator.clipboard.writeText(phone);
-    alert(`📋 নম্বর কপি হয়েছে: ${phone}`);
+function copyNumber(text) {
+    navigator.clipboard.writeText(text);
+    alert(`📋 কপি হয়েছে: ${text}`);
 }
 
 // =====================================================
