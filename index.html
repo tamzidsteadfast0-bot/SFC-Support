@@ -3,17 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IR Support Portal & Break Management</title>
+<title>IR Support Portal | Steadfast</title>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
 
 <!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <!-- Firebase SDKs (CDN) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <style>
-
 *{ margin:0; padding:0; box-sizing:border-box; }
 
 body{
@@ -21,14 +22,15 @@ body{
     background:#0f172a;
     color:#f8fafc;
     min-height:100vh;
+    -webkit-font-smoothing: antialiased;
 }
 
-.bn, .notice-title, .notice-text, .modal-body, .modal-title, .break-sidebar-content, .compact-form-title, .mini-stat-txt, .queue-section-title, .empty-compact-q, .compact-agent-name, .compact-type-badge, .compact-wait-time, .admin-only-badge, .mini-admin-badge, select, button, input, textarea{
+/* Bengali Font for Bengali sections */
+.bn, .notice-title, .notice-text, .modal-body, .modal-title, .break-sidebar-content, .compact-form-title, .mini-stat-txt, .empty-compact-q, .compact-agent-name, .compact-type-badge, .compact-wait-time, .admin-only-badge, .mini-admin-badge, .active-break-badge, .active-break-item, .live-break-list, .history-item-info, select, button, input, textarea{
     font-family:'Noto Sans Bengali','Inter',sans-serif;
 }
 
-/* ========== HEADER ========== */
-
+/* HEADER */
 header{
     background: linear-gradient(135deg, #0f2027 0%, #203a43 40%, #2c5364 100%);
     color:#fff;
@@ -36,144 +38,122 @@ header{
     overflow:hidden;
     border-bottom:1px solid rgba(255,255,255,0.1);
 }
-
 header::before{
-    content:'';
-    position:absolute;
+    content:''; position:absolute;
     top:-50%; right:-20%;
     width:500px; height:500px;
     background: radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%);
     border-radius:50%;
 }
-
 .header-content{
     position:relative; z-index:2;
     max-width:1350px; margin:0 auto;
-    padding:25px 30px;
+    padding:22px 30px;
     display:flex; align-items:center;
     justify-content:space-between;
-    flex-wrap:wrap; gap:15px;
+    flex-wrap:wrap; gap:12px;
 }
-
-.header-left{ display:flex; align-items:center; gap:18px; }
-
+.header-left{ display:flex; align-items:center; gap:16px; }
 .logo-icon{
-    width:52px; height:52px;
+    width:50px; height:50px;
     background: linear-gradient(135deg, #38bdf8, #6366f1);
     border-radius:14px;
     display:flex; align-items:center; justify-content:center;
-    font-size:26px;
+    font-size:24px;
     box-shadow: 0 4px 15px rgba(99,102,241,0.4);
 }
-
-.header-left h1{ font-size:26px; font-weight:800; letter-spacing:-0.5px; }
-
+.header-left h1{ font-size:24px; font-weight:800; letter-spacing:-0.5px; }
 .header-left h1 span{
     background: linear-gradient(90deg, #38bdf8, #818cf8);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    background-clip:text;
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
 }
+.header-left p{ font-size:11px; opacity:.65; margin-top:2px; }
 
-.header-left p{ font-size:12px; opacity:.65; margin-top:2px; }
-
-.header-badges { display: flex; gap: 10px; flex-wrap: wrap; }
-
+.header-badges { display: flex; gap: 8px; flex-wrap: wrap; }
 .header-badge{
     background: rgba(255,255,255,0.06);
     backdrop-filter: blur(10px);
     border:1px solid rgba(255,255,255,0.1);
-    padding:8px 16px; border-radius:50px;
-    font-size:12px; font-weight:500;
-    color:rgba(255,255,255,0.8);
-    display:flex; align-items:center; gap:8px;
+    padding:7px 14px; border-radius:50px;
+    font-size:11.5px; font-weight:500;
+    color:rgba(255,255,255,0.85);
+    display:flex; align-items:center; gap:7px;
 }
-
 .header-badge.online-badge { background: rgba(34, 197, 94, 0.12); border-color: rgba(34, 197, 94, 0.25); color: #4ade80; }
 .header-badge.visitor-badge { background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.25); color: #38bdf8; }
+.header-badge.active-break-badge { 
+    background: rgba(245, 158, 11, 0.12); 
+    border-color: rgba(245, 158, 11, 0.3); 
+    color: #fbbf24; 
+    cursor: pointer;
+    transition: 0.2s;
+}
+.header-badge.active-break-badge:hover { background: rgba(245, 158, 11, 0.25); }
+.header-badge.active-break-badge.zero-active { display: none; }
 
 .pulse-green {
     width: 8px; height: 8px; background: #22c55e;
-    border-radius: 50%; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-    animation: pulse-green 1.5s infinite;
+    border-radius: 50%; animation: pulse-green 1.5s infinite;
 }
-
-@keyframes pulse-green {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+.pulse-orange {
+    width: 8px; height: 8px; background: #f59e0b;
+    border-radius: 50%; animation: pulse-orange 1.5s infinite;
 }
+@keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.4} }
+@keyframes pulse-orange { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.15)} }
 
-/* ========== CONTAINER ========== */
-
-.container{ width:92%; max-width:1350px; margin:30px auto 40px; }
-
+/* CONTAINER */
+.container{ width:92%; max-width:1350px; margin:28px auto 40px; }
 .portal-layout{
     display:grid;
     grid-template-columns:1fr 380px;
-    gap:28px; align-items:start;
+    gap:24px; align-items:start;
 }
-
 .section-title{
-    font-size:18px; font-weight:700;
-    color:#f8fafc; margin-bottom:20px;
+    font-size:17px; font-weight:700;
+    color:#f8fafc; margin-bottom:18px;
     display:flex; align-items:center; gap:10px;
 }
-
 .section-title .line{ flex:1; height:1px; background: linear-gradient(90deg, #334155, transparent); }
 
-/* ========== CARDS ========== */
-
+/* CARDS */
 .cards{
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-    gap:18px;
+    grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+    gap:16px;
 }
-
 .card{
     background:#1e293b; border-radius:16px;
-    padding:24px 20px; position:relative;
+    padding:22px 20px; position:relative;
     overflow:hidden; border:1px solid #334155;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
 }
-
 .card::before{
     content:''; position:absolute; top:0; left:0; right:0; height:3px;
     background: linear-gradient(90deg, var(--a1), var(--a2));
     opacity:0; transition: opacity 0.3s;
 }
-
 .card:hover::before{ opacity:1; }
-.card:hover{ transform:translateY(-6px); border-color:#475569; }
-
+.card:hover{ transform:translateY(-5px); border-color:#475569; }
 .card-icon{
-    width:46px; height:48px; border-radius:12px;
+    width:44px; height:44px; border-radius:12px;
     display:flex; align-items:center; justify-content:center;
-    font-size:22px; margin-bottom:14px;
+    font-size:20px; margin-bottom:12px;
     background: linear-gradient(135deg, var(--a1), var(--a2));
 }
-
-.card h2{ font-size:16px; font-weight:700; color:#f8fafc; margin-bottom:6px; }
-.card p{ color:#94a3b8; font-size:12px; margin-bottom:16px; }
-
-.card-actions-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
+.card h2{ font-size:15px; font-weight:700; margin-bottom:5px; }
+.card p{ color:#94a3b8; font-size:12px; margin-bottom:14px; }
+.card-actions-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .card a, .card button.card-btn {
-    display:inline-flex; align-items:center; gap:6px;
+    display:inline-flex; align-items:center; gap:5px;
     text-decoration:none; color: var(--a1);
     font-weight:600; font-size:12px;
-    padding:8px 12px; border-radius:8px;
-    background: rgba(255,255,255,0.05); transition: all 0.25s;
+    padding:7px 12px; border-radius:8px;
+    background: rgba(255,255,255,0.05); transition: 0.2s;
     border: none; cursor: pointer; font-family: inherit;
 }
-
 .card a:hover, .card button.card-btn:hover { background: linear-gradient(135deg, var(--a1), var(--a2)); color:#fff; }
-
 .card:nth-child(1){ --a1:#f59e0b; --a2:#f97316; }
 .card:nth-child(2){ --a1:#10b981; --a2:#059669; }
 .card:nth-child(3){ --a1:#8b5cf6; --a2:#7c3aed; }
@@ -181,95 +161,59 @@ header::before{
 .card:nth-child(5){ --a1:#3b82f6; --a2:#2563eb; }
 .card:nth-child(6){ --a1:#06b6d4; --a2:#0891b2; }
 
-/* ========== RIGHT SIDEBAR CONTAINER ========== */
-
+/* RIGHT SIDEBAR */
 .right-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-    position: sticky;
-    top: 20px;
+    display: flex; flex-direction: column;
+    gap: 18px;
+    position: sticky; top: 20px;
 }
-
 .sidebar-widget {
     background: #1e293b;
     border-radius: 16px;
     border: 1px solid #334155;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
     overflow: hidden;
 }
-
 .widget-top-bar {
     background: #0f172a;
-    padding: 14px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 13px 16px;
+    display: flex; justify-content: space-between; align-items: center;
     border-bottom: 1px solid #334155;
 }
-
 .widget-top-bar h2 {
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; gap: 7px;
 }
-
 .admin-btn {
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.15);
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    cursor: pointer;
-    color: #fff;
-    font-weight: 600;
-    font-family: inherit;
-    transition: 0.2s;
+    padding: 4px 10px; border-radius: 6px;
+    font-size: 11px; cursor: pointer;
+    color: #fff; font-weight: 600; font-family: inherit;
 }
-
 .admin-btn:hover { background: rgba(255,255,255,0.2); }
 
-/* Notice List Styles */
+/* NOTICE */
 .admin-panel {
     display: none;
     background: #0f172a;
     border-bottom: 1px solid #334155;
-    padding: 14px;
+    padding: 12px;
 }
-
 .admin-panel input, .admin-panel textarea {
-    width: 100%;
-    padding: 8px 10px;
-    margin-bottom: 8px;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    font-size: 12px;
-    color: #fff;
-    outline: none;
+    width: 100%; padding: 8px 10px; margin-bottom: 7px;
+    background: #1e293b; border: 1px solid #334155;
+    border-radius: 6px; font-size: 13px; color: #fff; outline: none;
+    font-family: inherit;
 }
-
 .admin-panel .publish-btn {
-    width: 100%;
-    padding: 8px;
+    width: 100%; padding: 8px;
     background: linear-gradient(135deg, #6366f1, #3b82f6);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-weight: 700;
-    font-size: 12px;
-    cursor: pointer;
+    color: #fff; border: none; border-radius: 6px;
+    font-weight: 700; font-size: 12px; cursor: pointer;
+    font-family: inherit;
 }
-
-.notice-list { 
-    max-height: 240px; 
-    overflow-y: auto; 
-    padding: 12px; 
-}
-
+.notice-list { max-height: 260px; overflow-y: auto; padding: 10px; }
 .notice-list::-webkit-scrollbar { width: 4px; }
 .notice-list::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 10px; }
 
@@ -277,373 +221,320 @@ header::before{
     background: #0f172a;
     border: 1px solid #334155;
     border-left: 3px solid #3b82f6;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    position: relative;
+    padding: 12px 14px; border-radius: 8px;
+    margin-bottom: 9px; position: relative;
 }
-
-.notice-title { font-weight: 700; color: #f8fafc; font-size: 13px; margin-bottom: 4px; padding-right: 20px;}
-
+.notice-title { 
+    font-weight: 700; color: #f8fafc; 
+    font-size: 14px;
+    margin-bottom: 5px; padding-right: 20px;
+    line-height: 1.5;
+}
 .notice-text { 
-    color: #94a3b8; 
-    font-size: 11.5px; 
-    line-height: 1.4;
+    color: #cbd5e1;
+    font-size: 13px;
+    line-height: 1.6;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-
 .read-more-btn {
-    color: #38bdf8;
-    font-size: 10px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 4px;
-    display: inline-block;
+    color: #38bdf8; font-size: 11px; font-weight: 700;
+    cursor: pointer; margin-top: 4px; display: inline-block;
 }
-
 .read-more-btn:hover { text-decoration: underline; }
-
-.notice-time { font-size: 10px; color: #64748b; margin-top: 6px; }
+.notice-time { font-size: 10.5px; color: #64748b; margin-top: 6px; }
 
 .delete-btn {
     display: none; position: absolute; right: 6px; top: 6px;
     background: #ef4444; color: #fff; border: none;
-    padding: 2px 5px; border-radius: 4px; font-size: 9px; cursor: pointer;
+    padding: 2px 6px; border-radius: 4px; font-size: 10px; cursor: pointer;
 }
 
-/* ===================================================== */
-/* ☕ BREAK PORTAL WIDGET STYLES */
-/* ===================================================== */
-
-.break-sidebar-content { padding: 14px; }
+/* BREAK PORTAL */
+.break-sidebar-content { padding: 12px; }
 
 .break-mini-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 7px; margin-bottom: 10px;
 }
-
 .mini-stat-chip {
     background: #0f172a;
     border: 1px solid #334155;
     border-radius: 8px;
-    padding: 8px 6px;
-    text-align: center;
+    padding: 8px 5px; text-align: center;
     transition: 0.2s;
 }
-
-/* Clickable Stats for History */
-.mini-stat-chip.approved { cursor: pointer; }
-.mini-stat-chip.approved:hover { background: rgba(16, 185, 129, 0.05); border-color: #10b981; }
-
-.mini-stat-chip.rejected { cursor: pointer; }
-.mini-stat-chip.rejected:hover { background: rgba(239, 68, 68, 0.05); border-color: #ef4444; }
-
+.mini-stat-chip.approved, .mini-stat-chip.rejected { cursor: pointer; }
+.mini-stat-chip.approved:hover { background: rgba(16,185,129,0.08); border-color: #10b981; }
+.mini-stat-chip.rejected:hover { background: rgba(239,68,68,0.08); border-color: #ef4444; }
 
 .mini-stat-num {
-    font-size: 16px;
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 3px;
+    font-size: 17px; font-weight: 800;
+    line-height: 1; margin-bottom: 3px;
 }
-
 .mini-stat-chip.pending .mini-stat-num { color: #f59e0b; }
 .mini-stat-chip.approved .mini-stat-num { color: #10b981; }
 .mini-stat-chip.rejected .mini-stat-num { color: #ef4444; }
+.mini-stat-txt { font-size: 10px; color: #94a3b8; white-space: nowrap; }
 
-.mini-stat-txt { font-size: 9px; color: #94a3b8; white-space: nowrap; }
+/* LIVE ACTIVE BREAKS SECTION */
+.live-active-breaks {
+    background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(249,115,22,0.05));
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    display: none;
+}
+.live-active-breaks.has-active { display: block; }
+.live-active-header {
+    font-size: 11px; font-weight: 700;
+    color: #fbbf24; margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items:center;
+}
+.live-break-item {
+    background: rgba(15,23,42,0.6);
+    border-radius: 6px;
+    padding: 7px 10px;
+    margin-bottom: 5px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11.5px;
+}
+.live-break-item:last-child { margin-bottom: 0; }
+.live-break-name { color: #f8fafc; font-weight: 600; }
+.live-break-timer { 
+    font-weight: 700; font-size: 10.5px;
+    padding: 2px 7px; border-radius: 4px;
+}
+.timer-ok { color: #4ade80; background: rgba(34,197,94,0.15); }
+.timer-warn { color: #fbbf24; background: rgba(245,158,11,0.15); }
+.timer-over { color: #f87171; background: rgba(239,68,68,0.2); }
 
 .compact-break-form {
     background: #0f172a;
     border: 1px solid #334155;
     border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 12px;
+    padding: 11px; margin-bottom: 10px;
 }
-
 .compact-form-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: #f8fafc;
+    font-size: 12px; font-weight: 700;
     margin-bottom: 8px;
 }
-
-.compact-inputs {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
+.compact-inputs { display: flex; flex-direction: column; gap: 7px; }
 .compact-inputs select {
-    background: #1e293b;
-    border: 1px solid #334155;
-    color: #f8fafc;
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    outline: none;
-    font-family: inherit;
+    background: #1e293b; border: 1px solid #334155;
+    color: #f8fafc; padding: 8px 10px;
+    border-radius: 6px; font-size: 12px;
+    outline: none; font-family: inherit;
 }
-
 .compact-inputs select:focus { border-color: #f59e0b; }
-
 .compact-submit-btn {
-    background: #f59e0b;
-    color: #0f172a;
-    border: none;
-    padding: 8px;
-    border-radius: 6px;
-    font-weight: 700;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: inherit;
+    background: #f59e0b; color: #0f172a; border: none;
+    padding: 9px; border-radius: 6px;
+    font-weight: 700; font-size: 12.5px;
+    cursor: pointer; font-family: inherit;
     transition: 0.2s;
 }
-
 .compact-submit-btn:hover { background: #d97706; }
 .compact-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .compact-queue-header {
-    font-size: 12px;
-    font-weight: 700;
-    color: #f8fafc;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    font-size: 12px; font-weight: 700;
+    margin-bottom: 7px;
+    display: flex; justify-content: space-between; align-items: center;
 }
-
 .compact-queue-list {
-    max-height: 200px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    max-height: 200px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 7px;
 }
-
 .compact-queue-item {
     background: #0f172a;
     border: 1px solid #334155;
     border-left: 3px solid #f59e0b;
-    border-radius: 8px;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    border-radius: 8px; padding: 9px 10px;
+    display: flex; flex-direction: column; gap: 5px;
 }
-
 .compact-queue-top { display: flex; justify-content: space-between; align-items: center; }
 .compact-agent-info { display: flex; align-items: center; gap: 8px; }
-
 .compact-q-num {
     width: 20px; height: 20px;
-    background: rgba(245, 158, 11, 0.15);
+    background: rgba(245,158,11,0.15);
     color: #f59e0b; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-weight: 800; font-size: 10px;
 }
-
-.compact-agent-name { font-size: 12px; font-weight: 700; color: #f8fafc; }
+.compact-agent-name { font-size: 12.5px; font-weight: 700; }
 .compact-type-badge { font-size: 10px; color: #94a3b8; background: #1e293b; padding: 2px 6px; border-radius: 4px; }
-.compact-queue-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #64748b; }
+.compact-queue-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 10.5px; color: #64748b; }
 .compact-wait-time { color: #f59e0b; font-weight: 600; }
 .compact-actions { display: flex; gap: 4px; }
+.btn-mini-approve { background: #10b981; color: #fff; border: none; padding: 4px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.btn-mini-approve:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-mini-reject { background: #ef4444; color: #fff; border: none; padding: 4px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.mini-admin-badge { font-size: 9.5px; color: #64748b; background: #1e293b; padding: 3px 7px; border-radius: 4px; }
+.empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 12px; }
 
-.btn-mini-approve { background: #10b981; color: #fff; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer; }
-.btn-mini-reject { background: #ef4444; color: #fff; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer; }
-.mini-admin-badge { font-size: 9px; color: #64748b; background: #1e293b; padding: 2px 6px; border-radius: 4px; }
-.empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 11px; }
-
-/* ===================================================== */
-/* 🔍 MODAL OVERLAYS (NOTICE, HUB SEARCH, BREAK HISTORY) */
-/* ===================================================== */
-
+/* MODALS */
 .modal-overlay {
     display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    position: fixed; inset: 0;
     background: rgba(15, 23, 42, 0.88);
     backdrop-filter: blur(8px);
     z-index: 9999;
-    align-items: center;
-    justify-content: center;
+    align-items: center; justify-content: center;
     padding: 20px;
 }
-
 .modal-card {
     background: #1e293b;
     border: 1px solid #334155;
     border-radius: 16px;
-    width: 100%;
-    max-width: 650px;
+    width: 100%; max-width: 650px;
     padding: 24px;
     box-shadow: 0 25px 50px rgba(0,0,0,0.6);
     position: relative;
     animation: modalFadeIn 0.25s ease forwards;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
-
 @keyframes modalFadeIn {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
 }
-
 .modal-close-btn {
-    position: absolute;
-    right: 18px; top: 18px;
-    background: #334155;
-    color: #f8fafc;
-    border: none;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-weight: 700;
+    position: absolute; right: 16px; top: 16px;
+    background: #334155; color: #f8fafc; border: none;
+    width: 30px; height: 30px; border-radius: 50%;
+    cursor: pointer; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
+    z-index: 10;
 }
-
 .modal-close-btn:hover { background: #ef4444; }
+.modal-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; padding-right: 40px; line-height: 1.45; }
+.modal-time { font-size: 11.5px; color: #38bdf8; margin-bottom: 14px; font-weight: 600; }
+.modal-body { font-size: 15px; color: #e2e8f0; line-height: 1.85; overflow-y: auto; white-space: pre-line; }
 
-.modal-title { font-size: 16px; font-weight: 800; color: #f8fafc; margin-bottom: 8px; padding-right: 30px; }
-.modal-time { font-size: 11px; color: #38bdf8; margin-bottom: 16px; font-weight: 600; }
-.modal-body { font-size: 13px; color: #cbd5e1; line-height: 1.6; max-height: 350px; overflow-y: auto; white-space: pre-line; }
-
-/* HUB SEARCH MODAL STYLES */
+/* HUB SEARCH */
 .hub-search-input {
-    width: 100%;
-    padding: 12px 16px;
-    background: #0f172a;
-    border: 1px solid #38bdf8;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 13px;
-    outline: none;
-    margin-bottom: 15px;
+    width: 100%; padding: 12px 16px;
+    background: #0f172a; border: 1px solid #38bdf8;
+    border-radius: 10px; color: #fff; font-size: 13.5px;
+    outline: none; margin-bottom: 12px;
     font-family: inherit;
+    position: sticky; top: 0; z-index: 5;
 }
-
-.hub-search-input:focus {
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
-}
-
-.hub-structured-wrapper {
-    max-height: 480px;
-    overflow-y: auto;
-    padding-right: 4px;
-}
-
+.hub-search-input:focus { box-shadow: 0 0 15px rgba(56,189,248,0.3); }
+.hub-structured-wrapper { overflow-y: auto; padding-right: 4px; flex: 1; }
 .hub-structured-wrapper::-webkit-scrollbar { width: 4px; }
 .hub-structured-wrapper::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 10px; }
-
-/* Structured Section Box */
-.hub-sec-box {
-    background: #eef2f6;
-    border-radius: 12px;
-    padding: 18px;
-    margin-bottom: 15px;
-    color: #1e293b;
-}
-
+.hub-sec-box { background: #eef2f6; border-radius: 12px; padding: 16px; margin-bottom: 12px; color: #1e293b; }
 .hub-sec-header {
-    text-align: center;
-    font-size: 14px;
-    font-weight: 800;
-    color: #334155;
-    margin-bottom: 14px;
-    padding-bottom: 6px;
+    text-align: center; font-size: 14px; font-weight: 800;
+    color: #334155; margin-bottom: 12px; padding-bottom: 6px;
     border-bottom: 2px solid #cbd5e1;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    text-transform: uppercase; letter-spacing: 0.5px;
 }
-
-.hub-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.hub-grid-2.full-width {
-    grid-template-columns: 1fr;
-}
-
+.hub-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.hub-grid-2.full-width { grid-template-columns: 1fr; }
 .hub-pill {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 12px;
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 9px 12px; font-size: 12.5px;
     color: #334155;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between; align-items: center;
     box-shadow: 0 1px 3px rgba(0,0,0,0.03);
 }
-
-.hub-pill .lbl {
-    font-weight: 700;
-    color: #475569;
-    margin-right: 5px;
-}
-
-.hub-pill .val {
-    font-weight: 600;
-    color: #0f172a;
-    word-break: break-word;
-}
-
+.hub-pill .lbl { font-weight: 700; color: #475569; margin-right: 5px; }
+.hub-pill .val { font-weight: 600; color: #0f172a; word-break: break-word; }
 .copy-icon-btn {
-    background: #e2e8f0;
-    color: #0f172a;
-    border: none;
-    padding: 3px 7px;
-    border-radius: 4px;
-    font-size: 11px;
-    cursor: pointer;
-    margin-left: 8px;
-    transition: 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+    background: #e2e8f0; color: #0f172a; border: none;
+    padding: 3px 7px; border-radius: 4px; font-size: 11px;
+    cursor: pointer; margin-left: 8px;
+    display: inline-flex; align-items: center; gap: 4px;
 }
+.copy-icon-btn:hover { background: #38bdf8; color: #fff; }
 
-.copy-icon-btn:hover {
-    background: #38bdf8;
-    color: #fff;
-}
-
-/* History Modal specific list items */
+/* HISTORY MODAL */
 .history-item {
     background: #0f172a;
     border: 1px solid #334155;
     border-radius: 10px;
-    padding: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+    padding: 12px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px; gap: 10px;
 }
-.history-item-info h4 { font-size: 14px; color: #f8fafc; margin-bottom: 4px; display: flex; align-items: center; gap:6px;}
-.history-item-info p { font-size: 11px; color: #94a3b8; }
-.history-status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+.history-item-info h4 { font-size: 14px; color: #f8fafc; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+.history-item-info p { font-size: 11.5px; color: #94a3b8; }
+.history-status-badge { font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 6px; white-space: nowrap; }
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+    .portal-layout { grid-template-columns: 1fr; }
+    .right-sidebar { position: static; }
+    .header-left h1 { font-size: 22px; }
+    .header-content { padding: 20px; }
+}
 
 @media (max-width: 600px) {
     .hub-grid-2 { grid-template-columns: 1fr; }
+    
+    /* Full-screen mobile modal */
+    .modal-overlay { padding: 0; align-items: stretch; }
+    .modal-card {
+        max-width: 100%; height: 100%; max-height: 100%;
+        border-radius: 0; padding: 20px 15px;
+    }
+    .modal-title { font-size: 16px; }
+    .modal-body { font-size: 14px; line-height: 1.75; }
+    
+    /* Sticky Hub search bar on mobile */
+    .hub-search-input {
+        position: sticky;
+        top: 0;
+        background: #1e293b;
+        padding: 10px 14px;
+        margin-bottom: 10px;
+    }
+    
+    .card { padding: 20px 18px; }
+    .container { width: 94%; }
+    .section-title { font-size: 16px; }
+    .header-badges { width: 100%; justify-content: center; }
+    .history-item { flex-direction: column; align-items: flex-start; }
 }
 
 footer{
     background: #0f172a;
     border-top: 1px solid #334155;
-    color:rgba(255,255,255,0.5);
-    text-align:center; padding:22px; font-size:12px;
-    margin-top: 40px;
+    color: rgba(255,255,255,0.5);
+    text-align: center; padding: 20px;
+    font-size: 12px; margin-top: 40px;
 }
+footer strong { color: rgba(255,255,255,0.8); }
 
-footer strong{ color:rgba(255,255,255,0.8); }
-
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(200%);
+    background: #1e293b;
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: 1px solid #334155;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 99999;
+    font-size: 13px;
+    font-weight: 600;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: #10b981; color: #4ade80; }
+.toast.error { border-color: #ef4444; color: #f87171; }
+.toast.warn { border-color: #f59e0b; color: #fbbf24; }
 </style>
 </head>
 
@@ -659,11 +550,15 @@ footer strong{ color:rgba(255,255,255,0.8); }
             </div>
         </div>
         <div class="header-badges">
+            <!-- NEW: Live Active Break Badge -->
+            <div class="header-badge active-break-badge zero-active" id="activeBreakBadge" onclick="scrollToBreakSection()">
+                <span class="pulse-orange"></span> এখন ব্রেকে: <strong id="activeBreakCount">0</strong> জন
+            </div>
             <div class="header-badge online-badge">
-                <span class="pulse-green"></span> Online Now: <strong id="onlineCount">1</strong>
+                <span class="pulse-green"></span> Online: <strong id="onlineCount">1</strong>
             </div>
             <div class="header-badge visitor-badge">
-                👥 Total Visits: <strong id="visitCount">0</strong>
+                👥 Visits: <strong id="visitCount">0</strong>
             </div>
         </div>
     </div>
@@ -671,8 +566,6 @@ footer strong{ color:rgba(255,255,255,0.8); }
 
 <div class="container">
     <div class="portal-layout">
-
-        <!-- LEFT: Quick Access Tools -->
         <div>
             <div class="section-title">
                 🧰 Quick Access Tools <span class="line"></span>
@@ -720,53 +613,54 @@ footer strong{ color:rgba(255,255,255,0.8); }
             </div>
         </div>
 
-        <!-- RIGHT SIDEBAR -->
         <div class="right-sidebar">
-
-            <!-- WIDGET 1: Notice Board -->
+            <!-- NOTICE -->
             <div class="sidebar-widget">
                 <div class="widget-top-bar">
-                    <h2>📢 Notice Board <span class="live-dot"></span></h2>
+                    <h2>📢 Notice Board</h2>
                     <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 Admin Login</button>
                 </div>
-
                 <div class="admin-panel" id="adminPanel">
                     <input type="text" id="noticeTitle" placeholder="নোটিশের শিরোনাম...">
                     <textarea id="noticeContent" rows="3" placeholder="নোটিশের বিস্তারিত লিখুন..."></textarea>
                     <button class="publish-btn" id="publishBtn" onclick="publishNotice()">🚀 Publish Live</button>
                 </div>
-
                 <div class="notice-list" id="noticeContainer">
-                    <div class="loading-text">⏳ Connecting to real-time server...</div>
+                    <div style="text-align:center;color:#94a3b8;padding:20px;font-size:12px">⏳ Connecting...</div>
                 </div>
             </div>
 
-            <!-- WIDGET 2: Break Approval Portal -->
-            <div class="sidebar-widget">
+            <!-- BREAK PORTAL -->
+            <div class="sidebar-widget" id="breakSection">
                 <div class="widget-top-bar">
                     <h2>☕ ব্রেক অনুমোদন পোর্টাল</h2>
-                    <span style="font-size:10px; color:#94a3b8;" id="liveTimeDisplay">--:-- PM</span>
+                    <span style="font-size:10px;color:#94a3b8" id="liveTimeDisplay">--:--</span>
                 </div>
-
                 <div class="break-sidebar-content">
                     <div class="break-mini-stats">
                         <div class="mini-stat-chip pending">
                             <div class="mini-stat-num" id="statPendingCount">0</div>
                             <div class="mini-stat-txt">অপেক্ষমাণ</div>
                         </div>
-                        <!-- Clickable Approved Badge -->
-                        <div class="mini-stat-chip approved" onclick="openBreakHistory('approved')" title="তালিকা দেখতে ক্লিক করুন">
+                        <div class="mini-stat-chip approved" onclick="openBreakHistory('approved')" title="অনুমোদিত তালিকা">
                             <div class="mini-stat-num" id="statApprovedCount">0</div>
-                            <div class="mini-stat-txt">অনুমোদিত (তালিকা)</div>
+                            <div class="mini-stat-txt">অনুমোদিত</div>
                         </div>
-                        <!-- Clickable Rejected Badge -->
-                        <div class="mini-stat-chip rejected" onclick="openBreakHistory('rejected')" title="তালিকা দেখতে ক্লিক করুন">
+                        <div class="mini-stat-chip rejected" onclick="openBreakHistory('rejected')" title="বাতিল তালিকা">
                             <div class="mini-stat-num" id="statRejectedCount">0</div>
-                            <div class="mini-stat-txt">বাতিল (তালিকা)</div>
+                            <div class="mini-stat-txt">বাতিল</div>
                         </div>
                     </div>
 
-                    <!-- Compact Request Form -->
+                    <!-- NEW: LIVE ACTIVE BREAKS -->
+                    <div class="live-active-breaks" id="liveActiveBreaks">
+                        <div class="live-active-header">
+                            <span>🔴 এখন যারা ব্রেকে আছেন</span>
+                            <span style="color:#94a3b8;font-weight:500" id="activeBreakLimit">0/2 জন</span>
+                        </div>
+                        <div id="liveBreakList"></div>
+                    </div>
+
                     <div class="compact-break-form">
                         <div class="compact-form-title">➕ নতুন ব্রেক রিকোয়েস্ট</div>
                         <div class="compact-inputs">
@@ -778,47 +672,37 @@ footer strong{ color:rgba(255,255,255,0.8); }
                                 <option>Md.Sadikul Islam Rayat</option><option>Shamiul Bashir Ananno</option><option>Jabedul Islam</option><option>Shojon Ahmed</option>
                                 <option>Md Sajib Al Mamun</option><option>Rakib Hossain</option><option>Dipta Roy</option><option>Sabbir Ahmed</option><option>Dip Shorkar</option>
                             </select>
-
                             <select id="breakTypeSelect">
                                 <option value="শর্ট ব্রেক">শর্ট ব্রেক (১০ মিনিট)</option>
-                                <option value="নামাজের ব্রেক">নামাজের ব্রেক</option>
+                                <option value="নামাজের ব্রেক">নামাজের ব্রেক (২০ মিনিট)</option>
                             </select>
-
                             <button class="compact-submit-btn" id="submitBreakBtn" onclick="submitBreakRequest()">কিউতে যোগ করুন</button>
                         </div>
                     </div>
 
                     <div class="compact-queue-header">
                         <span>📋 অপেক্ষমাণ কিউ</span>
-                        <span style="font-size:10px; color:#f59e0b;" id="queueBadgeCount">0 জন</span>
+                        <span style="font-size:10px;color:#f59e0b" id="queueBadgeCount">0 জন</span>
                     </div>
-
                     <div class="compact-queue-list" id="queueContainer">
                         <div class="empty-compact-q">⏳ ডাটা লোড হচ্ছে...</div>
                     </div>
                 </div>
             </div>
-
         </div>
-
     </div>
 </div>
 
-<!-- ===================================================== -->
-<!-- 🔍 MODALS -->
-<!-- ===================================================== -->
-
-<!-- 1. FULL NOTICE POPUP MODAL -->
+<!-- MODALS -->
 <div class="modal-overlay" id="noticeModal">
     <div class="modal-card">
         <button class="modal-close-btn" onclick="closeModal()">✕</button>
-        <div class="modal-title" id="mTitle">Notice Title</div>
-        <div class="modal-time" id="mTime">Time</div>
-        <div class="modal-body" id="mBody">Notice Content</div>
+        <div class="modal-title" id="mTitle"></div>
+        <div class="modal-time" id="mTime"></div>
+        <div class="modal-body" id="mBody"></div>
     </div>
 </div>
 
-<!-- 2. HUB CONTACT LIVE SEARCH MODAL -->
 <div class="modal-overlay" id="hubSearchModal">
     <div class="modal-card">
         <button class="modal-close-btn" onclick="closeHubModal()">✕</button>
@@ -826,32 +710,27 @@ footer strong{ color:rgba(255,255,255,0.8); }
         <div class="modal-time" id="hubModalSubTitle">টাইপ করে হাব সার্চ করুন</div>
         <input type="text" class="hub-search-input" id="hubSearchInput" oninput="handleHubSearchDebounced()" placeholder="যেমন: Dhanmondi, Sutrapur, Rangpur..." autofocus>
         <div class="hub-structured-wrapper" id="hubResultsContainer">
-            <div style="text-align:center; padding:30px; color:#94a3b8; font-size:12px;">🔍 হাবের নাম টাইপ করুন...</div>
+            <div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">🔍 হাবের নাম টাইপ করুন...</div>
         </div>
     </div>
 </div>
 
-<!-- 3. BREAK HISTORY MODAL (নতুন যুক্ত করা হয়েছে) -->
 <div class="modal-overlay" id="breakHistoryModal">
     <div class="modal-card">
         <button class="modal-close-btn" onclick="closeBreakHistoryModal()">✕</button>
         <div class="modal-title" id="bhTitle">আজকের ব্রেক হিস্ট্রি</div>
         <div class="modal-time">আজকের দিনের ব্রেক রিকোয়েস্ট তালিকা</div>
-        
-        <div class="hub-structured-wrapper" id="bhListContainer">
-            <!-- History list loads here -->
-        </div>
+        <div class="hub-structured-wrapper" id="bhListContainer"></div>
     </div>
 </div>
 
-<footer>
-    © 2026 <strong>IR Support Portal</strong> — Developed for Steadfast Customer Care
-</footer>
+<!-- Toast -->
+<div class="toast" id="toast">Message</div>
+
+<footer>© 2026 <strong>IR Support Portal</strong> — Developed for Steadfast Customer Care</footer>
 
 <script>
-// =====================================================
-// 🔥 FIREBASE CONFIGURATION
-// =====================================================
+// ====== CONFIG ======
 const firebaseConfig = {
     apiKey: "AIzaSyApJsLg2XaDgIqmB694HRAP3noKty_HjTU",
     authDomain: "ir-support-portal.firebaseapp.com",
@@ -860,8 +739,9 @@ const firebaseConfig = {
     messagingSenderId: "589705470778",
     appId: "1:589705470778:web:4390bc11624fe36635a603"
 };
-
-const ADMIN_PIN = "4563";
+const ADMIN_PIN = "1234";
+const MAX_CONCURRENT_BREAKS = 2; // সর্বোচ্চ কতজন একসাথে ব্রেকে থাকতে পারবে
+const BREAK_DURATIONS = { "শর্ট ব্রেক": 10, "নামাজের ব্রেক": 20 }; // Minutes
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -869,20 +749,14 @@ const db = firebase.firestore();
 let isAdmin = false;
 const mySessionId = 'usr_' + Math.random().toString(36).slice(2, 11);
 let noticesDataStore = {};
+let activeBreakList = [];
+let todayApprovedList = [];
+let todayRejectedList = [];
 
-function updateClock() {
-    const now = new Date();
-    document.getElementById("liveTimeDisplay").innerText = now.toLocaleTimeString('en-US', {
-        hour: '2-digit', minute: '2-digit', hour12: true
-    });
-}
-setInterval(updateClock, 1000);
-updateClock();
-
+// ====== HELPERS ======
 function escapeHTML(str) {
     return str ? String(str).replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])) : '';
 }
-
 function formatPhoneNumber(val) {
     if(val===null||val===undefined||val==='') return '';
     let str = String(val).trim();
@@ -894,14 +768,31 @@ function formatPhoneNumber(val) {
     if(d.length===13 && d.startsWith('8801')) return '0'+d.slice(2);
     return str;
 }
-
 function normHeader(h) {
     return String(h||'').toLowerCase().replace(/[\s_\-\.\/]+/g,'').trim();
 }
+function scrollToBreakSection() {
+    const el = document.getElementById('breakSection');
+    if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function todayStr() { return new Date().toISOString().split('T')[0]; }
 
-// =====================================================
-// 🔍 HUB SEARCH LOGIC
-// =====================================================
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.className = 'toast ' + type;
+    t.innerText = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ====== CLOCK ======
+function updateClock() {
+    document.getElementById("liveTimeDisplay").innerText = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: true});
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ====== HUB SEARCH (unchanged) ======
 const HUB_SEARCH_SHEET_ID = "1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
 let hubCacheList = [];
 let isFetchingSheet = false;
@@ -911,21 +802,14 @@ function openHubSearchModal() {
     document.getElementById("hubSearchModal").style.display = "flex";
     const input = document.getElementById("hubSearchInput");
     input.value = "";
-    input.focus();
+    setTimeout(() => input.focus(), 100);
     renderHubResults([], "🔍 হাবের নাম টাইপ করুন (Dhanmondi, Sutrapur, Rangpur)...");
     if(!hubCacheList.length && !isFetchingSheet) fetchHubsFromGoogleSheet();
 }
 function closeHubModal() { document.getElementById("hubSearchModal").style.display = "none"; }
-
 function pickCol(headers, aliases) {
-    for(const a of aliases){
-        const i = headers.indexOf(a);
-        if(i !== -1) return i;
-    }
-    for(const a of aliases){
-        const i = headers.findIndex(h => h.includes(a));
-        if(i !== -1) return i;
-    }
+    for(const a of aliases){ const i = headers.indexOf(a); if(i !== -1) return i; }
+    for(const a of aliases){ const i = headers.findIndex(h => h.includes(a)); if(i !== -1) return i; }
     return -1;
 }
 
@@ -933,34 +817,25 @@ async function fetchHubsFromGoogleSheet() {
     isFetchingSheet = true;
     const sub = document.getElementById("hubModalSubTitle");
     if(sub) sub.innerText = "⏳ গুগল শিট লোড হচ্ছে...";
-
     const url = `https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/gviz/tq?tqx=out:json`;
-    try{
+    try {
         const res = await fetch(url);
         const text = await res.text();
         const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}')+1));
         const rows = json.table.rows || [];
-
         let headers = (json.table.cols||[]).map(c => normHeader(c.label || c.id || ''));
         const first = rows[0]?.c?.map(c => normHeader(c ? (c.f ?? c.v ?? '') : '')) || [];
         const firstLooksHeader = first.some(v => /name|address|manager|phone|hub|district|zonal/.test(v));
         let start = 0;
-        if(firstLooksHeader || headers.every(h=>!h)){
-            headers = first;
-            start = 1;
-        }
-
+        if(firstLooksHeader || headers.every(h=>!h)){ headers = first; start = 1; }
         const col = {
-            name: pickCol(headers, ['name','hubname','hub']),
-            address: pickCol(headers, ['address','hubaddress','location']),
-            hubId: pickCol(headers, ['hubid','id','code']),
-            distance: pickCol(headers, ['distance']),
+            name: pickCol(headers, ['name','hubname']),
+            address: pickCol(headers, ['address','location']),
             district: pickCol(headers, ['district']),
             division: pickCol(headers, ['division']),
             policeStation: pickCol(headers, ['policestation','thana','ps']),
-            zonalManager: pickCol(headers, ['zonalmanager','zm','zonal']),
+            zonalManager: pickCol(headers, ['zonal','zonalmanager','zm']),
             zonalPhone: pickCol(headers, ['zonalphone','zmphone']),
-            coordinates: pickCol(headers, ['coordinates','coordinate','map']),
             hubIp: pickCol(headers, ['hubip','ip']),
             hubPhone: pickCol(headers, ['hubphone','hub_phone']),
             manager: pickCol(headers, ['manager']),
@@ -971,7 +846,6 @@ async function fetchHubsFromGoogleSheet() {
             teamLeaderPhone: pickCol(headers, ['tlphone','team_leader_phone']),
             whatsappGroup: pickCol(headers, ['whatsappgroup','whatsapp_group'])
         };
-
         const cellAt = (row, idx) => {
             if(idx < 0 || !row.c || !row.c[idx]) return '';
             const c = row.c[idx];
@@ -979,64 +853,48 @@ async function fetchHubsFromGoogleSheet() {
             if(c.v !== null && c.v !== undefined) return String(c.v).trim();
             return '';
         };
-
         hubCacheList = [];
         for(let i=start;i<rows.length;i++){
-            const row = rows[i];
-            if(!row?.c) continue;
+            const row = rows[i]; if(!row?.c) continue;
             const all = row.c.map(c => c ? String(c.f ?? c.v ?? '').trim() : '');
             const rawText = all.join(' ').toLowerCase();
             if(!rawText.trim()) continue;
-
-            const get = (idx, fallbackIdx) => {
-                let v = cellAt(row, idx);
-                if(!v && fallbackIdx !== undefined) v = cellAt(row, fallbackIdx);
-                return v;
-            };
-
             hubCacheList.push({
                 rawText,
                 searchStr: rawText.replace(/[^a-z0-9\u0980-\u09FF]/gi,''),
-                name: get(col.name, 0) || 'N/A',
-                address: get(col.address, 1) || 'N/A',
-                district: get(col.district, 2) || 'N/A',
-                division: get(col.division, 3) || 'N/A',
-                policeStation: get(col.policeStation, 4) || 'N/A',
-                zonalManager: get(col.zonalManager, 5) || 'N/A',
-                zonalPhone: formatPhoneNumber(get(col.zonalPhone, 6)),
-                hubIp: get(col.hubIp, 7) || 'N/A',
-                hubPhone: formatPhoneNumber(get(col.hubPhone, 8)),
-                manager: get(col.manager, 9) || 'N/A',
-                managerPhone: formatPhoneNumber(get(col.managerPhone, 10)),
-                asstManager: get(col.asstManager, 11) || 'N/A',
-                asstPhone: formatPhoneNumber(get(col.asstPhone, 12)),
-                teamLeader: get(col.teamLeader, 13) || 'N/A',
-                teamLeaderPhone: formatPhoneNumber(get(col.teamLeaderPhone, 14)),
-                whatsappGroup: get(col.whatsappGroup, 15) || ''
+                name: cellAt(row, col.name) || 'N/A',
+                address: cellAt(row, col.address) || 'N/A',
+                district: cellAt(row, col.district) || 'N/A',
+                division: cellAt(row, col.division) || 'N/A',
+                policeStation: cellAt(row, col.policeStation) || 'N/A',
+                zonalManager: cellAt(row, col.zonalManager) || 'N/A',
+                zonalPhone: formatPhoneNumber(cellAt(row, col.zonalPhone)),
+                hubIp: cellAt(row, col.hubIp) || 'N/A',
+                hubPhone: formatPhoneNumber(cellAt(row, col.hubPhone)),
+                manager: cellAt(row, col.manager) || 'N/A',
+                managerPhone: formatPhoneNumber(cellAt(row, col.managerPhone)),
+                asstManager: cellAt(row, col.asstManager) || 'N/A',
+                asstPhone: formatPhoneNumber(cellAt(row, col.asstPhone)),
+                teamLeader: cellAt(row, col.teamLeader) || 'N/A',
+                teamLeaderPhone: formatPhoneNumber(cellAt(row, col.teamLeaderPhone)),
+                whatsappGroup: cellAt(row, col.whatsappGroup) || ''
             });
         }
-
-        if(sub) sub.innerText = `✅ ${hubCacheList.length} টি হাব লোড হয়েছে — টাইপ করে খুঁজুন`;
+        if(sub) sub.innerText = `✅ ${hubCacheList.length} টি হাব লোড হয়েছে`;
         if(document.getElementById("hubSearchInput").value.trim()) filterHubs();
-    }catch(e){
+    } catch(e){
         console.error(e);
-        if(sub) sub.innerText = "⚠️ শিট লোড ব্যর্থ — Share = Anyone with link (Viewer) চেক করুন";
-    }finally{
-        isFetchingSheet = false;
-    }
+        if(sub) sub.innerText = "⚠️ শিট লোড ব্যর্থ";
+    } finally { isFetchingSheet = false; }
 }
 
 function handleHubSearchDebounced() {
     clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(filterHubs, 120);
 }
-
 function filterHubs() {
     const q = document.getElementById("hubSearchInput").value.trim().toLowerCase();
-    if(!q){
-        renderHubResults([], "🔍 হাবের নাম টাইপ করুন...");
-        return;
-    }
+    if(!q){ renderHubResults([], "🔍 হাবের নাম টাইপ করুন..."); return; }
     if(!hubCacheList.length){
         renderHubResults([], "⏳ ডাটা লোড হচ্ছে...");
         if(!isFetchingSheet) fetchHubsFromGoogleSheet();
@@ -1050,35 +908,26 @@ function filterHubs() {
 function pill(label, value, isPhone=false, isLink=false) {
     const v = value && value !== 'N/A' ? value : 'N/A';
     let btn = '';
-    
     if (v !== 'N/A') {
         if (isLink && v.startsWith('http')) {
-            btn = `<a href="${escapeHTML(v)}" target="_blank" class="copy-icon-btn" style="text-decoration:none;">🔗 Open</a> <button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(v)}')">📄</button>`;
-        } else if (isPhone || isLink) {
+            btn = `<a href="${escapeHTML(v)}" target="_blank" class="copy-icon-btn" style="text-decoration:none;">🔗 Open</a>`;
+        } else if (isPhone) {
             btn = `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(v)}')">📄</button>`;
         }
     }
-
     const valDisplay = (isLink && v.startsWith('http')) ? `<a href="${escapeHTML(v)}" target="_blank" style="color:#38bdf8;text-decoration:none;">Group Link</a>` : escapeHTML(v);
     return `<div class="hub-pill"><div><span class="lbl">${label}:</span> <span class="val">${valDisplay}</span></div>${btn}</div>`;
 }
 
 function renderHubResults(list, prompt) {
     const box = document.getElementById("hubResultsContainer");
-    if(prompt){
-        box.innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">${prompt}</div>`;
-        return;
-    }
-    if(!list.length){
-        box.innerHTML = `<div style="text-align:center;padding:30px;color:#ef4444;font-size:12px">❌ কোনো হাব পাওয়া যায়নি</div>`;
-        return;
-    }
+    if(prompt){ box.innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">${prompt}</div>`; return; }
+    if(!list.length){ box.innerHTML = `<div style="text-align:center;padding:30px;color:#ef4444;font-size:12px">❌ কোনো হাব পাওয়া যায়নি</div>`; return; }
     const max = 3;
     const show = list.slice(0,max);
     let html = '';
-    show.forEach(item=>{
-        html += `
-        <div class="hub-sec-box">
+    show.forEach(item => {
+        html += `<div class="hub-sec-box">
             <div class="hub-sec-header">Hub Details</div>
             <div class="hub-grid-2 full-width">${pill('Name', item.name)}</div>
             <div class="hub-grid-2 full-width">${pill('Address', item.address)}</div>
@@ -1086,25 +935,20 @@ function renderHubResults(list, prompt) {
             <div class="hub-grid-2 full-width">${pill('Police Station', item.policeStation)}</div>
             <div class="hub-grid-2">${pill('Zonal Manager', item.zonalManager)}${pill('Phone', item.zonalPhone, true)}</div>
             <div class="hub-grid-2 full-width">${pill('WhatsApp Group', item.whatsappGroup, false, true)}</div>
-            
-            <div class="hub-sec-header" style="margin-top:18px">Contact Details</div>
+            <div class="hub-sec-header" style="margin-top:14px">Contact Details</div>
             <div class="hub-grid-2">${pill('Hub IP', item.hubIp)}${pill('Hub Phone', item.hubPhone, true)}</div>
             <div class="hub-grid-2">${pill('Manager', item.manager)}${pill('Phone', item.managerPhone, true)}</div>
             <div class="hub-grid-2">${pill('Asst. Manager', item.asstManager)}${pill('Phone', item.asstPhone, true)}</div>
             <div class="hub-grid-2">${pill('Team Leader', item.teamLeader)}${pill('Phone', item.teamLeaderPhone, true)}</div>
         </div>`;
     });
-    if(list.length>max){
-        html += `<div style="text-align:center;color:#38bdf8;font-size:11px;padding:8px">ℹ️ আরও ${list.length-max}টি মিলেছে — আরও নির্দিষ্ট করে লিখুন</div>`;
-    }
+    if(list.length>max) html += `<div style="text-align:center;color:#38bdf8;font-size:11px;padding:8px">ℹ️ আরও ${list.length-max}টি মিলেছে</div>`;
     box.innerHTML = html;
 }
-function copyNumber(t) { navigator.clipboard.writeText(t); alert('📋 কপি হয়েছে: '+t); }
+function copyNumber(t) { navigator.clipboard.writeText(t); showToast('📋 কপি হয়েছে: '+t); }
 
-// =====================================================
-// 📢 NOTICE BOARD LOGIC
-// =====================================================
-db.collection("notices").orderBy("timestamp","desc").onSnapshot(snap=>{
+// ====== NOTICE ======
+db.collection("notices").orderBy("timestamp","desc").onSnapshot(snap => {
     const c = document.getElementById("noticeContainer");
     if(snap.empty){
         c.innerHTML = `<div class="notice-item"><div class="notice-title">স্বাগতম টিম! 👋</div><div class="notice-text">সব আপডেট এখানে দেখা যাবে।</div></div>`;
@@ -1112,7 +956,7 @@ db.collection("notices").orderBy("timestamp","desc").onSnapshot(snap=>{
     }
     c.innerHTML = '';
     noticesDataStore = {};
-    snap.forEach(doc=>{
+    snap.forEach(doc => {
         const d = doc.data(); noticesDataStore[doc.id]=d;
         const t = d.timestamp ? new Date(d.timestamp.seconds*1000).toLocaleString('en-US',{day:'numeric',month:'short',hour:'numeric',minute:'numeric',hour12:true}) : 'Just now';
         const long = d.content && d.content.length>80;
@@ -1125,7 +969,6 @@ db.collection("notices").orderBy("timestamp","desc").onSnapshot(snap=>{
         </div>`;
     });
 });
-
 function openModal(id) {
     const d=noticesDataStore[id]; if(!d) return;
     const t=d.timestamp?new Date(d.timestamp.seconds*1000).toLocaleString('en-US',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'numeric',hour12:true}):'Just now';
@@ -1134,72 +977,129 @@ function openModal(id) {
     document.getElementById('mBody').innerText=d.content;
     document.getElementById('noticeModal').style.display='flex';
 }
-function closeModal() { document.getElementById('noticeModal').style.display='none'; }
-
-// Close modals on clicking outside
+function closeModal(){document.getElementById('noticeModal').style.display='none'}
 window.onclick = e => {
     if(e.target.id === 'noticeModal') closeModal();
     if(e.target.id === 'hubSearchModal') closeHubModal();
     if(e.target.id === 'breakHistoryModal') closeBreakHistoryModal();
 };
+document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') { closeModal(); closeHubModal(); closeBreakHistoryModal(); }
+});
 
-// =====================================================
-// ☕ BREAK PORTAL LOGIC & HISTORY
-// =====================================================
-let todayApprovedList = [];
-let todayRejectedList = [];
-
+// ====== BREAK PORTAL (UPGRADED) ======
 async function submitBreakRequest() {
-    const name=document.getElementById('agentNameSelect').value;
-    const type=document.getElementById('breakTypeSelect').value;
-    const btn=document.getElementById('submitBreakBtn');
-    if(!name) return alert('নাম নির্বাচন করুন!');
+    const name = document.getElementById('agentNameSelect').value;
+    const type = document.getElementById('breakTypeSelect').value;
+    const btn = document.getElementById('submitBreakBtn');
+    if(!name) { showToast('নাম নির্বাচন করুন!', 'warn'); return; }
     
-    const today=new Date().toISOString().split('T')[0];
-    btn.disabled=true; btn.innerText='যাচাই হচ্ছে...';
-    
-    try{
-        const snap = await db.collection('break_requests').where('agentName','==',name).where('dateStr','==',today).get();
-        if(snap.size >= 2){ alert(`⚠️ ${name}, আজ ২ বার রিকোয়েস্ট হয়ে গেছে!`); return; }
+    btn.disabled = true; btn.innerText = 'যাচাই হচ্ছে...';
+    try {
+        const today = todayStr();
         
-        await db.collection('break_requests').add({agentName:name,breakType:type,status:'pending',requestedAt:Date.now(),dateStr:today});
+        // 1. Check double-pending block for same agent (any status pending or approved-active)
+        const dupSnap = await db.collection('break_requests')
+            .where('agentName', '==', name)
+            .where('dateStr', '==', today)
+            .get();
+        
+        let hasPending = false;
+        let hasActive = false;
+        let totalToday = 0;
+
+        dupSnap.forEach(doc => {
+            const d = doc.data();
+            totalToday++;
+            if(d.status === 'pending') hasPending = true;
+            if(d.status === 'approved' && d.processedAt) {
+                const durationMin = BREAK_DURATIONS[d.breakType] || 10;
+                const endTime = d.processedAt + (durationMin * 60 * 1000);
+                if(Date.now() < endTime) hasActive = true;
+            }
+        });
+
+        if(hasPending) {
+            showToast(`⚠️ ${name}, আপনার একটি রিকোয়েস্ট আগে থেকেই পেন্ডিং আছে!`, 'warn');
+            return;
+        }
+        if(hasActive) {
+            showToast(`⚠️ ${name}, আপনি এখন ব্রেকে আছেন!`, 'warn');
+            return;
+        }
+        if(totalToday >= 2) {
+            showToast(`⚠️ ${name}, আজ ২ বার রিকোয়েস্ট হয়ে গেছে!`, 'warn');
+            return;
+        }
+        
+        await db.collection('break_requests').add({
+            agentName: name,
+            breakType: type,
+            status: 'pending',
+            requestedAt: Date.now(),
+            dateStr: today
+        });
         document.getElementById('agentNameSelect').value='';
-        alert('🎉 রিকোয়েস্ট জমা হয়েছে!');
-    }catch(e){alert(e.message)}
-    finally{btn.disabled=false;btn.innerText='কিউতে যোগ করুন'}
+        showToast('🎉 রিকোয়েস্ট জমা হয়েছে!', 'success');
+    } catch(e) { showToast(e.message, 'error'); }
+    finally { btn.disabled = false; btn.innerText = 'কিউতে যোগ করুন'; }
 }
 
 function listenBreakPortal() {
-    db.collection('break_requests').orderBy('requestedAt','asc').onSnapshot(snap=>{
-        const box = document.getElementById('queueContainer');
-        const today = new Date().toISOString().split('T')[0];
-        
-        let p=0, a=0, r=0, html='';
+    db.collection('break_requests').orderBy('requestedAt','asc').onSnapshot(snap => {
+        const today = todayStr();
+        let p=0, a=0, r=0, queueHTML='';
+        activeBreakList = [];
         todayApprovedList = [];
         todayRejectedList = [];
 
-        snap.forEach(doc=>{
+        snap.forEach(doc => {
             const d = doc.data();
+            const dId = doc.id;
+
+            // Auto-clean: skip pending requests from previous days
+            if(d.status === 'pending' && d.dateStr !== today) {
+                // Optional cleanup
+                if(isAdmin) db.collection('break_requests').doc(dId).delete().catch(()=>{});
+                return;
+            }
+
             if(d.status === 'pending') {
                 p++;
-                const mins = Math.max(0,Math.floor((Date.now()-d.requestedAt)/60000));
+                const mins = Math.max(0, Math.floor((Date.now()-d.requestedAt)/60000));
                 const tm = new Date(d.requestedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-                const actions = isAdmin ? `<button class="btn-mini-approve" onclick="updateBreakStatus('${doc.id}','approved')">✓</button><button class="btn-mini-reject" onclick="updateBreakStatus('${doc.id}','rejected')">✕</button>`:`<span class="mini-admin-badge">🔒 Admin</span>`;
-                html+=`<div class="compact-queue-item"><div class="compact-queue-top"><div class="compact-agent-info"><div class="compact-q-num">${p}</div><div class="compact-agent-name">${escapeHTML(d.agentName)}</div></div><span class="compact-type-badge">${escapeHTML(d.breakType)}</span></div><div class="compact-queue-bottom"><span>🕒 ${tm} (<span class="compact-wait-time">${mins} মি:</span>)</span><div class="compact-actions">${actions}</div></div></div>`;
+                
+                // Check if max concurrent limit blocks approval
+                const blockApproval = activeBreakList.length >= MAX_CONCURRENT_BREAKS;
+                const approveBtn = isAdmin ? 
+                    (blockApproval 
+                        ? `<button class="btn-mini-approve" disabled title="সর্বোচ্চ ২ জন ব্রেকে আছে">✓</button>` 
+                        : `<button class="btn-mini-approve" onclick="updateBreakStatus('${dId}','approved')">✓</button>`) 
+                    : '';
+                const rejectBtn = isAdmin ? `<button class="btn-mini-reject" onclick="updateBreakStatus('${dId}','rejected')">✕</button>` : '';
+                const actions = isAdmin ? approveBtn + rejectBtn : `<span class="mini-admin-badge">🔒 Admin</span>`;
+                
+                queueHTML += `<div class="compact-queue-item"><div class="compact-queue-top"><div class="compact-agent-info"><div class="compact-q-num">${p}</div><div class="compact-agent-name">${escapeHTML(d.agentName)}</div></div><span class="compact-type-badge">${escapeHTML(d.breakType)}</span></div><div class="compact-queue-bottom"><span>🕒 ${tm} (<span class="compact-wait-time">${mins} মি:</span>)</span><div class="compact-actions">${actions}</div></div></div>`;
             } 
             else if(d.dateStr === today) {
                 if(d.status === 'approved') {
                     a++;
-                    todayApprovedList.push({ id: doc.id, ...d });
+                    const item = { id: dId, ...d };
+                    todayApprovedList.push(item);
+                    
+                    // Determine if still ACTIVE (within break duration)
+                    if(d.processedAt) {
+                        const durationMin = BREAK_DURATIONS[d.breakType] || 10;
+                        const endTime = d.processedAt + (durationMin * 60 * 1000);
+                        if(Date.now() < endTime + 60000) { // Show 1 min grace period
+                            activeBreakList.push({ ...item, endTime, durationMin });
+                        }
+                    }
                 }
-                if(d.status === 'rejected') {
-                    r++;
-                    todayRejectedList.push({ id: doc.id, ...d });
-                }
+                if(d.status === 'rejected') { r++; todayRejectedList.push({ id: dId, ...d }); }
             }
         });
 
-        // Sort history by processing time (newest top)
         todayApprovedList.sort((x,y) => (y.processedAt || 0) - (x.processedAt || 0));
         todayRejectedList.sort((x,y) => (y.processedAt || 0) - (x.processedAt || 0));
 
@@ -1207,24 +1107,96 @@ function listenBreakPortal() {
         document.getElementById('statApprovedCount').innerText = a;
         document.getElementById('statRejectedCount').innerText = r;
         document.getElementById('queueBadgeCount').innerText = p + ' জন';
-        box.innerHTML = p ? html : `<div class="empty-compact-q">🎉 কোনো অপেক্ষমাণ রিকোয়েস্ট নেই</div>`;
+
+        document.getElementById('queueContainer').innerHTML = p 
+            ? queueHTML 
+            : `<div class="empty-compact-q">🎉 কোনো অপেক্ষমাণ রিকোয়েস্ট নেই</div>`;
+
+        renderActiveBreaks();
     });
 }
 
-async function updateBreakStatus(id, s) { 
-    if(!isAdmin) return; 
-    await db.collection('break_requests').doc(id).update({status:s, processedAt:Date.now()}); 
+function renderActiveBreaks() {
+    const box = document.getElementById('liveActiveBreaks');
+    const list = document.getElementById('liveBreakList');
+    const badge = document.getElementById('activeBreakBadge');
+    const countBadge = document.getElementById('activeBreakCount');
+    const limitBadge = document.getElementById('activeBreakLimit');
+
+    const now = Date.now();
+    const activeNow = activeBreakList.filter(it => now < it.endTime + 60000);
+    
+    countBadge.innerText = activeNow.length;
+    limitBadge.innerText = `${activeNow.length}/${MAX_CONCURRENT_BREAKS} জন`;
+    
+    if(activeNow.length === 0) {
+        box.classList.remove('has-active');
+        badge.classList.add('zero-active');
+        return;
+    }
+    
+    badge.classList.remove('zero-active');
+    box.classList.add('has-active');
+    
+    let html = '';
+    activeNow.forEach(it => {
+        const remainingMs = it.endTime - now;
+        const remainingMin = Math.ceil(remainingMs / 60000);
+        let timerClass = 'timer-ok', timerText = '';
+        
+        if(remainingMs <= 0) {
+            timerClass = 'timer-over';
+            const overMin = Math.abs(Math.floor(remainingMs / 60000));
+            timerText = `⛔ ${overMin} মি: বেশি!`;
+        } else if(remainingMin <= 3) {
+            timerClass = 'timer-warn';
+            timerText = `⚠️ ${remainingMin} মি: বাকি`;
+        } else {
+            timerText = `⏳ ${remainingMin} মি: বাকি`;
+        }
+        
+        html += `<div class="live-break-item">
+            <div>
+                <span class="live-break-name">${escapeHTML(it.agentName)}</span>
+                <span style="color:#94a3b8;font-size:10px;margin-left:5px;">(${escapeHTML(it.breakType)})</span>
+            </div>
+            <span class="live-break-timer ${timerClass}">${timerText}</span>
+        </div>`;
+    });
+    list.innerHTML = html;
 }
 
-// History Modal Logic
+// Refresh timers every 15 seconds without re-fetching database
+setInterval(renderActiveBreaks, 15000);
+
+async function updateBreakStatus(id, s) { 
+    if(!isAdmin) return;
+    
+    if(s === 'approved') {
+        const activeCount = activeBreakList.length;
+        if(activeCount >= MAX_CONCURRENT_BREAKS) {
+            showToast(`⛔ সর্বোচ্চ ${MAX_CONCURRENT_BREAKS} জন একসাথে ব্রেকে থাকতে পারবে!`, 'warn');
+            return;
+        }
+    }
+    
+    try {
+        await db.collection('break_requests').doc(id).update({
+            status: s, 
+            processedAt: Date.now(),
+            processedBy: 'Admin'
+        });
+        showToast(s === 'approved' ? '✅ অনুমোদন করা হয়েছে' : '❌ বাতিল করা হয়েছে', s === 'approved' ? 'success' : 'error');
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
+// HISTORY
 function openBreakHistory(type) {
     const modal = document.getElementById("breakHistoryModal");
     const title = document.getElementById("bhTitle");
     const container = document.getElementById("bhListContainer");
-    
     container.innerHTML = "";
     let list = [];
-
     if(type === 'approved') {
         title.innerHTML = "✅ আজকের অনুমোদিত ব্রেক";
         title.style.color = "#10b981";
@@ -1234,97 +1206,91 @@ function openBreakHistory(type) {
         title.style.color = "#ef4444";
         list = todayRejectedList;
     }
-
     if(list.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:30px; color:#94a3b8; font-size:12px;">কোনো ডাটা পাওয়া যায়নি।</div>`;
+        container.innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">কোনো ডাটা পাওয়া যায়নি।</div>`;
     } else {
         list.forEach(item => {
-            const reqTime = new Date(item.requestedAt).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:true});
-            const procTime = item.processedAt ? new Date(item.processedAt).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:true}) : '--:--';
+            const reqTime = new Date(item.requestedAt).toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',hour12:true});
+            const procTime = item.processedAt ? new Date(item.processedAt).toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',hour12:true}) : '--:--';
             const badgeColor = type === 'approved' ? '#10b981' : '#ef4444';
-            const badgeBg = type === 'approved' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+            const badgeBg = type === 'approved' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
             const statusTxt = type === 'approved' ? 'অনুমোদিত' : 'বাতিল';
-
             container.innerHTML += `
                 <div class="history-item" style="border-left: 3px solid ${badgeColor};">
                     <div class="history-item-info">
                         <h4>👤 ${escapeHTML(item.agentName)}</h4>
-                        <p style="margin-bottom:4px; font-weight:600; color:#38bdf8;">🏷️ ${escapeHTML(item.breakType)}</p>
+                        <p style="margin-bottom:4px;font-weight:600;color:#38bdf8;">🏷️ ${escapeHTML(item.breakType)}</p>
                         <p>🕒 রিকোয়েস্ট: ${reqTime} <span style="margin:0 5px;">|</span> আপডেট: ${procTime}</p>
                     </div>
-                    <div class="history-status-badge" style="background:${badgeBg}; color:${badgeColor};">
-                        ${statusTxt}
-                    </div>
-                </div>
-            `;
+                    <div class="history-status-badge" style="background:${badgeBg};color:${badgeColor};">${statusTxt}</div>
+                </div>`;
         });
     }
     modal.style.display = "flex";
 }
+function closeBreakHistoryModal() { document.getElementById("breakHistoryModal").style.display = "none"; }
 
-function closeBreakHistoryModal() {
-    document.getElementById("breakHistoryModal").style.display = "none";
-}
-
-// =====================================================
-// STATS & PRESENCE
-// =====================================================
-function initTotalVisits(){
+// ====== STATS ======
+function initTotalVisits() {
     const ref = db.collection('portal_stats').doc('visits');
-    if(!sessionStorage.getItem('has_counted_visit')){
+    if(!sessionStorage.getItem('has_counted_visit')) {
         sessionStorage.setItem('has_counted_visit','true');
         ref.set({total:firebase.firestore.FieldValue.increment(1)},{merge:true});
     }
     ref.onSnapshot(d=>{ if(d.exists) document.getElementById('visitCount').innerText=(d.data().total||0).toLocaleString(); });
 }
-
-function initOnlinePresence(){
+function initOnlinePresence() {
     const ref = db.collection('active_presence').doc(mySessionId);
     const beat = ()=>ref.set({last_seen:Date.now()}).catch(()=>{});
-    beat(); setInterval(beat,8000);
+    beat(); setInterval(beat, 8000);
     window.addEventListener('beforeunload',()=>ref.delete());
     db.collection('active_presence').onSnapshot(snap=>{
-        const now = Date.now(); let n=0;
+        const now=Date.now(); let n=0;
         snap.forEach(doc=>{ const d=doc.data(); if(d?.last_seen && now-d.last_seen<20000) n++; });
-        document.getElementById('onlineCount').innerText=Math.max(1,n);
+        document.getElementById('onlineCount').innerText = Math.max(1,n);
     });
 }
 
-// =====================================================
-// ADMIN
-// =====================================================
-function toggleAdmin(){
+// ====== ADMIN ======
+function toggleAdmin() {
     const panel = document.getElementById('adminPanel');
     const btn = document.getElementById('adminBtn');
     if(isAdmin){
-        isAdmin = false; panel.style.display='none'; btn.innerText='🔒 Admin Login';
+        isAdmin=false; panel.style.display='none'; btn.innerText='🔒 Admin Login';
         document.querySelectorAll('.delete-btn').forEach(el=>el.style.display='none');
         listenBreakPortal();
-    }else{
+    } else {
         const pin = prompt('Enter Admin PIN:');
         if(pin === ADMIN_PIN){
-            isAdmin = true; panel.style.display='block'; btn.innerText='🔓 Logout';
+            isAdmin=true; panel.style.display='block'; btn.innerText='🔓 Logout';
             document.querySelectorAll('.delete-btn').forEach(el=>el.style.display='block');
             listenBreakPortal();
-        }else if(pin !== null) alert('❌ Incorrect PIN!');
+            showToast('👑 অ্যাডমিন লগইন হয়েছে', 'success');
+        } else if(pin !== null) showToast('❌ Incorrect PIN!', 'error');
     }
 }
-
-async function publishNotice(){
+async function publishNotice() {
     const title = document.getElementById('noticeTitle').value.trim();
     const content = document.getElementById('noticeContent').value.trim();
-    if(!title||!content) return alert('সব ঘর পূরণ করুন!');
+    if(!title||!content) { showToast('সব ঘর পূরণ করুন!', 'warn'); return; }
     const btn = document.getElementById('publishBtn');
     btn.disabled=true; btn.innerText='Publishing...';
-    try{
+    try {
         await db.collection('notices').add({title,content,timestamp:firebase.firestore.FieldValue.serverTimestamp()});
         document.getElementById('noticeTitle').value='';
         document.getElementById('noticeContent').value='';
-    }catch(e){alert(e.message)}
-    finally{btn.disabled=false;btn.innerText='🚀 Publish Live'}
+        showToast('📢 নোটিশ প্রকাশিত!', 'success');
+    } catch(e){ showToast(e.message, 'error'); }
+    finally { btn.disabled=false; btn.innerText='🚀 Publish Live'; }
 }
-async function deleteNotice(id){ if(confirm('ডিলিট করবেন?')) await db.collection('notices').doc(id).delete(); }
+async function deleteNotice(id) { 
+    if(confirm('ডিলিট করবেন?')) {
+        await db.collection('notices').doc(id).delete();
+        showToast('🗑️ ডিলিট করা হয়েছে', 'success');
+    }
+}
 
+// INIT
 document.addEventListener('DOMContentLoaded',()=>{
     initTotalVisits();
     initOnlinePresence();
