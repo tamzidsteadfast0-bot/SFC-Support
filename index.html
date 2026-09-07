@@ -289,7 +289,7 @@ footer strong{color:rgba(255,255,255,.8)}
 
 <script>
 const firebaseConfig={apiKey:"AIzaSyApJsLg2XaDgIqmB694HRAP3noKty_HjTU",authDomain:"ir-support-portal.firebaseapp.com",projectId:"ir-support-portal",storageBucket:"ir-support-portal.firebasestorage.app",messagingSenderId:"589705470778",appId:"1:589705470778:web:4390bc11624fe36635a603"};
-const ADMIN_PIN="4563";
+const ADMIN_PIN="1234";
 const MAX_CONCURRENT_BREAKS=2;
 const BREAK_DURATIONS={"শর্ট ব্রেক":10,"নামাজের ব্রেক":20};
 
@@ -505,17 +505,23 @@ async function fetchHubsFromGoogleSheet(){
     const first=rows[0]?.c?.map(c=>normHeader(c?(c.f??c.v??''):''))||[];
     const firstLooksHeader=first.some(v=>/name|address|manager|phone|hub|district|zonal/.test(v));
     let start=0; if(firstLooksHeader||headers.every(h=>!h)){headers=first;start=1}
+    /* Aliases are matched against ALREADY-NORMALIZED headers (normHeader strips
+       spaces/underscores/dots/hyphens), so aliases here must be written WITHOUT
+       those separators too, or they will never match. Expected sheet header row:
+       name | address | district | division | police_station | zonal | zonal phone |
+       hub_ip | hub_phone | manager | manager_phone | assistant_manager |
+       assistant_manager_phone | team_leader | team_leader_phone | whatsapp_group */
     const col={
       name:pickIdx(headers,['name','hubname']),address:pickIdx(headers,['address','location']),
       district:pickIdx(headers,['district']),division:pickIdx(headers,['division']),
       policeStation:pickIdx(headers,['policestation','thana','ps']),
       zonalManager:pickIdx(headers,['zonal','zonalmanager','zm']),zonalPhone:pickIdx(headers,['zonalphone','zmphone']),
-      hubIp:pickIdx(headers,['hubip','ip']),hubPhone:pickIdx(headers,['hubphone','hub_phone']),
-      manager:pickIdx(headers,['manager']),managerPhone:pickIdx(headers,['managerphone','manager_phone']),
-      asstManager:pickIdx(headers,['asstmanager','assistantmanager','assistant_manager']),
-      asstPhone:pickIdx(headers,['asstphone','assistant_manager_phone']),
-      teamLeader:pickIdx(headers,['teamleader','team_leader']),teamLeaderPhone:pickIdx(headers,['tlphone','team_leader_phone']),
-      whatsappGroup:pickIdx(headers,['whatsappgroup','whatsapp_group'])
+      hubIp:pickIdx(headers,['hubip','ip']),hubPhone:pickIdx(headers,['hubphone']),
+      manager:pickIdx(headers,['manager']),managerPhone:pickIdx(headers,['managerphone']),
+      asstManager:pickIdx(headers,['assistantmanager','asstmanager']),
+      asstPhone:pickIdx(headers,['assistantmanagerphone','asstphone','asstmanagerphone']),
+      teamLeader:pickIdx(headers,['teamleader']),teamLeaderPhone:pickIdx(headers,['teamleaderphone','tlphone']),
+      whatsappGroup:pickIdx(headers,['whatsappgroup','whatsapp'])
     };
     const cellAt=(row,idx)=>{
       if(idx<0||!row.c||!row.c[idx])return '';
