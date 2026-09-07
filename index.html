@@ -120,17 +120,34 @@ header::before{content:'';position:absolute;top:-50%;right:-20%;width:500px;heig
 .copy-icon-btn{background:#e2e8f0;border:none;padding:3px 7px;border-radius:4px;font-size:11px;cursor:pointer;margin-left:6px;text-decoration:none;color:#0f172a}
 .copy-icon-btn:hover{background:#38bdf8;color:#fff}
 
-/* LOCATION RESULT */
-.location-result-item{background:linear-gradient(135deg,#eef2f6,#e0e7ef);border-radius:10px;padding:14px 16px;margin-bottom:8px;color:#1e293b;border-left:4px solid #ec4899}
-.location-result-item.union-item{border-left-color:#ec4899;background:linear-gradient(135deg,#fdf2f8,#fce7f3)}
-.location-result-item.thana-item{border-left-color:#3b82f6;background:linear-gradient(135deg,#eff6ff,#dbeafe)}
+/* LOCATION RESULT - TWO TYPES */
+.location-result-item{border-radius:10px;padding:14px 16px;margin-bottom:10px;color:#1e293b;border-left:4px solid #ec4899}
+.location-result-item.nationwide{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-left-color:#10b981}
+.location-result-item.dhaka-metro{background:linear-gradient(135deg,#eff6ff,#dbeafe);border-left-color:#3b82f6}
 .location-result-item .loc-title{font-size:14px;font-weight:800;color:#0f172a;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* Source Badges */
+.badge-nation{background:#10b981;color:#fff;padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+.badge-metro{background:#3b82f6;color:#fff;padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+
+/* Type Badges */
 .badge-u{background:#ec4899;color:#fff;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700}
-.badge-t{background:#3b82f6;color:#fff;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700}
+.badge-t{background:#8b5cf6;color:#fff;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700}
+
 .loc-detail-row{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#475569;padding:3px 0}
-.loc-detail-row .loc-lbl{font-weight:700;color:#334155;min-width:75px}
+.loc-detail-row .loc-lbl{font-weight:700;color:#334155;min-width:80px}
 .loc-detail-row .loc-val{font-weight:600;color:#0f172a}
 .loc-copy-area{margin-top:8px;padding-top:6px;border-top:1px dashed #cbd5e1;text-align:right}
+
+/* Section Divider */
+.location-section-divider{
+  font-size:13px;font-weight:800;color:#f8fafc;
+  padding:10px 14px;margin:12px 0 8px;border-radius:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.divider-metro{background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(37,99,235,.1));border:1px solid rgba(59,130,246,.3);color:#93c5fd}
+.divider-nation{background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(5,150,105,.1));border:1px solid rgba(16,185,129,.3);color:#6ee7b7}
+.divider-count{margin-left:auto;font-size:11px;font-weight:600;opacity:.8}
 
 .history-item{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px}
 .history-item-info h4{font-size:14px;margin-bottom:4px}
@@ -186,7 +203,7 @@ footer strong{color:rgba(255,255,255,.8)}
         <div class="card">
           <div class="card-icon">📍</div>
           <h2>জেলা-থানা-ইউনিয়ন</h2>
-          <p>District · Thana · Union Search</p>
+          <p>Dhaka Metro + Nationwide Search</p>
           <button class="card-btn" onclick="openLocationSearchModal()">🗺️ Search Location</button>
         </div>
       </div>
@@ -265,8 +282,8 @@ footer strong{color:rgba(255,255,255,.8)}
   <div class="modal-card">
     <button class="modal-close-btn" onclick="closeLocationModal()">✕</button>
     <div class="modal-title">📍 জেলা · থানা · ইউনিয়ন সার্চ</div>
-    <div class="modal-time" id="locModalSubTitle">ইউনিয়ন / থানা / জেলা — বাংলা বা ইংরেজিতে লিখুন</div>
-    <input type="text" class="hub-search-input" id="locationSearchInput" oninput="handleLocationSearchDebounced()" placeholder="যেমন: Savar, ধানমন্ডি, Yearpur, ইয়ারপুর..." autofocus>
+    <div class="modal-time" id="locModalSubTitle">🏙️ Dhaka Metro + 🌆 Nationwide — দুই ধরনের ডাটাই এক জায়গায়</div>
+    <input type="text" class="hub-search-input" id="locationSearchInput" oninput="handleLocationSearchDebounced()" placeholder="যেমন: Dhanmondi, Savar, Bamondi, ধানমন্ডি, বামন্দী..." autofocus>
     <div class="hub-structured-wrapper" id="locationResultsContainer">
       <div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">🔍 সার্চ শুরু করুন...</div>
     </div>
@@ -279,11 +296,13 @@ footer strong{color:rgba(255,255,255,.8)}
 <script>
 /* ========== CONFIG ========== */
 const firebaseConfig={apiKey:"AIzaSyApJsLg2XaDgIqmB694HRAP3noKty_HjTU",authDomain:"ir-support-portal.firebaseapp.com",projectId:"ir-support-portal",storageBucket:"ir-support-portal.firebasestorage.app",messagingSenderId:"589705470778",appId:"1:589705470778:web:4390bc11624fe36635a603"};
-const ADMIN_PIN="4563";
+const ADMIN_PIN="1234";
 const MAX_CONCURRENT_BREAKS=2;
 const BREAK_DURATIONS={"শর্ট ব্রেক":10,"নামাজের ব্রেক":20};
 const HUB_SEARCH_SHEET_ID="1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
 const LOCATION_SHEET_ID="1ZGASaywVQWuC6wPtBvV8UBQwJibfkucCEleuRABB17w";
+const LOCATION_SHEET_NATIONWIDE="Union-Thana-District-Division";
+const LOCATION_SHEET_DHAKA_METRO="Dhaka Metro (City Corp)";
 
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
@@ -313,9 +332,11 @@ function updateClock(){document.getElementById('liveTimeDisplay').innerText=new 
 setInterval(updateClock,1000);updateClock();
 
 /* =====================================================
-   📍 LOCATION SEARCH — Union + Thana + District
+   📍 DUAL-SHEET LOCATION SEARCH
+   Sheet 1: Union-Thana-District-Division (Nationwide - Dhaka Outside)
+   Sheet 2: Dhaka Metro (City Corp) - Inside Dhaka
    ===================================================== */
-let locationDataAll = [];   // combined index for searching
+let locationDataCombined = []; // combined index
 let locationLoaded = false;
 let locationLoading = false;
 let locSearchDebounce = null;
@@ -325,8 +346,8 @@ function openLocationSearchModal(){
   const input=document.getElementById("locationSearchInput");
   input.value="";
   setTimeout(()=>input.focus(),80);
-  renderLocationResults([], "🔍 ইউনিয়ন / থানা / জেলা লিখুন (বাংলা বা ইংরেজি)");
-  if(!locationLoaded && !locationLoading) loadLocationsFromSheet();
+  renderLocationResults([], "🔍 এলাকা / ইউনিয়ন / থানা / জেলার নাম লিখুন (বাংলা বা ইংরেজি)");
+  if(!locationLoaded && !locationLoading) loadBothLocationSheets();
 }
 function closeLocationModal(){ document.getElementById("locationSearchModal").style.display="none"; }
 
@@ -336,101 +357,90 @@ function pickIdx(headers, aliases){
   return -1;
 }
 
-async function loadLocationsFromSheet(){
+// Load a single sheet by name
+async function fetchLocationSheet(sheetName, source){
+  const url = `https://docs.google.com/spreadsheets/d/${LOCATION_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}")+1));
+  const rows = json.table.rows || [];
+
+  // Detect headers
+  let headers = (json.table.cols||[]).map(c => normHeader(c.label || c.id || ""));
+  const firstRow = rows[0]?.c?.map(c => normHeader(c ? (c.f ?? c.v ?? "") : "")) || [];
+  const firstIsHeader = firstRow.some(v => /union|thana|upazila|district|division|area|ward|zone|city|corp|ইউনিয়ন|থানা|উপজেলা|জেলা|বিভাগ|এলাকা/.test(v));
+  let start = 0;
+  if(firstIsHeader || headers.every(h=>!h)){
+    headers = firstRow;
+    start = 1;
+  }
+
+  const col = {
+    union:    pickIdx(headers, ['union','unionname','unionen','area','areaname','ইউনিয়ন','এলাকা']),
+    unionBn:  pickIdx(headers, ['unionbn','unionbangla','areabn','ইউনিয়নবাংলা','এলাকাবাংলা']),
+    thana:    pickIdx(headers, ['thana','upazila','ps','policestation','ward','zone','থানা','উপজেলা','ওয়ার্ড']),
+    thanaBn:  pickIdx(headers, ['thanabn','upazilabn','wardbn','থানাবাংলা']),
+    dist:    pickIdx(headers, ['district','dist','city','citycorp','জেলা','সিটি']),
+    distBn:  pickIdx(headers, ['districtbn','distbn','citybn','জেলাবাংলা']),
+    div:     pickIdx(headers, ['division','div','বিভাগ']),
+    divBn:   pickIdx(headers, ['divisionbn','divbn','বিভাগবাংলা'])
+  };
+
+  const cell = (row, i) => {
+    if(i < 0 || !row.c || !row.c[i]) return "";
+    const c = row.c[i];
+    if(c.f != null && String(c.f).trim() !== "") return String(c.f).trim();
+    if(c.v != null) return String(c.v).trim();
+    return "";
+  };
+
+  const result = [];
+  for(let r=start; r<rows.length; r++){
+    const row = rows[r];
+    if(!row?.c) continue;
+
+    // Use column mapping OR positional fallback
+    const union    = cell(row, col.union)    || cell(row, 0);
+    const unionBn  = cell(row, col.unionBn)  || cell(row, 1);
+    const thana    = cell(row, col.thana)    || cell(row, 2);
+    const thanaBn  = cell(row, col.thanaBn)  || cell(row, 3);
+    const dist     = cell(row, col.dist)     || cell(row, 4);
+    const distBn   = cell(row, col.distBn)   || cell(row, 5);
+    const div      = cell(row, col.div)      || cell(row, 6);
+    const divBn    = cell(row, col.divBn)    || cell(row, 7);
+
+    if(!union && !thana && !dist) continue;
+
+    result.push({
+      source, // 'nationwide' or 'dhaka-metro'
+      union, unionBn, thana, thanaBn,
+      dist, distBn, div, divBn,
+      search: [union, unionBn, thana, thanaBn, dist, distBn, div, divBn].join(" ").toLowerCase()
+    });
+  }
+  return result;
+}
+
+async function loadBothLocationSheets(){
   locationLoading = true;
   const sub = document.getElementById("locModalSubTitle");
-  if(sub) sub.innerText = "⏳ লোকেশন ডাটা লোড হচ্ছে...";
+  if(sub) sub.innerText = "⏳ দুটি শিট লোড হচ্ছে (Nationwide + Dhaka Metro)...";
 
   try{
-    const url = `https://docs.google.com/spreadsheets/d/${LOCATION_SHEET_ID}/gviz/tq?tqx=out:json`;
-    const res = await fetch(url);
-    const text = await res.text();
-    const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}")+1));
-    const rows = json.table.rows || [];
+    const [nationwide, dhakaMetro] = await Promise.all([
+      fetchLocationSheet(LOCATION_SHEET_NATIONWIDE, 'nationwide').catch(e => { console.error("Nationwide error:", e); return []; }),
+      fetchLocationSheet(LOCATION_SHEET_DHAKA_METRO, 'dhaka-metro').catch(e => { console.error("Dhaka Metro error:", e); return []; })
+    ]);
 
-    // Headers
-    let headers = (json.table.cols||[]).map(c => normHeader(c.label || c.id || ""));
-    const firstRow = rows[0]?.c?.map(c => normHeader(c ? (c.f ?? c.v ?? "") : "")) || [];
-    const firstIsHeader = firstRow.some(v => /union|thana|upazila|district|division|ইউনিয়ন|থানা|উপজেলা|জেলা|বিভাগ/.test(v));
-    let start = 0;
-    if(firstIsHeader || headers.every(h=>!h)){
-      headers = firstRow;
-      start = 1;
-    }
-
-    // Column mapping — supports many variations
-    const col = {
-      union:    pickIdx(headers, ['union','unionname','unionen','ইউনিয়ন']),
-      unionBn:  pickIdx(headers, ['unionbn','unionbangla','unionbanglaname','ইউনিয়নবাংলা','ইউনিয়নবাংলা']),
-      thana:    pickIdx(headers, ['thana','upazila','ps','policestation','থানা','উপজেলা']),
-      thanaBn:  pickIdx(headers, ['thanabn','upazilabn','থানাবাংলা']),
-      dist:     pickIdx(headers, ['district','dist','জেলা']),
-      distBn:   pickIdx(headers, ['districtbn','distbn','জেলাবাংলা']),
-      div:      pickIdx(headers, ['division','div','বিভাগ']),
-      divBn:    pickIdx(headers, ['divisionbn','divbn','বিভাগবাংলা'])
-    };
-
-    const cell = (row, i) => {
-      if(i < 0 || !row.c || !row.c[i]) return "";
-      const c = row.c[i];
-      if(c.f != null && String(c.f).trim() !== "") return String(c.f).trim();
-      if(c.v != null) return String(c.v).trim();
-      return "";
-    };
-
-    // Build combined index
-    locationDataAll = [];
-    const seenThana = new Set(); // to also add thana-only entries (deduped)
-
-    for(let r=start; r<rows.length; r++){
-      const row = rows[r];
-      if(!row?.c) continue;
-
-      const union    = cell(row, col.union);
-      const unionBn  = cell(row, col.unionBn);
-      const thana    = cell(row, col.thana);
-      const thanaBn  = cell(row, col.thanaBn);
-      const dist     = cell(row, col.dist);
-      const distBn   = cell(row, col.distBn);
-      const div      = cell(row, col.div);
-      const divBn    = cell(row, col.divBn);
-
-      // If row has both union and thana, add UNION-level entry
-      if(union || unionBn){
-        locationDataAll.push({
-          type:"union",
-          union, unionBn,
-          thana, thanaBn,
-          dist, distBn,
-          div,   divBn,
-          search: [union,unionBn,thana,thanaBn,dist,distBn,div,divBn].join(" ").toLowerCase()
-        });
-      }
-
-      // Also add a THANA-level entry (deduplicated)
-      if(thana || thanaBn){
-        const key = (thana + "|" + dist).toLowerCase();
-        if(!seenThana.has(key)){
-          seenThana.add(key);
-          locationDataAll.push({
-            type:"thana",
-            union:"", unionBn:"",
-            thana, thanaBn,
-            dist, distBn,
-            div,   divBn,
-            search: [thana,thanaBn,dist,distBn,div,divBn].join(" ").toLowerCase()
-          });
-        }
-      }
-    }
-
+    locationDataCombined = [...nationwide, ...dhakaMetro];
     locationLoaded = true;
-    if(sub) sub.innerText = `✅ ${locationDataAll.length}+ লোকেশন লোড হয়েছে — টাইপ করে সার্চ করুন`;
-    // If user already typed, re-run filter
+
+    if(sub) sub.innerText = `✅ ${nationwide.length} Nationwide + ${dhakaMetro.length} Dhaka Metro লোড হয়েছে`;
+
     if(document.getElementById("locationSearchInput").value.trim()) filterLocations();
   }catch(e){
     console.error("Location load error:", e);
-    if(sub) sub.innerText = "⚠️ লোকেশন লোড ব্যর্থ — শিটের Share পারমিশন চেক করুন";
+    if(sub) sub.innerText = "⚠️ লোকেশন লোড ব্যর্থ — Share পারমিশন চেক করুন";
   }finally{
     locationLoading = false;
   }
@@ -444,21 +454,15 @@ function handleLocationSearchDebounced(){
 function filterLocations(){
   const q = document.getElementById("locationSearchInput").value.trim().toLowerCase();
   if(!q){
-    renderLocationResults([], "🔍 ইউনিয়ন / থানা / জেলা লিখুন");
+    renderLocationResults([], "🔍 এলাকা / ইউনিয়ন / থানা / জেলার নাম লিখুন");
     return;
   }
   if(!locationLoaded){
     renderLocationResults([], "⏳ ডাটা লোড হচ্ছে... একটু অপেক্ষা করুন");
-    if(!locationLoading) loadLocationsFromSheet();
+    if(!locationLoading) loadBothLocationSheets();
     return;
   }
-  const matches = locationDataAll.filter(x => x.search.includes(q));
-  // union first, then thana
-  matches.sort((a,b)=>{
-    if(a.type==="union" && b.type!=="union") return -1;
-    if(b.type==="union" && a.type!=="union") return 1;
-    return 0;
-  });
+  const matches = locationDataCombined.filter(x => x.search.includes(q));
   renderLocationResults(matches);
 }
 
@@ -473,49 +477,88 @@ function renderLocationResults(list, prompt){
     return;
   }
 
-  const MAX = 30;
-  const show = list.slice(0, MAX);
-  let html = `<div style="color:#38bdf8;font-size:12px;font-weight:600;margin-bottom:10px">✅ ${list.length}টি ফলাফল ${list.length>MAX?`(প্রথম ${MAX}টি)`:""}</div>`;
+  // Split by source
+  const dhakaMetroResults = list.filter(x => x.source === 'dhaka-metro');
+  const nationwideResults = list.filter(x => x.source === 'nationwide');
 
-  show.forEach(loc => {
-    const isUnion = loc.type === "union" && (loc.union || loc.unionBn);
-    const titleEn = isUnion ? (loc.union || "") : (loc.thana || "");
-    const titleBn = isUnion ? (loc.unionBn || "") : (loc.thanaBn || "");
-    const badge = isUnion ? `<span class="badge-u">ইউনিয়ন</span>` : `<span class="badge-t">থানা/উপজেলা</span>`;
+  const MAX_PER_GROUP = 20;
+  let html = `<div style="color:#38bdf8;font-size:12px;font-weight:600;margin-bottom:10px">✅ মোট ${list.length}টি ফলাফল</div>`;
 
-    const copyText = isUnion
-      ? [loc.union, loc.thana, loc.dist, loc.div].filter(Boolean).join(", ")
-      : [loc.thana, loc.dist, loc.div].filter(Boolean).join(", ");
-
-    html += `
-      <div class="location-result-item ${isUnion?'union-item':'thana-item'}">
-        <div class="loc-title">
-          📍 ${escapeHTML(titleEn)}${titleBn?` <span style="color:#64748b;font-weight:500">/</span> ${escapeHTML(titleBn)}`:""}
-          ${badge}
-        </div>
-        ${isUnion && (loc.thana || loc.thanaBn) ? `
-          <div class="loc-detail-row">
-            <span class="loc-lbl">📌 থানা:</span>
-            <span class="loc-val">${escapeHTML(loc.thana||"")}${loc.thanaBn?` (${escapeHTML(loc.thanaBn)})`:""}</span>
-          </div>` : ""}
-        <div class="loc-detail-row">
-          <span class="loc-lbl">🏛️ জেলা:</span>
-          <span class="loc-val">${escapeHTML(loc.dist||"N/A")}${loc.distBn?` (${escapeHTML(loc.distBn)})`:""}</span>
-        </div>
-        <div class="loc-detail-row">
-          <span class="loc-lbl">🌐 বিভাগ:</span>
-          <span class="loc-val">${escapeHTML(loc.div||"N/A")}${loc.divBn?` (${escapeHTML(loc.divBn)})`:""}</span>
-        </div>
-        <div class="loc-copy-area">
-          <button class="copy-icon-btn" onclick="copyLocation('${escapeHTML(copyText)}')">📋 কপি</button>
-        </div>
-      </div>`;
-  });
-
-  if(list.length > MAX){
-    html += `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:8px">আরও ${list.length-MAX}টি — নাম আরও নির্দিষ্ট করে লিখুন</div>`;
+  // 1. DHAKA METRO SECTION (Show first if there are results)
+  if(dhakaMetroResults.length > 0){
+    html += `<div class="location-section-divider divider-metro">
+      🏙️ Dhaka Metro (City Corporation - Inside Dhaka)
+      <span class="divider-count">${dhakaMetroResults.length}টি</span>
+    </div>`;
+    
+    dhakaMetroResults.slice(0, MAX_PER_GROUP).forEach(loc => {
+      html += renderLocationCard(loc, 'dhaka-metro');
+    });
+    
+    if(dhakaMetroResults.length > MAX_PER_GROUP){
+      html += `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:6px">আরও ${dhakaMetroResults.length - MAX_PER_GROUP}টি Dhaka Metro ফলাফল</div>`;
+    }
   }
+
+  // 2. NATIONWIDE SECTION
+  if(nationwideResults.length > 0){
+    html += `<div class="location-section-divider divider-nation">
+      🌆 Nationwide (Dhaka Outside + সারাদেশ)
+      <span class="divider-count">${nationwideResults.length}টি</span>
+    </div>`;
+    
+    nationwideResults.slice(0, MAX_PER_GROUP).forEach(loc => {
+      html += renderLocationCard(loc, 'nationwide');
+    });
+    
+    if(nationwideResults.length > MAX_PER_GROUP){
+      html += `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:6px">আরও ${nationwideResults.length - MAX_PER_GROUP}টি Nationwide ফলাফল</div>`;
+    }
+  }
+
   box.innerHTML = html;
+}
+
+function renderLocationCard(loc, source){
+  const isMetro = source === 'dhaka-metro';
+  const hasUnion = loc.union || loc.unionBn;
+  const mainTitle = hasUnion ? (loc.union || loc.thana) : (loc.thana || loc.dist);
+  const subTitle = hasUnion ? loc.unionBn : loc.thanaBn;
+
+  const sourceBadge = isMetro
+    ? `<span class="badge-metro">🏙️ Dhaka Metro</span>`
+    : `<span class="badge-nation">🌆 Nationwide</span>`;
+
+  const typeBadge = hasUnion
+    ? `<span class="badge-u">${isMetro?'এলাকা':'ইউনিয়ন'}</span>`
+    : `<span class="badge-t">${isMetro?'ওয়ার্ড/জোন':'থানা/উপজেলা'}</span>`;
+
+  const copyText = [loc.union, loc.thana, loc.dist, loc.div].filter(Boolean).join(", ");
+
+  return `
+    <div class="location-result-item ${isMetro ? 'dhaka-metro' : 'nationwide'}">
+      <div class="loc-title">
+        📍 ${escapeHTML(mainTitle || 'N/A')}${subTitle ? ` <span style="color:#64748b;font-weight:500">/</span> ${escapeHTML(subTitle)}` : ""}
+        ${sourceBadge}
+        ${typeBadge}
+      </div>
+      ${hasUnion && (loc.thana || loc.thanaBn) ? `
+        <div class="loc-detail-row">
+          <span class="loc-lbl">📌 ${isMetro?'ওয়ার্ড:':'থানা:'}</span>
+          <span class="loc-val">${escapeHTML(loc.thana||'')}${loc.thanaBn?` (${escapeHTML(loc.thanaBn)})`:""}</span>
+        </div>` : ""}
+      <div class="loc-detail-row">
+        <span class="loc-lbl">🏛️ ${isMetro?'সিটি:':'জেলা:'}</span>
+        <span class="loc-val">${escapeHTML(loc.dist||'N/A')}${loc.distBn?` (${escapeHTML(loc.distBn)})`:""}</span>
+      </div>
+      <div class="loc-detail-row">
+        <span class="loc-lbl">🌐 বিভাগ:</span>
+        <span class="loc-val">${escapeHTML(loc.div||'N/A')}${loc.divBn?` (${escapeHTML(loc.divBn)})`:""}</span>
+      </div>
+      <div class="loc-copy-area">
+        <button class="copy-icon-btn" onclick="copyLocation('${escapeHTML(copyText)}')">📋 কপি</button>
+      </div>
+    </div>`;
 }
 
 function copyLocation(text){
@@ -523,9 +566,7 @@ function copyLocation(text){
   showToast("📋 " + text);
 }
 
-/* =====================================================
-   🏢 HUB SEARCH
-   ===================================================== */
+/* ========== HUB SEARCH ========== */
 let hubCacheList=[]; let isFetchingSheet=false; let searchDebounceTimer=null;
 
 function openHubSearchModal(){
@@ -678,7 +719,7 @@ window.onclick=e=>{
 };
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeHubModal();closeBreakHistoryModal();closeLocationModal();}});
 
-/* ========== BREAK PORTAL ========== */
+/* ========== BREAK ========== */
 async function submitBreakRequest(){
   const name=document.getElementById('agentNameSelect').value;
   const type=document.getElementById('breakTypeSelect').value;
