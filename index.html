@@ -58,6 +58,8 @@ header::before{content:'';position:absolute;top:-50%;right:-20%;width:500px;heig
 .admin-panel input,.admin-panel textarea{width:100%;padding:8px 10px;margin-bottom:7px;background:#1e293b;border:1px solid #334155;border-radius:6px;font-size:13px;color:#fff;outline:none;font-family:inherit}
 .admin-panel .publish-btn{width:100%;padding:8px;background:linear-gradient(135deg,#6366f1,#3b82f6);color:#fff;border:none;border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
 .notice-list{max-height:260px;overflow-y:auto;padding:10px}
+.notice-list::-webkit-scrollbar{width:4px}
+.notice-list::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:10px}
 .notice-item{background:#0f172a;border:1px solid #334155;border-left:3px solid #3b82f6;padding:12px 14px;border-radius:8px;margin-bottom:9px;position:relative}
 .notice-title{font-weight:700;font-size:14px;margin-bottom:5px;padding-right:20px;line-height:1.5}
 .notice-text{color:#cbd5e1;font-size:13px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -66,8 +68,8 @@ header::before{content:'';position:absolute;top:-50%;right:-20%;width:500px;heig
 .delete-btn{display:none;position:absolute;right:6px;top:6px;background:#ef4444;color:#fff;border:none;padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer}
 .break-sidebar-content{padding:12px}
 .break-mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
-.mini-stat-chip{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 5px;text-align:center}
-.mini-stat-chip.approved,.mini-stat-chip.rejected{cursor:pointer}
+.mini-stat-chip{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 5px;text-align:center;cursor:pointer;transition:.2s}
+.mini-stat-chip:hover{background:rgba(255,255,255,.05)}
 .mini-stat-num{font-size:17px;font-weight:800;line-height:1;margin-bottom:3px}
 .mini-stat-chip.pending .mini-stat-num{color:#f59e0b}.mini-stat-chip.approved .mini-stat-num{color:#10b981}.mini-stat-chip.rejected .mini-stat-num{color:#ef4444}
 .mini-stat-txt{font-size:10px;color:#94a3b8}
@@ -96,10 +98,10 @@ header::before{content:'';position:absolute;top:-50%;right:-20%;width:500px;heig
 .compact-wait-time{color:#f59e0b;font-weight:600}
 .compact-actions{display:flex;gap:4px}
 .btn-mini-approve{background:#10b981;color:#fff;border:none;padding:4px 9px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer}
-.btn-mini-approve:disabled{opacity:.4;cursor:not-allowed}
 .btn-mini-reject{background:#ef4444;color:#fff;border:none;padding:4px 9px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer}
 .mini-admin-badge{font-size:9.5px;color:#64748b;background:#1e293b;padding:3px 7px;border-radius:4px}
 .empty-compact-q{text-align:center;padding:15px;color:#64748b;font-size:12px}
+
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.88);backdrop-filter:blur(5px);z-index:9999;align-items:center;justify-content:center;padding:20px}
 .modal-card{background:#1e293b;border:1px solid #334155;border-radius:16px;width:100%;max-width:650px;padding:24px;box-shadow:0 25px 50px rgba(0,0,0,.6);position:relative;max-height:90vh;display:flex;flex-direction:column}
 .modal-close-btn{position:absolute;right:16px;top:16px;background:#334155;color:#fff;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-weight:700;z-index:10;display:flex;align-items:center;justify-content:center}
@@ -107,9 +109,12 @@ header::before{content:'';position:absolute;top:-50%;right:-20%;width:500px;heig
 .modal-title{font-size:17px;font-weight:800;margin-bottom:8px;padding-right:40px;line-height:1.45}
 .modal-time{font-size:11.5px;color:#38bdf8;margin-bottom:14px;font-weight:600}
 .modal-body{font-size:15px;color:#e2e8f0;line-height:1.85;overflow-y:auto;white-space:pre-line}
+
 .hub-search-input{width:100%;padding:12px 16px;background:#0f172a;border:1px solid #38bdf8;border-radius:10px;color:#fff;font-size:13.5px;outline:none;margin-bottom:12px;font-family:inherit;position:sticky;top:0;z-index:5}
 .hub-search-input:focus{box-shadow:0 0 15px rgba(56,189,248,.3)}
 .hub-structured-wrapper{overflow-y:auto;flex:1;padding-right:4px}
+.hub-structured-wrapper::-webkit-scrollbar{width:4px}
+.hub-structured-wrapper::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:10px}
 .hub-sec-box{background:#eef2f6;border-radius:12px;padding:16px;margin-bottom:12px;color:#1e293b}
 .hub-sec-header{text-align:center;font-size:14px;font-weight:800;color:#334155;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #cbd5e1;text-transform:uppercase}
 .hub-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
@@ -117,45 +122,34 @@ header::before{content:'';position:absolute;top:-50%;right:-20%;width:500px;heig
 .hub-pill{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center}
 .hub-pill .lbl{font-weight:700;color:#475569;margin-right:5px}
 .hub-pill .val{font-weight:600;color:#0f172a;word-break:break-word}
-.copy-icon-btn{background:#e2e8f0;border:none;padding:3px 7px;border-radius:4px;font-size:11px;cursor:pointer;margin-left:6px;text-decoration:none;color:#0f172a}
+.copy-icon-btn{background:#e2e8f0;color:#0f172a;border:none;padding:3px 7px;border-radius:4px;font-size:11px;cursor:pointer;margin-left:6px;text-decoration:none}
 .copy-icon-btn:hover{background:#38bdf8;color:#fff}
 
-/* LOCATION RESULT - TWO TYPES */
 .location-result-item{border-radius:10px;padding:14px 16px;margin-bottom:10px;color:#1e293b;border-left:4px solid #ec4899}
 .location-result-item.nationwide{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-left-color:#10b981}
 .location-result-item.dhaka-metro{background:linear-gradient(135deg,#eff6ff,#dbeafe);border-left-color:#3b82f6}
 .location-result-item .loc-title{font-size:14px;font-weight:800;color:#0f172a;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-
-/* Source Badges */
 .badge-nation{background:#10b981;color:#fff;padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
 .badge-metro{background:#3b82f6;color:#fff;padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
-
-/* Type Badges */
 .badge-u{background:#ec4899;color:#fff;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700}
 .badge-t{background:#8b5cf6;color:#fff;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700}
-
 .loc-detail-row{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#475569;padding:3px 0}
 .loc-detail-row .loc-lbl{font-weight:700;color:#334155;min-width:80px}
 .loc-detail-row .loc-val{font-weight:600;color:#0f172a}
 .loc-copy-area{margin-top:8px;padding-top:6px;border-top:1px dashed #cbd5e1;text-align:right}
-
-/* Section Divider */
-.location-section-divider{
-  font-size:13px;font-weight:800;color:#f8fafc;
-  padding:10px 14px;margin:12px 0 8px;border-radius:8px;
-  display:flex;align-items:center;gap:8px;
-}
+.location-section-divider{font-size:13px;font-weight:800;color:#f8fafc;padding:10px 14px;margin:12px 0 8px;border-radius:8px;display:flex;align-items:center;gap:8px}
 .divider-metro{background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(37,99,235,.1));border:1px solid rgba(59,130,246,.3);color:#93c5fd}
 .divider-nation{background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(5,150,105,.1));border:1px solid rgba(16,185,129,.3);color:#6ee7b7}
-.divider-count{margin-left:auto;font-size:11px;font-weight:600;opacity:.8}
 
 .history-item{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px}
 .history-item-info h4{font-size:14px;margin-bottom:4px}
 .history-item-info p{font-size:11.5px;color:#94a3b8}
 .history-status-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:6px;white-space:nowrap}
+
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(200%);background:#1e293b;color:#fff;padding:12px 22px;border-radius:10px;border:1px solid #334155;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:99999;font-size:13px;font-weight:600;transition:transform .3s}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.success{border-color:#10b981;color:#4ade80}.toast.error{border-color:#ef4444;color:#f87171}.toast.warn{border-color:#f59e0b;color:#fbbf24}
+
 footer{background:#0f172a;border-top:1px solid #334155;color:rgba(255,255,255,.5);text-align:center;padding:22px;font-size:12px;margin-top:40px}
 footer strong{color:rgba(255,255,255,.8)}
 @media(max-width:992px){.portal-layout{grid-template-columns:1fr}.right-sidebar{position:static}}
@@ -217,7 +211,7 @@ footer strong{color:rgba(255,255,255,.8)}
         </div>
         <div class="admin-panel" id="adminPanel">
           <input type="text" id="noticeTitle" placeholder="নোটিশের শিরোনাম...">
-          <textarea id="noticeContent" rows="3" placeholder="নোটিশের বিস্তারিত..."></textarea>
+          <textarea id="noticeContent" rows="3" placeholder="নোটিশের বিস্তারিত লিখুন..."></textarea>
           <button class="publish-btn" id="publishBtn" onclick="publishNotice()">🚀 Publish Live</button>
         </div>
         <div class="notice-list" id="noticeContainer"><div style="text-align:center;color:#94a3b8;padding:20px;font-size:12px">⏳ Connecting...</div></div>
@@ -271,7 +265,7 @@ footer strong{color:rgba(255,255,255,.8)}
     <button class="modal-close-btn" onclick="closeHubModal()">✕</button>
     <div class="modal-title">🔍 Hub Emergency Contact Search</div>
     <div class="modal-time" id="hubModalSubTitle">টাইপ করে হাব সার্চ করুন</div>
-    <input type="text" class="hub-search-input" id="hubSearchInput" oninput="handleHubSearchDebounced()" placeholder="Dhanmondi, Sutrapur, Rangpur..." autofocus>
+    <input type="text" class="hub-search-input" id="hubSearchInput" oninput="handleHubSearchDebounced()" placeholder="যেমন: Dhanmondi, Sutrapur, Rangpur..." autofocus>
     <div class="hub-structured-wrapper" id="hubResultsContainer"><div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">🔍 হাবের নাম টাইপ করুন...</div></div>
   </div>
 </div>
@@ -282,23 +276,23 @@ footer strong{color:rgba(255,255,255,.8)}
   <div class="modal-card">
     <button class="modal-close-btn" onclick="closeLocationModal()">✕</button>
     <div class="modal-title">📍 জেলা · থানা · ইউনিয়ন সার্চ</div>
-    <div class="modal-time" id="locModalSubTitle">🏙️ Dhaka Metro + 🌆 Nationwide — দুই ধরনের ডাটাই এক জায়গায়</div>
-    <input type="text" class="hub-search-input" id="locationSearchInput" oninput="handleLocationSearchDebounced()" placeholder="যেমন: Dhanmondi, Savar, Bamondi, ধানমন্ডি, বামন্দী..." autofocus>
+    <div class="modal-time" id="locModalSubTitle">ইউনিয়ন / থানা / জেলা — বাংলা বা ইংরেজিতে লিখুন</div>
+    <input type="text" class="hub-search-input" id="locationSearchInput" oninput="handleLocationSearchDebounced()" placeholder="যেমন: Savar, ধানমন্ডি, Keraniganj, ইউনিয়নের নাম..." autofocus>
     <div class="hub-structured-wrapper" id="locationResultsContainer">
       <div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">🔍 সার্চ শুরু করুন...</div>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast">Message</div>
 <footer>© 2026 <strong>IR Support Portal</strong> — Steadfast Customer Care</footer>
 
 <script>
-/* ========== CONFIG ========== */
 const firebaseConfig={apiKey:"AIzaSyApJsLg2XaDgIqmB694HRAP3noKty_HjTU",authDomain:"ir-support-portal.firebaseapp.com",projectId:"ir-support-portal",storageBucket:"ir-support-portal.firebasestorage.app",messagingSenderId:"589705470778",appId:"1:589705470778:web:4390bc11624fe36635a603"};
-const ADMIN_PIN="1234";
+const ADMIN_PIN="4563";
 const MAX_CONCURRENT_BREAKS=2;
 const BREAK_DURATIONS={"শর্ট ব্রেক":10,"নামাজের ব্রেক":20};
+
 const HUB_SEARCH_SHEET_ID="1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
 const LOCATION_SHEET_ID="1ZGASaywVQWuC6wPtBvV8UBQwJibfkucCEleuRABB17w";
 const LOCATION_SHEET_NATIONWIDE="Union-Thana-District-Division";
@@ -332,11 +326,9 @@ function updateClock(){document.getElementById('liveTimeDisplay').innerText=new 
 setInterval(updateClock,1000);updateClock();
 
 /* =====================================================
-   📍 DUAL-SHEET LOCATION SEARCH
-   Sheet 1: Union-Thana-District-Division (Nationwide - Dhaka Outside)
-   Sheet 2: Dhaka Metro (City Corp) - Inside Dhaka
+   📍 DUAL-SHEET LOCATION SEARCH (FIXED FOR TOTAL VISIT)
    ===================================================== */
-let locationDataCombined = []; // combined index
+let locationDataCombined = []; 
 let locationLoaded = false;
 let locationLoading = false;
 let locSearchDebounce = null;
@@ -350,14 +342,12 @@ function openLocationSearchModal(){
   if(!locationLoaded && !locationLoading) loadBothLocationSheets();
 }
 function closeLocationModal(){ document.getElementById("locationSearchModal").style.display="none"; }
-
 function pickIdx(headers, aliases){
   for(const a of aliases){ const i=headers.indexOf(a); if(i!==-1) return i; }
   for(const a of aliases){ const i=headers.findIndex(h=>h.includes(a)); if(i!==-1) return i; }
   return -1;
 }
 
-// Load a single sheet by name
 async function fetchLocationSheet(sheetName, source){
   const url = `https://docs.google.com/spreadsheets/d/${LOCATION_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
   const res = await fetch(url);
@@ -365,15 +355,11 @@ async function fetchLocationSheet(sheetName, source){
   const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}")+1));
   const rows = json.table.rows || [];
 
-  // Detect headers
   let headers = (json.table.cols||[]).map(c => normHeader(c.label || c.id || ""));
   const firstRow = rows[0]?.c?.map(c => normHeader(c ? (c.f ?? c.v ?? "") : "")) || [];
   const firstIsHeader = firstRow.some(v => /union|thana|upazila|district|division|area|ward|zone|city|corp|ইউনিয়ন|থানা|উপজেলা|জেলা|বিভাগ|এলাকা/.test(v));
   let start = 0;
-  if(firstIsHeader || headers.every(h=>!h)){
-    headers = firstRow;
-    start = 1;
-  }
+  if(firstIsHeader || headers.every(h=>!h)){ headers = firstRow; start = 1; }
 
   const col = {
     union:    pickIdx(headers, ['union','unionname','unionen','area','areaname','ইউনিয়ন','এলাকা']),
@@ -385,7 +371,6 @@ async function fetchLocationSheet(sheetName, source){
     div:     pickIdx(headers, ['division','div','বিভাগ']),
     divBn:   pickIdx(headers, ['divisionbn','divbn','বিভাগবাংলা'])
   };
-
   const cell = (row, i) => {
     if(i < 0 || !row.c || !row.c[i]) return "";
     const c = row.c[i];
@@ -393,13 +378,9 @@ async function fetchLocationSheet(sheetName, source){
     if(c.v != null) return String(c.v).trim();
     return "";
   };
-
   const result = [];
   for(let r=start; r<rows.length; r++){
-    const row = rows[r];
-    if(!row?.c) continue;
-
-    // Use column mapping OR positional fallback
+    const row = rows[r]; if(!row?.c) continue;
     const union    = cell(row, col.union)    || cell(row, 0);
     const unionBn  = cell(row, col.unionBn)  || cell(row, 1);
     const thana    = cell(row, col.thana)    || cell(row, 2);
@@ -410,11 +391,9 @@ async function fetchLocationSheet(sheetName, source){
     const divBn    = cell(row, col.divBn)    || cell(row, 7);
 
     if(!union && !thana && !dist) continue;
-
     result.push({
-      source, // 'nationwide' or 'dhaka-metro'
-      union, unionBn, thana, thanaBn,
-      dist, distBn, div, divBn,
+      source,
+      union, unionBn, thana, thanaBn, dist, distBn, div, divBn,
       search: [union, unionBn, thana, thanaBn, dist, distBn, div, divBn].join(" ").toLowerCase()
     });
   }
@@ -425,38 +404,26 @@ async function loadBothLocationSheets(){
   locationLoading = true;
   const sub = document.getElementById("locModalSubTitle");
   if(sub) sub.innerText = "⏳ দুটি শিট লোড হচ্ছে (Nationwide + Dhaka Metro)...";
-
   try{
     const [nationwide, dhakaMetro] = await Promise.all([
-      fetchLocationSheet(LOCATION_SHEET_NATIONWIDE, 'nationwide').catch(e => { console.error("Nationwide error:", e); return []; }),
-      fetchLocationSheet(LOCATION_SHEET_DHAKA_METRO, 'dhaka-metro').catch(e => { console.error("Dhaka Metro error:", e); return []; })
+      fetchLocationSheet(LOCATION_SHEET_NATIONWIDE, 'nationwide').catch(e => { console.error("Nationwide err:", e); return []; }),
+      fetchLocationSheet(LOCATION_SHEET_DHAKA_METRO, 'dhaka-metro').catch(e => { console.error("Dhaka Metro err:", e); return []; })
     ]);
-
     locationDataCombined = [...nationwide, ...dhakaMetro];
     locationLoaded = true;
-
     if(sub) sub.innerText = `✅ ${nationwide.length} Nationwide + ${dhakaMetro.length} Dhaka Metro লোড হয়েছে`;
-
     if(document.getElementById("locationSearchInput").value.trim()) filterLocations();
   }catch(e){
     console.error("Location load error:", e);
     if(sub) sub.innerText = "⚠️ লোকেশন লোড ব্যর্থ — Share পারমিশন চেক করুন";
-  }finally{
-    locationLoading = false;
-  }
+  }finally{ locationLoading = false; }
 }
 
-function handleLocationSearchDebounced(){
-  clearTimeout(locSearchDebounce);
-  locSearchDebounce = setTimeout(filterLocations, 120);
-}
+function handleLocationSearchDebounced(){ clearTimeout(locSearchDebounce); locSearchDebounce = setTimeout(filterLocations, 120); }
 
 function filterLocations(){
   const q = document.getElementById("locationSearchInput").value.trim().toLowerCase();
-  if(!q){
-    renderLocationResults([], "🔍 এলাকা / ইউনিয়ন / থানা / জেলার নাম লিখুন");
-    return;
-  }
+  if(!q){ renderLocationResults([], "🔍 এলাকা / ইউনিয়ন / থানা / জেলার নাম লিখুন"); return; }
   if(!locationLoaded){
     renderLocationResults([], "⏳ ডাটা লোড হচ্ছে... একটু অপেক্ষা করুন");
     if(!locationLoading) loadBothLocationSheets();
@@ -468,54 +435,24 @@ function filterLocations(){
 
 function renderLocationResults(list, prompt){
   const box = document.getElementById("locationResultsContainer");
-  if(prompt){
-    box.innerHTML = `<div style="text-align:center;padding:28px;color:#94a3b8;font-size:12px">${prompt}</div>`;
-    return;
-  }
-  if(!list.length){
-    box.innerHTML = `<div style="text-align:center;padding:28px;color:#ef4444;font-size:12px">❌ কিছু পাওয়া যায়নি<br><span style="color:#94a3b8;font-size:11px">বানান বদলে চেষ্টা করুন</span></div>`;
-    return;
-  }
+  if(prompt){ box.innerHTML = `<div style="text-align:center;padding:28px;color:#94a3b8;font-size:12px">${prompt}</div>`; return; }
+  if(!list.length){ box.innerHTML = `<div style="text-align:center;padding:28px;color:#ef4444;font-size:12px">❌ কিছু পাওয়া যায়নি<br><span style="color:#94a3b8;font-size:11px">বানান বদলে চেষ্টা করুন</span></div>`; return; }
 
-  // Split by source
   const dhakaMetroResults = list.filter(x => x.source === 'dhaka-metro');
   const nationwideResults = list.filter(x => x.source === 'nationwide');
-
   const MAX_PER_GROUP = 20;
   let html = `<div style="color:#38bdf8;font-size:12px;font-weight:600;margin-bottom:10px">✅ মোট ${list.length}টি ফলাফল</div>`;
 
-  // 1. DHAKA METRO SECTION (Show first if there are results)
   if(dhakaMetroResults.length > 0){
-    html += `<div class="location-section-divider divider-metro">
-      🏙️ Dhaka Metro (City Corporation - Inside Dhaka)
-      <span class="divider-count">${dhakaMetroResults.length}টি</span>
-    </div>`;
-    
-    dhakaMetroResults.slice(0, MAX_PER_GROUP).forEach(loc => {
-      html += renderLocationCard(loc, 'dhaka-metro');
-    });
-    
-    if(dhakaMetroResults.length > MAX_PER_GROUP){
-      html += `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:6px">আরও ${dhakaMetroResults.length - MAX_PER_GROUP}টি Dhaka Metro ফলাফল</div>`;
-    }
+    html += `<div class="location-section-divider divider-metro">🏙️ Dhaka Metro (City Corporation)<span class="divider-count">${dhakaMetroResults.length}টি</span></div>`;
+    dhakaMetroResults.slice(0, MAX_PER_GROUP).forEach(loc => html += renderLocationCard(loc, 'dhaka-metro'));
+    if(dhakaMetroResults.length > MAX_PER_GROUP) html += `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:6px">আরও ${dhakaMetroResults.length - MAX_PER_GROUP}টি Dhaka Metro ফলাফল</div>`;
   }
-
-  // 2. NATIONWIDE SECTION
   if(nationwideResults.length > 0){
-    html += `<div class="location-section-divider divider-nation">
-      🌆 Nationwide (Dhaka Outside + সারাদেশ)
-      <span class="divider-count">${nationwideResults.length}টি</span>
-    </div>`;
-    
-    nationwideResults.slice(0, MAX_PER_GROUP).forEach(loc => {
-      html += renderLocationCard(loc, 'nationwide');
-    });
-    
-    if(nationwideResults.length > MAX_PER_GROUP){
-      html += `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:6px">আরও ${nationwideResults.length - MAX_PER_GROUP}টি Nationwide ফলাফল</div>`;
-    }
+    html += `<div class="location-section-divider divider-nation">🌆 Nationwide (সারাদেশ)<span class="divider-count">${nationwideResults.length}টি</span></div>`;
+    nationwideResults.slice(0, MAX_PER_GROUP).forEach(loc => html += renderLocationCard(loc, 'nationwide'));
+    if(nationwideResults.length > MAX_PER_GROUP) html += `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:6px">আরও ${nationwideResults.length - MAX_PER_GROUP}টি Nationwide ফলাফল</div>`;
   }
-
   box.innerHTML = html;
 }
 
@@ -524,69 +461,35 @@ function renderLocationCard(loc, source){
   const hasUnion = loc.union || loc.unionBn;
   const mainTitle = hasUnion ? (loc.union || loc.thana) : (loc.thana || loc.dist);
   const subTitle = hasUnion ? loc.unionBn : loc.thanaBn;
-
-  const sourceBadge = isMetro
-    ? `<span class="badge-metro">🏙️ Dhaka Metro</span>`
-    : `<span class="badge-nation">🌆 Nationwide</span>`;
-
-  const typeBadge = hasUnion
-    ? `<span class="badge-u">${isMetro?'এলাকা':'ইউনিয়ন'}</span>`
-    : `<span class="badge-t">${isMetro?'ওয়ার্ড/জোন':'থানা/উপজেলা'}</span>`;
-
+  const sourceBadge = isMetro ? `<span class="badge-metro">🏙️ Dhaka Metro</span>` : `<span class="badge-nation">🌆 Nationwide</span>`;
+  const typeBadge = hasUnion ? `<span class="badge-u">${isMetro?'এলাকা':'ইউনিয়ন'}</span>` : `<span class="badge-t">${isMetro?'ওয়ার্ড/জোন':'থানা/উপজেলা'}</span>`;
   const copyText = [loc.union, loc.thana, loc.dist, loc.div].filter(Boolean).join(", ");
-
   return `
     <div class="location-result-item ${isMetro ? 'dhaka-metro' : 'nationwide'}">
-      <div class="loc-title">
-        📍 ${escapeHTML(mainTitle || 'N/A')}${subTitle ? ` <span style="color:#64748b;font-weight:500">/</span> ${escapeHTML(subTitle)}` : ""}
-        ${sourceBadge}
-        ${typeBadge}
-      </div>
-      ${hasUnion && (loc.thana || loc.thanaBn) ? `
-        <div class="loc-detail-row">
-          <span class="loc-lbl">📌 ${isMetro?'ওয়ার্ড:':'থানা:'}</span>
-          <span class="loc-val">${escapeHTML(loc.thana||'')}${loc.thanaBn?` (${escapeHTML(loc.thanaBn)})`:""}</span>
-        </div>` : ""}
-      <div class="loc-detail-row">
-        <span class="loc-lbl">🏛️ ${isMetro?'সিটি:':'জেলা:'}</span>
-        <span class="loc-val">${escapeHTML(loc.dist||'N/A')}${loc.distBn?` (${escapeHTML(loc.distBn)})`:""}</span>
-      </div>
-      <div class="loc-detail-row">
-        <span class="loc-lbl">🌐 বিভাগ:</span>
-        <span class="loc-val">${escapeHTML(loc.div||'N/A')}${loc.divBn?` (${escapeHTML(loc.divBn)})`:""}</span>
-      </div>
-      <div class="loc-copy-area">
-        <button class="copy-icon-btn" onclick="copyLocation('${escapeHTML(copyText)}')">📋 কপি</button>
-      </div>
+      <div class="loc-title">📍 ${escapeHTML(mainTitle || 'N/A')}${subTitle ? ` <span style="color:#64748b;font-weight:500">/</span> ${escapeHTML(subTitle)}` : ""} ${sourceBadge} ${typeBadge}</div>
+      ${hasUnion && (loc.thana || loc.thanaBn) ? `<div class="loc-detail-row"><span class="loc-lbl">📌 ${isMetro?'ওয়ার্ড:' : 'থানা:'}</span><span class="loc-val">${escapeHTML(loc.thana||'')}${loc.thanaBn?` (${escapeHTML(loc.thanaBn)})`:""}</span></div>` : ""}
+      <div class="loc-detail-row"><span class="loc-lbl">🏛️ ${isMetro?'সিটি:':'জেলা:'}</span><span class="loc-val">${escapeHTML(loc.dist||'N/A')}${loc.distBn?` (${escapeHTML(loc.distBn)})`:""}</span></div>
+      <div class="loc-detail-row"><span class="loc-lbl">🌐 বিভাগ:</span><span class="loc-val">${escapeHTML(loc.div||'N/A')}${loc.divBn?` (${escapeHTML(loc.divBn)})`:""}</span></div>
+      <div class="loc-copy-area"><button class="copy-icon-btn" onclick="copyLocation('${escapeHTML(copyText)}')">📋 কপি</button></div>
     </div>`;
 }
+function copyLocation(text){ navigator.clipboard.writeText(text); showToast("📋 " + text); }
 
-function copyLocation(text){
-  navigator.clipboard.writeText(text);
-  showToast("📋 " + text);
-}
-
-/* ========== HUB SEARCH ========== */
-let hubCacheList=[]; let isFetchingSheet=false; let searchDebounceTimer=null;
-
+/* =====================================================
+   🏢 HUB SEARCH LOGIC
+   ===================================================== */
 function openHubSearchModal(){
   document.getElementById("hubSearchModal").style.display="flex";
   const input=document.getElementById("hubSearchInput");
-  input.value="";
-  setTimeout(()=>input.focus(),100);
-  renderHubResults([], "🔍 হাবের নাম টাইপ করুন (Dhanmondi, Sutrapur, Rangpur)...");
-  if(!hubCacheList.length && !isFetchingSheet) fetchHubsFromGoogleSheet();
+  input.value=""; setTimeout(()=>input.focus(),100);
+  renderHubResults([],"🔍 হাবের নাম টাইপ করুন...");
+  if(!hubCacheList.length&&!isFetchingSheet)fetchHubsFromGoogleSheet();
 }
-function closeHubModal(){ document.getElementById("hubSearchModal").style.display="none"; }
-function pickCol(headers, aliases){
-  for(const a of aliases){ const i=headers.indexOf(a); if(i!==-1) return i; }
-  for(const a of aliases){ const i=headers.findIndex(h=>h.includes(a)); if(i!==-1) return i; }
-  return -1;
-}
+function closeHubModal(){document.getElementById("hubSearchModal").style.display="none"}
 async function fetchHubsFromGoogleSheet(){
   isFetchingSheet=true;
   const sub=document.getElementById("hubModalSubTitle");
-  if(sub) sub.innerText="⏳ গুগল শিট লোড হচ্ছে...";
+  if(sub)sub.innerText="⏳ গুগল শিট লোড হচ্ছে...";
   try{
     const res=await fetch(`https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/gviz/tq?tqx=out:json`);
     const text=await res.text();
@@ -597,16 +500,16 @@ async function fetchHubsFromGoogleSheet(){
     const firstLooksHeader=first.some(v=>/name|address|manager|phone|hub|district|zonal/.test(v));
     let start=0; if(firstLooksHeader||headers.every(h=>!h)){headers=first;start=1}
     const col={
-      name:pickCol(headers,['name','hubname']),address:pickCol(headers,['address','location']),
-      district:pickCol(headers,['district']),division:pickCol(headers,['division']),
-      policeStation:pickCol(headers,['policestation','thana','ps']),
-      zonalManager:pickCol(headers,['zonal','zonalmanager','zm']),zonalPhone:pickCol(headers,['zonalphone','zmphone']),
-      hubIp:pickCol(headers,['hubip','ip']),hubPhone:pickCol(headers,['hubphone','hub_phone']),
-      manager:pickCol(headers,['manager']),managerPhone:pickCol(headers,['managerphone','manager_phone']),
-      asstManager:pickCol(headers,['asstmanager','assistantmanager','assistant_manager']),
-      asstPhone:pickCol(headers,['asstphone','assistant_manager_phone']),
-      teamLeader:pickCol(headers,['teamleader','team_leader']),teamLeaderPhone:pickCol(headers,['tlphone','team_leader_phone']),
-      whatsappGroup:pickCol(headers,['whatsappgroup','whatsapp_group'])
+      name:pickIdx(headers,['name','hubname']),address:pickIdx(headers,['address','location']),
+      district:pickIdx(headers,['district']),division:pickIdx(headers,['division']),
+      policeStation:pickIdx(headers,['policestation','thana','ps']),
+      zonalManager:pickIdx(headers,['zonal','zonalmanager','zm']),zonalPhone:pickIdx(headers,['zonalphone','zmphone']),
+      hubIp:pickIdx(headers,['hubip','ip']),hubPhone:pickIdx(headers,['hubphone','hub_phone']),
+      manager:pickIdx(headers,['manager']),managerPhone:pickIdx(headers,['managerphone','manager_phone']),
+      asstManager:pickIdx(headers,['asstmanager','assistantmanager','assistant_manager']),
+      asstPhone:pickIdx(headers,['asstphone','assistant_manager_phone']),
+      teamLeader:pickIdx(headers,['teamleader','team_leader']),teamLeaderPhone:pickIdx(headers,['tlphone','team_leader_phone']),
+      whatsappGroup:pickIdx(headers,['whatsappgroup','whatsapp_group'])
     };
     const cellAt=(row,idx)=>{
       if(idx<0||!row.c||!row.c[idx])return '';
@@ -651,10 +554,10 @@ function pill(label,value,isPhone=false,isLink=false){
   const v=value&&value!=='N/A'?value:'N/A';
   let btn='';
   if(v!=='N/A'){
-    if(isLink&&v.startsWith('http')) btn=`<a href="${escapeHTML(v)}" target="_blank" class="copy-icon-btn">🔗 Open</a>`;
+    if(isLink&&v.startsWith('http')) btn=`<a href="${escapeHTML(v)}" target="_blank" class="copy-icon-btn" style="text-decoration:none;">🔗 Open</a>`;
     else if(isPhone) btn=`<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(v)}')">📄</button>`;
   }
-  const valDisplay=(isLink&&v.startsWith('http'))?`<a href="${escapeHTML(v)}" target="_blank" style="color:#0891b2;text-decoration:none">Group Link</a>`:escapeHTML(v);
+  const valDisplay=(isLink&&v.startsWith('http'))?`<a href="${escapeHTML(v)}" target="_blank" style="color:#38bdf8;text-decoration:none">Group Link</a>`:escapeHTML(v);
   return `<div class="hub-pill"><div><span class="lbl">${label}:</span> <span class="val">${valDisplay}</span></div>${btn}</div>`;
 }
 function renderHubResults(list,prompt){
@@ -802,7 +705,7 @@ function renderActiveBreaks(){
     if(remainingMs<=0){timerClass='timer-over';timerText=`⛔ ${Math.abs(Math.floor(remainingMs/60000))} মি: বেশি!`}
     else if(remainingMin<=3){timerClass='timer-warn';timerText=`⚠️ ${remainingMin} মি: বাকি`}
     else timerText=`⏳ ${remainingMin} মি: বাকি`;
-    html+=`<div class="live-break-item"><div><span class="live-break-name">${escapeHTML(it.agentName)}</span><span style="color:#94a3b8;font-size:10px;margin-left:5px">(${escapeHTML(it.breakType)})</span></div><span class="live-break-timer ${timerClass}">${timerText}</span></div>`;
+    html+=`<div class="live-break-item"><div><span class="live-break-name">${escapeHTML(it.agentName)}</span><span style="color:rgba(248,250,252,.55);font-size:10px;margin-left:5px">(${escapeHTML(it.breakType)})</span></div><span class="live-break-timer ${timerClass}">${timerText}</span></div>`;
   });
   list.innerHTML=html;
 }
@@ -822,7 +725,7 @@ function openBreakHistory(type){
   const list=type==='approved'?todayApprovedList:todayRejectedList;
   title.innerHTML=type==='approved'?"✅ আজকের অনুমোদিত ব্রেক":"❌ আজকের বাতিল ব্রেক";
   title.style.color=type==='approved'?"#10b981":"#ef4444";
-  if(!list.length) container.innerHTML=`<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">কোনো ডাটা পাওয়া যায়নি।</div>`;
+  if(!list.length) container.innerHTML=`<div style="text-align:center;padding:30px;color:rgba(248,250,252,.6);font-size:13px">কোনো ডাটা পাওয়া যায়নি।</div>`;
   else list.forEach(item=>{
     const reqTime=new Date(item.requestedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
     const procTime=item.processedAt?new Date(item.processedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}):'--:--';
@@ -837,7 +740,16 @@ function closeBreakHistoryModal(){document.getElementById('breakHistoryModal').s
 /* ========== STATS ========== */
 function initTotalVisits(){
   const ref=db.collection('portal_stats').doc('visits');
-  if(!sessionStorage.getItem('has_counted_visit')){sessionStorage.setItem('has_counted_visit','true');ref.set({total:firebase.firestore.FieldValue.increment(1)},{merge:true})}
+  
+  // Real daily unique visit tracker
+  const today = new Date().toISOString().split('T')[0];
+  const lastVisitDay = localStorage.getItem('last_visit_date');
+  
+  if (lastVisitDay !== today) {
+    localStorage.setItem('last_visit_date', today);
+    ref.set({total:firebase.firestore.FieldValue.increment(1)},{merge:true}).catch(console.error);
+  }
+  
   ref.onSnapshot(d=>{if(d.exists&&d.data().total!==undefined) document.getElementById('visitCount').innerText=d.data().total.toLocaleString()});
 }
 function initOnlinePresence(){
