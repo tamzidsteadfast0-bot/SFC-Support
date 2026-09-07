@@ -304,6 +304,12 @@ let isAdmin=false;
 const mySessionId='usr_'+Math.random().toString(36).slice(2,11);
 let noticesDataStore={},activeBreakList=[],todayApprovedList=[],todayRejectedList=[];
 
+/* FIX: these were used throughout the Hub Search code (fetchHubsFromGoogleSheet,
+   openHubSearchModal, filterHubs, handleHubSearchDebounced) but were never
+   declared anywhere. Reading hubCacheList.length before it was ever assigned
+   threw a ReferenceError, which silently killed the whole search feature. */
+let hubCacheList=[],isFetchingSheet=false,searchDebounceTimer=null;
+
 function escapeHTML(s){return s?String(s).replace(/[&<>'"]/g,t=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])):''}
 function formatPhoneNumber(val){
   if(val==null||val==='')return '';
