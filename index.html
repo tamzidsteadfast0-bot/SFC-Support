@@ -4,801 +4,1591 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IR Support Portal | Steadfast</title>
+
+<!-- Favicon (ব্রাউজার ট্যাবে লোগো দেখাবে) -->
 <link rel="icon" href="steadfast-logo.png">
+
+<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Firebase SDKs (CDN) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter','Noto Sans Bengali',sans-serif;background:#0f172a;color:#f8fafc;min-height:100vh}
-.bn,.notice-title,.notice-text,.modal-body,.modal-title,.break-sidebar-content,.compact-form-title,.mini-stat-txt,.empty-compact-q,.compact-agent-name,.compact-type-badge,.compact-wait-time,.mini-admin-badge,.history-item-info,select,button,input,textarea{font-family:'Noto Sans Bengali','Inter',sans-serif}
-header{background:linear-gradient(135deg,#0f2027 0%,#203a43 40%,#2c5364 100%);color:#fff;position:relative;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.1)}
-header::before{content:'';position:absolute;top:-50%;right:-20%;width:500px;height:500px;background:radial-gradient(circle,rgba(56,189,248,.15) 0%,transparent 70%);border-radius:50%}
-.header-content{position:relative;z-index:2;max-width:1350px;margin:0 auto;padding:22px 30px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.header-left{display:flex;align-items:center;gap:15px}
-.logo-icon{width:54px;height:54px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,.3);padding:3px;flex-shrink:0}
-.logo-img{width:100%;height:100%;object-fit:contain;border-radius:50%}
-.header-left h1{font-size:24px;font-weight:800;letter-spacing:-.5px}
-.header-left h1 span{background:linear-gradient(90deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-left p{font-size:11.5px;opacity:.65;margin-top:2px}
-.header-badges{display:flex;gap:8px;flex-wrap:wrap}
-.header-badge{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:7px 14px;border-radius:50px;font-size:11.5px;font-weight:500;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:7px}
-.header-badge.online-badge{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.25);color:#4ade80}
-.header-badge.visitor-badge{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.25);color:#38bdf8}
-.header-badge.active-break-badge{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3);color:#fbbf24;cursor:pointer}
-.header-badge.active-break-badge.zero-active{display:none}
-.pulse-green,.pulse-orange{width:8px;height:8px;border-radius:50%}
-.pulse-green{background:#22c55e;animation:pg 1.5s infinite}
-.pulse-orange{background:#f59e0b;animation:po 1.5s infinite}
-@keyframes pg{0%,100%{opacity:1}50%{opacity:.4}}
-@keyframes po{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.15)}}
-.container{width:92%;max-width:1350px;margin:28px auto 40px}
-.portal-layout{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
-.section-title{font-size:17px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:10px}
-.section-title .line{flex:1;height:1px;background:linear-gradient(90deg,#334155,transparent)}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
-.card{background:#1e293b;border-radius:16px;padding:22px 20px;position:relative;overflow:hidden;border:1px solid #334155;transition:all .3s}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--a1),var(--a2));opacity:0;transition:.3s}
-.card:hover::before{opacity:1}
-.card:hover{transform:translateY(-5px);border-color:#475569}
-.card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px;background:linear-gradient(135deg,var(--a1),var(--a2))}
-.card h2{font-size:15px;font-weight:700;margin-bottom:5px}
-.card p{color:#94a3b8;font-size:12px;margin-bottom:14px}
-.card-actions-row{display:flex;gap:8px;flex-wrap:wrap}
-.card a,.card button.card-btn{display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:var(--a1);font-weight:600;font-size:12px;padding:7px 12px;border-radius:8px;background:rgba(255,255,255,.05);border:none;cursor:pointer;font-family:inherit;transition:.2s}
-.card a:hover,.card button.card-btn:hover{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff}
-.card:nth-child(1){--a1:#f59e0b;--a2:#f97316}.card:nth-child(2){--a1:#10b981;--a2:#059669}.card:nth-child(3){--a1:#8b5cf6;--a2:#7c3aed}
-.card:nth-child(4){--a1:#ef4444;--a2:#dc2626}.card:nth-child(5){--a1:#3b82f6;--a2:#2563eb}.card:nth-child(6){--a1:#06b6d4;--a2:#0891b2}.card:nth-child(7){--a1:#ec4899;--a2:#db2777}
-.right-sidebar{display:flex;flex-direction:column;gap:18px;position:sticky;top:20px}
-.sidebar-widget{background:#1e293b;border-radius:16px;border:1px solid #334155;overflow:hidden}
-.widget-top-bar{background:#0f172a;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #334155}
-.widget-top-bar h2{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px}
-.admin-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;color:#fff;font-weight:600;font-family:inherit}
-.admin-panel{display:none;background:#0f172a;border-bottom:1px solid #334155;padding:12px}
-.admin-panel input,.admin-panel textarea{width:100%;padding:8px 10px;margin-bottom:7px;background:#1e293b;border:1px solid #334155;border-radius:6px;font-size:13px;color:#fff;outline:none;font-family:inherit}
-.admin-panel .publish-btn{width:100%;padding:8px;background:linear-gradient(135deg,#6366f1,#3b82f6);color:#fff;border:none;border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit}
-.notice-list{max-height:260px;overflow-y:auto;padding:10px}
-.notice-list::-webkit-scrollbar{width:4px}
-.notice-list::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:10px}
-.notice-item{background:#0f172a;border:1px solid #334155;border-left:3px solid #3b82f6;padding:12px 14px;border-radius:8px;margin-bottom:9px;position:relative}
-.notice-title{font-weight:700;font-size:14px;margin-bottom:5px;padding-right:20px;line-height:1.5}
-.notice-text{color:#cbd5e1;font-size:13px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.read-more-btn{color:#38bdf8;font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;display:inline-block}
-.notice-time{font-size:10.5px;color:#64748b;margin-top:6px}
-.delete-btn{display:none;position:absolute;right:6px;top:6px;background:#ef4444;color:#fff;border:none;padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer}
-.break-sidebar-content{padding:12px}
-.break-mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
-.mini-stat-chip{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 5px;text-align:center;cursor:pointer;transition:.2s}
-.mini-stat-chip:hover{background:rgba(255,255,255,.05)}
-.mini-stat-num{font-size:17px;font-weight:800;line-height:1;margin-bottom:3px}
-.mini-stat-chip.pending .mini-stat-num{color:#f59e0b}.mini-stat-chip.approved .mini-stat-num{color:#10b981}.mini-stat-chip.rejected .mini-stat-num{color:#ef4444}
-.mini-stat-txt{font-size:10px;color:#94a3b8}
-.live-active-breaks{display:none;margin-bottom:12px;padding:10px 12px;border-radius:10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)}
-.live-active-breaks.has-active{display:block}
-.live-active-header{font-size:11px;font-weight:700;color:#fbbf24;margin-bottom:8px;display:flex;justify-content:space-between}
-.live-break-item{background:#0f172a;border:1px solid #334155;border-radius:6px;padding:7px 10px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;font-size:11.5px}
-.live-break-name{font-weight:600}
-.live-break-timer{font-weight:700;font-size:10.5px;padding:2px 7px;border-radius:4px}
-.timer-ok{color:#4ade80;background:rgba(34,197,94,.15)}.timer-warn{color:#fbbf24;background:rgba(245,158,11,.15)}.timer-over{color:#f87171;background:rgba(239,68,68,.2)}
-.compact-break-form{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:11px;margin-bottom:10px}
-.compact-form-title{font-size:12px;font-weight:700;margin-bottom:8px}
-.compact-inputs{display:flex;flex-direction:column;gap:7px}
-.compact-inputs select{background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:8px 10px;border-radius:6px;font-size:12px;outline:none;font-family:inherit}
-.compact-submit-btn{background:#f59e0b;color:#0f172a;border:none;padding:9px;border-radius:6px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit}
-.compact-submit-btn:disabled{opacity:.6;cursor:not-allowed}
-.compact-queue-header{font-size:12px;font-weight:700;margin-bottom:7px;display:flex;justify-content:space-between}
-.compact-queue-list{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
-.compact-queue-item{background:#0f172a;border:1px solid #334155;border-left:3px solid #f59e0b;border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:5px}
-.compact-queue-top{display:flex;justify-content:space-between;align-items:center}
-.compact-agent-info{display:flex;align-items:center;gap:8px}
-.compact-q-num{width:20px;height:20px;background:rgba(245,158,11,.15);color:#f59e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px}
-.compact-agent-name{font-size:12.5px;font-weight:700}
-.compact-type-badge{font-size:10px;color:#94a3b8;background:#1e293b;padding:2px 6px;border-radius:4px}
-.compact-queue-bottom{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:#64748b}
-.compact-wait-time{color:#f59e0b;font-weight:600}
-.compact-actions{display:flex;gap:4px}
-.btn-mini-approve{background:#10b981;color:#fff;border:none;padding:4px 9px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer}
-.btn-mini-reject{background:#ef4444;color:#fff;border:none;padding:4px 9px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer}
-.mini-admin-badge{font-size:9.5px;color:#64748b;background:#1e293b;padding:3px 7px;border-radius:4px}
-.empty-compact-q{text-align:center;padding:15px;color:#64748b;font-size:12px}
 
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.88);backdrop-filter:blur(5px);z-index:9999;align-items:center;justify-content:center;padding:20px}
-.modal-card{background:#1e293b;border:1px solid #334155;border-radius:16px;width:100%;max-width:650px;padding:24px;box-shadow:0 25px 50px rgba(0,0,0,.6);position:relative;max-height:90vh;display:flex;flex-direction:column}
-.modal-close-btn{position:absolute;right:16px;top:16px;background:#334155;color:#fff;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-weight:700;z-index:10;display:flex;align-items:center;justify-content:center}
-.modal-close-btn:hover{background:#ef4444}
-.modal-title{font-size:17px;font-weight:800;margin-bottom:8px;padding-right:40px;line-height:1.45}
-.modal-time{font-size:11.5px;color:#38bdf8;margin-bottom:14px;font-weight:600}
-.modal-body{font-size:15px;color:#e2e8f0;line-height:1.85;overflow-y:auto;white-space:pre-line}
+*{ margin:0; padding:0; box-sizing:border-box; }
 
-.hub-search-input{width:100%;padding:12px 16px;background:#0f172a;border:1px solid #38bdf8;border-radius:10px;color:#fff;font-size:13.5px;outline:none;margin-bottom:12px;font-family:inherit;position:sticky;top:0;z-index:5}
-.hub-search-input:focus{box-shadow:0 0 15px rgba(56,189,248,.3)}
-.hub-structured-wrapper{overflow-y:auto;flex:1;padding-right:4px}
-.hub-structured-wrapper::-webkit-scrollbar{width:4px}
-.hub-structured-wrapper::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:10px}
-.hub-sec-box{background:#eef2f6;border-radius:12px;padding:16px;margin-bottom:12px;color:#1e293b}
-.hub-sec-header{text-align:center;font-size:14px;font-weight:800;color:#334155;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #cbd5e1;text-transform:uppercase}
-.hub-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.hub-grid-2.full-width{grid-template-columns:1fr}
-.hub-pill{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center}
-.hub-pill .lbl{font-weight:700;color:#475569;margin-right:5px}
-.hub-pill .val{font-weight:600;color:#0f172a;word-break:break-word}
-.copy-icon-btn{background:#e2e8f0;color:#0f172a;border:none;padding:3px 7px;border-radius:4px;font-size:11px;cursor:pointer;margin-left:6px;text-decoration:none}
-.copy-icon-btn:hover{background:#38bdf8;color:#fff}
+body{
+    font-family:'Inter', 'Noto Sans Bengali', sans-serif;
+    background:#0f172a;
+    color:#f8fafc;
+    min-height:100vh;
+}
 
-.location-result-item{border-radius:10px;padding:14px 16px;margin-bottom:10px;color:#1e293b;border-left:4px solid #ec4899}
-.location-result-item.nationwide{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-left-color:#10b981}
-.location-result-item.dhaka-metro{background:linear-gradient(135deg,#eff6ff,#dbeafe);border-left-color:#3b82f6}
-.location-result-item .loc-title{font-size:14px;font-weight:800;color:#0f172a;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.badge-nation{background:#10b981;color:#fff;padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
-.badge-metro{background:#3b82f6;color:#fff;padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
-.badge-u{background:#ec4899;color:#fff;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700}
-.badge-t{background:#8b5cf6;color:#fff;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700}
-.loc-detail-row{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#475569;padding:3px 0}
-.loc-detail-row .loc-lbl{font-weight:700;color:#334155;min-width:80px}
-.loc-detail-row .loc-val{font-weight:600;color:#0f172a}
-.loc-copy-area{margin-top:8px;padding-top:6px;border-top:1px dashed #cbd5e1;text-align:right}
-.location-section-divider{font-size:13px;font-weight:800;color:#f8fafc;padding:10px 14px;margin:12px 0 8px;border-radius:8px;display:flex;align-items:center;gap:8px}
-.divider-metro{background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(37,99,235,.1));border:1px solid rgba(59,130,246,.3);color:#93c5fd}
-.divider-nation{background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(5,150,105,.1));border:1px solid rgba(16,185,129,.3);color:#6ee7b7}
+.bn, .notice-title, .notice-text, .modal-body, .modal-title, .break-sidebar-content, .compact-form-title, .mini-stat-txt, .empty-compact-q, .compact-agent-name, .compact-type-badge, .compact-wait-time, .admin-only-badge, .mini-admin-badge, .active-break-badge, .live-break-item, .history-item-info, select, button, input, textarea{
+    font-family:'Noto Sans Bengali','Inter',sans-serif;
+}
 
-.history-item{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px}
-.history-item-info h4{font-size:14px;margin-bottom:4px}
-.history-item-info p{font-size:11.5px;color:#94a3b8}
-.history-status-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:6px;white-space:nowrap}
+/* ========== HEADER ========== */
 
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(200%);background:#1e293b;color:#fff;padding:12px 22px;border-radius:10px;border:1px solid #334155;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:99999;font-size:13px;font-weight:600;transition:transform .3s}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.success{border-color:#10b981;color:#4ade80}.toast.error{border-color:#ef4444;color:#f87171}.toast.warn{border-color:#f59e0b;color:#fbbf24}
+header{
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 40%, #2c5364 100%);
+    color:#fff;
+    position:relative;
+    overflow:hidden;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
 
-footer{background:#0f172a;border-top:1px solid #334155;color:rgba(255,255,255,.5);text-align:center;padding:22px;font-size:12px;margin-top:40px}
-footer strong{color:rgba(255,255,255,.8)}
-@media(max-width:992px){.portal-layout{grid-template-columns:1fr}.right-sidebar{position:static}}
-@media(max-width:600px){.hub-grid-2{grid-template-columns:1fr}.modal-overlay{padding:0;align-items:stretch}.modal-card{max-width:100%;height:100%;max-height:100%;border-radius:0}.hub-search-input{position:sticky;top:0;background:#1e293b}.container{width:94%}.header-badges{width:100%;justify-content:center}.history-item{flex-direction:column;align-items:flex-start}}
+header::before{
+    content:'';
+    position:absolute;
+    top:-50%; right:-20%;
+    width:500px; height:500px;
+    background: radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%);
+    border-radius:50%;
+}
+
+.header-content{
+    position:relative; z-index:2;
+    max-width:1350px; margin:0 auto;
+    padding:22px 30px;
+    display:flex; align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap; gap:12px;
+}
+
+.header-left{ display:flex; align-items:center; gap:15px; }
+
+/* LOGO STYLE */
+.logo-icon{
+    width:54px; height:54px;
+    background: #ffffff;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    padding: 3px;
+    flex-shrink: 0;
+}
+.logo-img{
+    width: 100%; height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+.header-left h1{ font-size:24px; font-weight:800; letter-spacing:-0.5px; }
+
+.header-left h1 span{
+    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+
+.header-left p{ font-size:11.5px; opacity:.65; margin-top:2px; }
+
+/* ========================================= */
+/* 🏆 TOP ISSUE TAKER MARQUEE ANIMATION */
+/* ========================================= */
+.header-center-marquee {
+    flex: 1;
+    margin: 0 20px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    height: 38px;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+}
+.marquee-title {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 11px;
+    padding: 0 14px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    z-index: 2;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.marquee-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.marquee-content {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll-left 25s linear infinite;
+    padding-left: 100%;
+}
+.marquee-content:hover {
+    animation-play-state: paused;
+}
+.marquee-item {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 40px;
+    font-size: 13px;
+    font-weight: 700;
+}
+.marquee-item .rank-icon { font-size: 15px; margin-right: 6px; }
+.marquee-item .name { color: #f8fafc; }
+.marquee-item .score {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    font-size: 11px;
+}
+@keyframes scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+
+.header-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.header-badge{
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+    border:1px solid rgba(255,255,255,0.1);
+    padding:7px 14px; border-radius:50px;
+    font-size:11.5px; font-weight:500;
+    color:rgba(255,255,255,0.85);
+    display:flex; align-items:center; gap:7px;
+}
+
+.header-badge.online-badge { background: rgba(34, 197, 94, 0.12); border-color: rgba(34, 197, 94, 0.25); color: #4ade80; }
+.header-badge.visitor-badge { background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.25); color: #38bdf8; }
+.header-badge.active-break-badge { 
+    background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.3); color: #fbbf24; cursor: pointer; transition: 0.2s;
+}
+.header-badge.active-break-badge:hover { background: rgba(245, 158, 11, 0.25); }
+.header-badge.active-break-badge.zero-active { display: none; }
+
+.pulse-green {
+    width: 8px; height: 8px; background: #22c55e;
+    border-radius: 50%; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    animation: pulse-green 1.5s infinite;
+}
+.pulse-orange {
+    width: 8px; height: 8px; background: #f59e0b;
+    border-radius: 50%; box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+    animation: pulse-orange 1.5s infinite;
+}
+
+@keyframes pulse-green {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+@keyframes pulse-orange {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+/* ========== CONTAINER ========== */
+
+.container{ width:92%; max-width:1350px; margin:28px auto 40px; }
+
+.portal-layout{
+    display:grid;
+    grid-template-columns:1fr 380px;
+    gap:24px; align-items:start;
+}
+
+.section-title{
+    font-size:17px; font-weight:700;
+    color:#f8fafc; margin-bottom:18px;
+    display:flex; align-items:center; gap:10px;
+}
+
+.section-title .line{ flex:1; height:1px; background: linear-gradient(90deg, #334155, transparent); }
+
+/* ========== CARDS ========== */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+    gap:16px;
+}
+
+.card{
+    background:#1e293b; border-radius:16px;
+    padding:22px 20px; position:relative;
+    overflow:hidden; border:1px solid #334155;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+.card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--a1), var(--a2));
+    opacity:0; transition: opacity 0.3s;
+}
+
+.card:hover::before{ opacity:1; }
+.card:hover{ transform:translateY(-5px); border-color:#475569; }
+
+.card-icon{
+    width:44px; height:44px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; margin-bottom:12px;
+    background: linear-gradient(135deg, var(--a1), var(--a2));
+}
+
+.card h2{ font-size:15px; font-weight:700; color:#f8fafc; margin-bottom:5px; }
+.card p{ color:#94a3b8; font-size:12px; margin-bottom:14px; }
+
+.card-actions-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.card a, .card button.card-btn {
+    display:inline-flex; align-items:center; gap:5px;
+    text-decoration:none; color: var(--a1);
+    font-weight:600; font-size:12px;
+    padding:7px 12px; border-radius:8px;
+    background: rgba(255,255,255,0.05); transition: all 0.2s;
+    border: none; cursor: pointer; font-family: inherit;
+}
+
+.card a:hover, .card button.card-btn:hover { background: linear-gradient(135deg, var(--a1), var(--a2)); color:#fff; }
+
+.card:nth-child(1){ --a1:#f59e0b; --a2:#f97316; }
+.card:nth-child(2){ --a1:#10b981; --a2:#059669; }
+.card:nth-child(3){ --a1:#8b5cf6; --a2:#7c3aed; }
+.card:nth-child(4){ --a1:#ef4444; --a2:#dc2626; }
+.card:nth-child(5){ --a1:#3b82f6; --a2:#2563eb; }
+.card:nth-child(6){ --a1:#06b6d4; --a2:#0891b2; }
+.card:nth-child(7){ --a1:#ec4899; --a2:#db2777; }
+
+/* ========== RIGHT SIDEBAR CONTAINER ========== */
+
+.right-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar-widget {
+    background: #1e293b;
+    border-radius: 16px;
+    border: 1px solid #334155;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    overflow: hidden;
+}
+
+.widget-top-bar {
+    background: #0f172a;
+    padding: 13px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+}
+
+.widget-top-bar h2 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.admin-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 600;
+    font-family: inherit;
+    transition: 0.2s;
+}
+
+.admin-btn:hover { background: rgba(255,255,255,0.2); }
+
+/* Notice List Styles */
+.admin-panel {
+    display: none;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+    padding: 12px;
+}
+
+.admin-panel input, .admin-panel textarea {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 7px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #fff;
+    outline: none;
+    font-family: inherit;
+}
+
+.admin-panel .publish-btn {
+    width: 100%;
+    padding: 8px;
+    background: linear-gradient(135deg, #6366f1, #3b82f6);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.notice-list { 
+    max-height: 260px; 
+    overflow-y: auto; 
+    padding: 10px; 
+}
+
+.notice-list::-webkit-scrollbar { width: 4px; }
+.notice-list::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 10px; }
+
+.notice-item {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-left: 3px solid #3b82f6;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 9px;
+    position: relative;
+}
+
+.notice-title { font-weight: 700; color: #f8fafc; font-size: 14px; margin-bottom: 5px; padding-right: 20px; line-height: 1.5;}
+
+.notice-text { 
+    color: #cbd5e1; 
+    font-size: 13px; 
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.read-more-btn {
+    color: #38bdf8;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.read-more-btn:hover { text-decoration: underline; }
+
+.notice-time { font-size: 10.5px; color: #64748b; margin-top: 6px; }
+
+.delete-btn {
+    display: none; position: absolute; right: 6px; top: 6px;
+    background: #ef4444; color: #fff; border: none;
+    padding: 2px 6px; border-radius: 4px; font-size: 10px; cursor: pointer;
+}
+
+/* ===================================================== */
+/* ☕ BREAK PORTAL WIDGET STYLES */
+/* ===================================================== */
+
+.break-sidebar-content { padding: 12px; }
+
+.break-mini-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    margin-bottom: 10px;
+}
+
+.mini-stat-chip {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 8px 5px;
+    text-align: center;
+    transition: 0.2s;
+}
+
+.mini-stat-chip.approved { cursor: pointer; }
+.mini-stat-chip.approved:hover { background: rgba(16, 185, 129, 0.08); border-color: #10b981; }
+
+.mini-stat-chip.rejected { cursor: pointer; }
+.mini-stat-chip.rejected:hover { background: rgba(239, 68, 68, 0.08); border-color: #ef4444; }
+
+
+.mini-stat-num {
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 3px;
+}
+
+.mini-stat-chip.pending .mini-stat-num { color: #f59e0b; }
+.mini-stat-chip.approved .mini-stat-num { color: #10b981; }
+.mini-stat-chip.rejected .mini-stat-num { color: #ef4444; }
+
+.mini-stat-txt { font-size: 10px; color: #94a3b8; white-space: nowrap; }
+
+/* LIVE ACTIVE BREAKS */
+.live-active-breaks {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(249, 115, 22, 0.05));
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    display: none;
+}
+.live-active-breaks.has-active { display: block; }
+
+.live-active-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: #fbbf24;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.live-break-item {
+    background: #0f172a;
+    border-radius: 6px;
+    padding: 7px 10px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+    border: 1px solid #334155;
+}
+.live-break-item:last-child { margin-bottom: 0; }
+.live-break-name { color: #f8fafc; font-weight: 600; }
+.live-break-timer { 
+    font-weight: 700; font-size: 10.5px;
+    padding: 2px 7px; border-radius: 4px;
+}
+
+.timer-ok { color: #4ade80; background: rgba(34, 197, 94, 0.15); }
+.timer-warn { color: #fbbf24; background: rgba(245, 158, 11, 0.15); }
+.timer-over { color: #f87171; background: rgba(239, 68, 68, 0.2); }
+
+.compact-break-form {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 11px;
+    margin-bottom: 10px;
+}
+
+.compact-form-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 8px;
+}
+
+.compact-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.compact-inputs select {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #f8fafc;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    outline: none;
+    font-family: inherit;
+}
+
+.compact-inputs select:focus { border-color: #f59e0b; }
+
+.compact-submit-btn {
+    background: #f59e0b;
+    color: #0f172a;
+    border: none;
+    padding: 9px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12.5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.2s;
+}
+
+.compact-submit-btn:hover { background: #d97706; }
+.compact-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.compact-queue-header {
+    font-size: 12px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 7px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.compact-queue-list {
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.compact-queue-item {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-left: 3px solid #f59e0b;
+    border-radius: 8px;
+    padding: 9px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.compact-queue-top { display: flex; justify-content: space-between; align-items: center; }
+.compact-agent-info { display: flex; align-items: center; gap: 8px; }
+
+.compact-q-num {
+    width: 20px; height: 20px;
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 10px;
+}
+
+.compact-agent-name { font-size: 12.5px; font-weight: 700; color: #f8fafc; }
+.compact-type-badge { font-size: 10px; color: #94a3b8; background: #1e293b; padding: 2px 6px; border-radius: 4px; }
+.compact-queue-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 10.5px; color: #64748b; }
+.compact-wait-time { color: #f59e0b; font-weight: 600; }
+.compact-actions { display: flex; gap: 4px; }
+
+.btn-mini-approve { background: #10b981; color: #fff; border: none; padding: 4px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.btn-mini-approve:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-mini-reject { background: #ef4444; color: #fff; border: none; padding: 4px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.mini-admin-badge { font-size: 9.5px; color: #64748b; background: #1e293b; padding: 3px 7px; border-radius: 4px; }
+.empty-compact-q { text-align: center; padding: 15px; color: #64748b; font-size: 12px; }
+
+/* ===================================================== */
+/* 🔍 MODAL OVERLAYS */
+/* ===================================================== */
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 650px;
+    padding: 24px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+    position: relative;
+    animation: modalFadeIn 0.25s ease forwards;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-close-btn {
+    position: absolute;
+    right: 16px; top: 16px;
+    background: #334155;
+    color: #f8fafc;
+    border: none;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+}
+
+.modal-close-btn:hover { background: #ef4444; }
+
+.modal-title { font-size: 17px; font-weight: 800; color: #f8fafc; margin-bottom: 8px; padding-right: 40px; line-height: 1.45; }
+.modal-time { font-size: 11.5px; color: #38bdf8; margin-bottom: 14px; font-weight: 600; }
+.modal-body { font-size: 15px; color: #e2e8f0; line-height: 1.85; overflow-y: auto; white-space: pre-line; }
+
+/* HUB SEARCH MODAL STYLES */
+.hub-search-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: #0f172a;
+    border: 1px solid #38bdf8;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 13.5px;
+    outline: none;
+    margin-bottom: 15px;
+    font-family: inherit;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.hub-search-input:focus {
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+}
+
+.hub-structured-wrapper {
+    overflow-y: auto;
+    padding-right: 4px;
+    flex: 1;
+}
+
+.hub-structured-wrapper::-webkit-scrollbar { width: 4px; }
+.hub-structured-wrapper::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 10px; }
+
+/* Structured Section Box */
+.hub-sec-box {
+    background: #eef2f6;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    color: #1e293b;
+}
+
+.hub-sec-header {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #334155;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #cbd5e1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hub-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.hub-grid-2.full-width {
+    grid-template-columns: 1fr;
+}
+
+.hub-pill {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 12.5px;
+    color: #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.hub-pill .lbl {
+    font-weight: 700;
+    color: #475569;
+    margin-right: 5px;
+}
+
+.hub-pill .val {
+    font-weight: 600;
+    color: #0f172a;
+    word-break: break-word;
+}
+
+.copy-icon-btn {
+    background: #e2e8f0;
+    color: #0f172a;
+    border: none;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+}
+
+.copy-icon-btn:hover {
+    background: #38bdf8;
+    color: #fff;
+}
+
+/* LOCATION SEARCH RESULT ITEMS */
+.location-result-item {
+    background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    color: #1e293b;
+    border-left: 4px solid #ec4899;
+}
+.location-result-item.thana-type {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left-color: #3b82f6;
+}
+.location-result-item .loc-title {
+    font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.location-result-item .loc-title .badge-u {
+    background: #ec4899; color: #fff; padding: 2px 8px; border-radius: 5px;
+    font-size: 10px; font-weight: 700;
+}
+.location-result-item .loc-title .badge-t {
+    background: #3b82f6; color: #fff; padding: 2px 8px; border-radius: 5px;
+    font-size: 10px; font-weight: 700;
+}
+.loc-detail-row {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12.5px; color: #475569; padding: 3px 0;
+}
+.loc-detail-row .loc-lbl { font-weight: 700; color: #334155; min-width: 80px; }
+.loc-detail-row .loc-val { font-weight: 600; color: #0f172a; }
+.loc-copy-area {
+    margin-top: 8px; padding-top: 6px;
+    border-top: 1px dashed #cbd5e1; text-align: right;
+}
+
+.history-item { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 10px; }
+.history-item-info h4 { font-size: 14px; color: #f8fafc; margin-bottom: 4px; }
+.history-item-info p { font-size: 11.5px; color: #94a3b8; }
+.history-status-badge { font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 6px; white-space: nowrap; }
+
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(200%); background: #1e293b; color: #fff; padding: 12px 22px; border-radius: 10px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 99999; font-size: 13px; font-weight: 600; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: #10b981; color: #4ade80; }
+.toast.error { border-color: #ef4444; color: #f87171; }
+.toast.warn { border-color: #f59e0b; color: #fbbf24; }
+
+@media (max-width: 992px) { 
+    .portal-layout { grid-template-columns: 1fr; } 
+    .right-sidebar { position: static; } 
+    .header-content { padding: 20px; } 
+    .header-center-marquee { order: 3; width: 100%; margin: 15px 0 0 0; flex: none; }
+}
+
+@media (max-width: 600px) { 
+    .hub-grid-2 { grid-template-columns: 1fr; } 
+    .modal-overlay { padding: 0; align-items: stretch; } 
+    .modal-card { max-width: 100%; height: 100%; max-height: 100%; border-radius: 0; padding: 20px 15px; } 
+    .hub-search-input { position: sticky; top: 0; background: #1e293b; padding: 10px 14px; margin-bottom: 10px; } 
+    .card { padding: 20px 18px; } 
+    .container { width: 94%; } 
+    .header-badges { width: 100%; justify-content: center; } 
+    .history-item { flex-direction: column; align-items: flex-start; } 
+}
+
+footer{
+    background: #0f172a;
+    border-top: 1px solid #334155;
+    color:rgba(255,255,255,0.5);
+    text-align:center; padding:22px; font-size:12px;
+    margin-top: 40px;
+}
+
+footer strong{ color:rgba(255,255,255,0.8); }
+
 </style>
 </head>
+
 <body>
 
 <header>
-  <div class="header-content">
-    <div class="header-left">
-      <div class="logo-icon"><img src="steadfast-logo.png" alt="SteadFast" class="logo-img"></div>
-      <div>
-        <h1>IR <span>Support Portal</span></h1>
-        <p>STEADFAST CUSTOMER CARE — INTERNAL TOOLS</p>
-      </div>
+    <div class="header-content">
+        <div class="header-left">
+            <div class="logo-icon">
+                <img src="steadfast-logo.png" alt="SteadFast" class="logo-img">
+            </div>
+            <div>
+                <h1>IR <span>Support Portal</span></h1>
+                <p>STEADFAST CUSTOMER CARE — INTERNAL TOOLS</p>
+            </div>
+        </div>
+
+        <!-- TOP ISSUE TAKERS MARQUEE -->
+        <div class="header-center-marquee" id="topIssueTakerContainer" style="display: none;">
+            <div class="marquee-title">🏆 Top Issue Takers</div>
+            <div class="marquee-wrapper">
+                <div class="marquee-content" id="topIssueTakersText">
+                    <!-- Data will load here automatically -->
+                </div>
+            </div>
+        </div>
+
+        <div class="header-badges">
+            <div class="header-badge active-break-badge zero-active" id="activeBreakBadge" onclick="scrollToBreakSection()">
+                <span class="pulse-orange"></span> এখন ব্রেকে: <strong id="activeBreakCount">0</strong> জন
+            </div>
+            <div class="header-badge online-badge">
+                <span class="pulse-green"></span> Online Now: <strong id="onlineCount">1</strong>
+            </div>
+            <div class="header-badge visitor-badge">
+                👥 Total Visits: <strong id="visitCount">0</strong>
+            </div>
+        </div>
     </div>
-    <div class="header-badges">
-      <div class="header-badge active-break-badge zero-active" id="activeBreakBadge" onclick="scrollToBreakSection()">
-        <span class="pulse-orange"></span> এখন ব্রেকে: <strong id="activeBreakCount">0</strong> জন
-      </div>
-      <div class="header-badge online-badge"><span class="pulse-green"></span> Online: <strong id="onlineCount">1</strong></div>
-      <div class="header-badge visitor-badge">👥 Visits: <strong id="visitCount">0</strong></div>
-    </div>
-  </div>
 </header>
 
 <div class="container">
-  <div class="portal-layout">
-    <div>
-      <div class="section-title">🧰 Quick Access Tools <span class="line"></span></div>
-      <div class="cards">
-        <div class="card"><div class="card-icon">💰</div><h2>Regular Charge</h2><p>Open Regular Charge Calculator</p><a href="Regular Charge.html">Open Calculator →</a></div>
-        <div class="card"><div class="card-icon">🥭</div><h2>Mango Charge</h2><p>Open Mango Charge Calculator</p><a href="Mango Charge.html">Open Calculator →</a></div>
-        <div class="card"><div class="card-icon">📦</div><h2>Offline Charge</h2><p>Open Offline Charge Calculator</p><a href="Offline Charge.html">Open Calculator →</a></div>
-        <div class="card">
-          <div class="card-icon">📞</div><h2>Hub Contact</h2><p>Hub Emergency Contact List</p>
-          <div class="card-actions-row">
-            <a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0" target="_blank">Open Sheet →</a>
-            <button class="card-btn" onclick="openHubSearchModal()">🔍 Search</button>
-          </div>
-        </div>
-        <div class="card"><div class="card-icon">📅</div><h2>Duty Roster</h2><p>Open Daily Duty Roster</p><a href="https://docs.google.com/spreadsheets/d/1YQQnCBFFJNu7K65TrmSBT0aAJVPlCvNrc_oDUImSgZQ/edit?gid=1425212002#gid=1425212002" target="_blank">Open Sheet →</a></div>
-        <div class="card"><div class="card-icon">🌐</div><h2>Hub Roadmap</h2><p>Hub Support Roadmap</p><a href="https://sfccare-files.github.io/sfc-hubs/" target="_blank">Click Here →</a></div>
-        <div class="card">
-          <div class="card-icon">📍</div>
-          <h2>জেলা-থানা-ইউনিয়ন</h2>
-          <p>Dhaka Metro + Nationwide Search</p>
-          <button class="card-btn" onclick="openLocationSearchModal()">🗺️ Search Location</button>
-        </div>
-      </div>
-    </div>
+    <div class="portal-layout">
 
-    <div class="right-sidebar">
-      <div class="sidebar-widget">
-        <div class="widget-top-bar">
-          <h2>📢 Notice Board</h2>
-          <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 Admin Login</button>
-        </div>
-        <div class="admin-panel" id="adminPanel">
-          <input type="text" id="noticeTitle" placeholder="নোটিশের শিরোনাম...">
-          <textarea id="noticeContent" rows="3" placeholder="নোটিশের বিস্তারিত লিখুন..."></textarea>
-          <button class="publish-btn" id="publishBtn" onclick="publishNotice()">🚀 Publish Live</button>
-        </div>
-        <div class="notice-list" id="noticeContainer"><div style="text-align:center;color:#94a3b8;padding:20px;font-size:12px">⏳ Connecting...</div></div>
-      </div>
-
-      <div class="sidebar-widget" id="breakSection">
-        <div class="widget-top-bar">
-          <h2>☕ ব্রেক অনুমোদন পোর্টাল</h2>
-          <span style="font-size:10px;color:#94a3b8" id="liveTimeDisplay">--:--</span>
-        </div>
-        <div class="break-sidebar-content">
-          <div class="break-mini-stats">
-            <div class="mini-stat-chip pending"><div class="mini-stat-num" id="statPendingCount">0</div><div class="mini-stat-txt">অপেক্ষমাণ</div></div>
-            <div class="mini-stat-chip approved" onclick="openBreakHistory('approved')"><div class="mini-stat-num" id="statApprovedCount">0</div><div class="mini-stat-txt">অনুমোদিত</div></div>
-            <div class="mini-stat-chip rejected" onclick="openBreakHistory('rejected')"><div class="mini-stat-num" id="statRejectedCount">0</div><div class="mini-stat-txt">বাতিল</div></div>
-          </div>
-          <div class="live-active-breaks" id="liveActiveBreaks">
-            <div class="live-active-header"><span>🔴 এখন যারা ব্রেকে আছেন</span><span id="activeBreakLimit" style="color:#94a3b8;font-weight:500">0/2 জন</span></div>
-            <div id="liveBreakList"></div>
-          </div>
-          <div class="compact-break-form">
-            <div class="compact-form-title">➕ নতুন ব্রেক রিকোয়েস্ট</div>
-            <div class="compact-inputs">
-              <select id="agentNameSelect">
-                <option value="">-- নাম নির্বাচন করুন --</option>
-                <option>Md Ezaj Ahmed</option><option>Md Rabbi</option><option>Sahin Hasan Sabbir</option><option>Rakibul Islam</option>
-                <option>Md Muzahidul Islam Jahid</option><option>Shoaib Hasan</option><option>Khayrul Islam</option><option>Md.Omor Faruk</option>
-                <option>Md. Mehedi Hasan Sohag</option><option>Sheikh Md Ebrahim Anu</option><option>Latifur Rahman</option><option>Md Rasel</option>
-                <option>Md.Sadikul Islam Rayat</option><option>Shamiul Bashir Ananno</option><option>Jabedul Islam</option><option>Shojon Ahmed</option>
-                <option>Md Sajib Al Mamun</option><option>Rakib Hossain</option><option>Dipta Roy</option><option>Sabbir Ahmed</option><option>Dip Shorkar</option>
-              </select>
-              <select id="breakTypeSelect">
-                <option value="শর্ট ব্রেক">শর্ট ব্রেক (১০ মিনিট)</option>
-                <option value="নামাজের ব্রেক">নামাজের ব্রেক (২০ মিনিট)</option>
-              </select>
-              <button class="compact-submit-btn" id="submitBreakBtn" onclick="submitBreakRequest()">কিউতে যোগ করুন</button>
+        <div>
+            <div class="section-title">
+                🧰 Quick Access Tools <span class="line"></span>
             </div>
-          </div>
-          <div class="compact-queue-header"><span>📋 অপেক্ষমাণ কিউ</span><span style="font-size:10px;color:#f59e0b" id="queueBadgeCount">0 জন</span></div>
-          <div class="compact-queue-list" id="queueContainer"><div class="empty-compact-q">⏳ ডাটা লোড হচ্ছে...</div></div>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-icon">💰</div>
+                    <h2>Regular Charge</h2>
+                    <p>Open Regular Charge Calculator</p>
+                    <a href="Regular Charge.html">Open Calculator →</a>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🥭</div>
+                    <h2>Mango Charge</h2>
+                    <p>Open Mango Charge Calculator</p>
+                    <a href="Mango Charge.html">Open Calculator →</a>
+                </div>
+                <div class="card">
+                    <div class="card-icon">📦</div>
+                    <h2>Offline Charge</h2>
+                    <p>Open Offline Charge Calculator</p>
+                    <a href="Offline Charge.html">Open Calculator →</a>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">📞</div>
+                    <h2>Hub Contact</h2>
+                    <p>Hub Emergency Contact List</p>
+                    <div class="card-actions-row">
+                        <a href="https://docs.google.com/spreadsheets/d/13labODowPDqDPr1WbjXoLfk_cK1wIc2QOOzjxjhBNTY/edit?gid=0#gid=0" target="_blank">Open Sheet →</a>
+                        <button class="card-btn" onclick="openHubSearchModal()">🔍 Search</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">📅</div>
+                    <h2>Duty Roster</h2>
+                    <p>Open Daily Duty Roster</p>
+                    <a href="https://docs.google.com/spreadsheets/d/1YQQnCBFFJNu7K65TrmSBT0aAJVPlCvNrc_oDUImSgZQ/edit?gid=1425212002#gid=1425212002" target="_blank">Open Sheet →</a>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🌐</div>
+                    <h2>Hub Roadmap</h2>
+                    <p>Hub Support Roadmap</p>
+                    <a href="https://sfccare-files.github.io/sfc-hubs/" target="_blank">Click Here →</a>
+                </div>
+
+                <!-- LOCATION SEARCH CARD -->
+                <div class="card">
+                    <div class="card-icon">📍</div>
+                    <h2>জেলা-থানা-ইউনিয়ন</h2>
+                    <p>District · Thana · Union Search</p>
+                    <button class="card-btn" onclick="openLocationSearchModal()">🗺️ Search Location</button>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <div class="right-sidebar">
+
+            <div class="sidebar-widget">
+                <div class="widget-top-bar">
+                    <h2>📢 Notice Board</h2>
+                    <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 Admin Login</button>
+                </div>
+                <div class="admin-panel" id="adminPanel">
+                    <input type="text" id="noticeTitle" placeholder="নোটিশের শিরোনাম...">
+                    <textarea id="noticeContent" rows="3" placeholder="নোটিশের বিস্তারিত লিখুন..."></textarea>
+                    <button class="publish-btn" id="publishBtn" onclick="publishNotice()">🚀 Publish Live</button>
+                </div>
+                <div class="notice-list" id="noticeContainer">
+                    <div style="text-align:center;color:#94a3b8;padding:20px;font-size:12px">⏳ Connecting to real-time server...</div>
+                </div>
+            </div>
+
+            <div class="sidebar-widget" id="breakSection">
+                <div class="widget-top-bar">
+                    <h2>☕ ব্রেক অনুমোদন পোর্টাল</h2>
+                    <span style="font-size:10px; color:#94a3b8;" id="liveTimeDisplay">--:-- PM</span>
+                </div>
+                <div class="break-sidebar-content">
+                    <div class="break-mini-stats">
+                        <div class="mini-stat-chip pending"><div class="mini-stat-num" id="statPendingCount">0</div><div class="mini-stat-txt">অপেক্ষমাণ</div></div>
+                        <div class="mini-stat-chip approved" onclick="openBreakHistory('approved')" title="তালিকা"><div class="mini-stat-num" id="statApprovedCount">0</div><div class="mini-stat-txt">অনুমোদিত</div></div>
+                        <div class="mini-stat-chip rejected" onclick="openBreakHistory('rejected')" title="তালিকা"><div class="mini-stat-num" id="statRejectedCount">0</div><div class="mini-stat-txt">বাতিল</div></div>
+                    </div>
+                    <div class="live-active-breaks" id="liveActiveBreaks">
+                        <div class="live-active-header">
+                            <span>🔴 এখন যারা ব্রেকে আছেন</span>
+                            <span style="color:#94a3b8;font-weight:500" id="activeBreakLimit">0/2 জন</span>
+                        </div>
+                        <div id="liveBreakList"></div>
+                    </div>
+                    <div class="compact-break-form">
+                        <div class="compact-form-title">➕ নতুন ব্রেক রিকোয়েস্ট</div>
+                        <div class="compact-inputs">
+                            <select id="agentNameSelect">
+                                <option value="">-- নাম নির্বাচন করুন --</option>
+                                <option>Md Ezaj Ahmed</option><option>Md Rabbi</option><option>Sahin Hasan Sabbir</option><option>Rakibul Islam</option>
+                                <option>Md Muzahidul Islam Jahid</option><option>Shoaib Hasan</option><option>Khayrul Islam</option><option>Md.Omor Faruk</option>
+                                <option>Md. Mehedi Hasan Sohag</option><option>Sheikh Md Ebrahim Anu</option><option>Latifur Rahman</option><option>Md Rasel</option>
+                                <option>Md.Sadikul Islam Rayat</option><option>Shamiul Bashir Ananno</option><option>Jabedul Islam</option><option>Shojon Ahmed</option>
+                                <option>Md Sajib Al Mamun</option><option>Rakib Hossain</option><option>Dipta Roy</option><option>Sabbir Ahmed</option><option>Dip Shorkar</option>
+                            </select>
+                            <select id="breakTypeSelect">
+                                <option value="শর্ট ব্রেক">শর্ট ব্রেক (১০ মিনিট)</option>
+                                <option value="নামাজের ব্রেক">নামাজের ব্রেক (২০ মিনিট)</option>
+                            </select>
+                            <button class="compact-submit-btn" id="submitBreakBtn" onclick="submitBreakRequest()">কিউতে যোগ করুন</button>
+                        </div>
+                    </div>
+                    <div class="compact-queue-header">
+                        <span>📋 অপেক্ষমাণ কিউ</span>
+                        <span style="font-size:10px; color:#f59e0b;" id="queueBadgeCount">0 জন</span>
+                    </div>
+                    <div class="compact-queue-list" id="queueContainer">
+                        <div class="empty-compact-q">⏳ ডাটা লোড হচ্ছে...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
-  </div>
 </div>
 
+<!-- MODALS -->
 <div class="modal-overlay" id="noticeModal"><div class="modal-card"><button class="modal-close-btn" onclick="closeModal()">✕</button><div class="modal-title" id="mTitle"></div><div class="modal-time" id="mTime"></div><div class="modal-body" id="mBody"></div></div></div>
-
-<div class="modal-overlay" id="hubSearchModal">
-  <div class="modal-card">
-    <button class="modal-close-btn" onclick="closeHubModal()">✕</button>
-    <div class="modal-title">🔍 Hub Emergency Contact Search</div>
-    <div class="modal-time" id="hubModalSubTitle">টাইপ করে হাব সার্চ করুন</div>
-    <input type="text" class="hub-search-input" id="hubSearchInput" oninput="handleHubSearchDebounced()" placeholder="যেমন: Dhanmondi, Sutrapur, Rangpur..." autofocus>
-    <div class="hub-structured-wrapper" id="hubResultsContainer"><div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">🔍 হাবের নাম টাইপ করুন...</div></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="breakHistoryModal"><div class="modal-card"><button class="modal-close-btn" onclick="closeBreakHistoryModal()">✕</button><div class="modal-title" id="bhTitle">হিস্ট্রি</div><div class="modal-time">আজকের তালিকা</div><div class="hub-structured-wrapper" id="bhListContainer"></div></div></div>
-
-<div class="modal-overlay" id="locationSearchModal">
-  <div class="modal-card">
-    <button class="modal-close-btn" onclick="closeLocationModal()">✕</button>
-    <div class="modal-title">📍 জেলা · থানা · ইউনিয়ন সার্চ</div>
-    <div class="modal-time" id="locModalSubTitle">ইউনিয়ন / থানা / জেলা — বাংলা বা ইংরেজিতে লিখুন</div>
-    <input type="text" class="hub-search-input" id="locationSearchInput" oninput="handleLocationSearchDebounced()" placeholder="যেমন: Savar, ধানমন্ডি, Keraniganj, ইউনিয়নের নাম..." autofocus>
-    <div class="hub-structured-wrapper" id="locationResultsContainer">
-      <div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">🔍 সার্চ শুরু করুন...</div>
-    </div>
-  </div>
-</div>
+<div class="modal-overlay" id="hubSearchModal"><div class="modal-card"><button class="modal-close-btn" onclick="closeHubModal()">✕</button><div class="modal-title">🔍 Hub Emergency Contact Search</div><div class="modal-time" id="hubModalSubTitle">টাইপ করে হাব সার্চ করুন</div><input type="text" class="hub-search-input" id="hubSearchInput" oninput="handleHubSearchDebounced()" placeholder="যেমন: Dhanmondi, Sutrapur, Rangpur..." autofocus><div class="hub-structured-wrapper" id="hubResultsContainer"><div style="text-align:center; padding:30px; color:#94a3b8; font-size:12px;">🔍 হাবের নাম টাইপ করুন...</div></div></div></div>
+<div class="modal-overlay" id="breakHistoryModal"><div class="modal-card"><button class="modal-close-btn" onclick="closeBreakHistoryModal()">✕</button><div class="modal-title" id="bhTitle">আজকের ব্রেক হিস্ট্রি</div><div class="modal-time">আজকের দিনের ব্রেক রিকোয়েস্ট তালিকা</div><div class="hub-structured-wrapper" id="bhListContainer"></div></div></div>
+<div class="modal-overlay" id="locationSearchModal"><div class="modal-card"><button class="modal-close-btn" onclick="closeLocationModal()">✕</button><div class="modal-title">📍 জেলা · থানা · ইউনিয়ন সার্চ</div><div class="modal-time" id="locModalSubTitle">ইউনিয়ন, থানা বা জেলার নাম বাংলা বা ইংরেজিতে লিখুন</div><input type="text" class="hub-search-input" id="locationSearchInput" oninput="handleLocationSearchDebounced()" placeholder="যেমন: Dhanmondi, Savar, Bamondi, ধানমন্ডি, বামন্দী..." autofocus><div class="hub-structured-wrapper" id="locationResultsContainer"><div style="text-align:center; padding:30px; color:#94a3b8; font-size:12px;">🔍 এলাকা বা থানার নাম টাইপ করুন...</div></div></div></div>
 
 <div class="toast" id="toast">Message</div>
-<footer>© 2026 <strong>IR Support Portal</strong> — Steadfast Customer Care</footer>
+<footer>© 2026 <strong>IR Support Portal</strong> — Developed for Steadfast Customer Care</footer>
 
 <script>
-const firebaseConfig={apiKey:"AIzaSyApJsLg2XaDgIqmB694HRAP3noKty_HjTU",authDomain:"ir-support-portal.firebaseapp.com",projectId:"ir-support-portal",storageBucket:"ir-support-portal.firebasestorage.app",messagingSenderId:"589705470778",appId:"1:589705470778:web:4390bc11624fe36635a603"};
-const ADMIN_PIN="4563";
-const MAX_CONCURRENT_BREAKS=2;
-const BREAK_DURATIONS={"শর্ট ব্রেক":10,"নামাজের ব্রেক":20};
+// =====================================================
+// 🔥 CONFIGURATION
+// =====================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyApJsLg2XaDgIqmB694HRAP3noKty_HjTU",
+    authDomain: "ir-support-portal.firebaseapp.com",
+    projectId: "ir-support-portal",
+    storageBucket: "ir-support-portal.firebasestorage.app",
+    messagingSenderId: "589705470778",
+    appId: "1:589705470778:web:4390bc11624fe36635a603"
+};
 
-const HUB_SEARCH_SHEET_ID="1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
-const LOCATION_SHEET_ID="1ZGASaywVQWuC6wPtBvV8UBQwJibfkucCEleuRABB17w";
-const LOCATION_SHEET_NATIONWIDE="Union-Thana-District-Division";
-const LOCATION_SHEET_DHAKA_METRO="Dhaka Metro (City Corp)";
+const ADMIN_PIN = "1234";
+const MAX_CONCURRENT_BREAKS = 2;
+const BREAK_DURATIONS = { "শর্ট ব্রেক": 10, "নামাজের ব্রেক": 20 };
+
+const HUB_SEARCH_SHEET_ID = "1GHBXEzMGb1BWDeOCdUHvhguouCvRD7EjnF4lPqwbAn4";
+const LOCATION_SHEET_ID = "1ZGASaywVQWuC6wPtBvV8UBQwJibfkucCEleuRABB17w";
+
+// 🏆 Top Performer Sheet Configuration
+const TOP_PERFORMER_SHEET_ID = "1La_PUSmGKp7V-bIpBkseliyr0iH8ipBA-1tZjZqaZPc";
+const TOP_PERFORMER_TAB_NAME = "Daily Report";
 
 firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
-let isAdmin=false;
-const mySessionId='usr_'+Math.random().toString(36).slice(2,11);
-let noticesDataStore={},activeBreakList=[],todayApprovedList=[],todayRejectedList=[];
+const db = firebase.firestore();
 
-/* FIX: these were used throughout the Hub Search code (fetchHubsFromGoogleSheet,
-   openHubSearchModal, filterHubs, handleHubSearchDebounced) but were never
-   declared anywhere. Reading hubCacheList.length before it was ever assigned
-   threw a ReferenceError, which silently killed the whole search feature. */
-let hubCacheList=[],isFetchingSheet=false,searchDebounceTimer=null;
+let isAdmin = false;
+const mySessionId = 'usr_' + Math.random().toString(36).slice(2, 11);
+let noticesDataStore = {};
+let activeBreakList = [];
+let todayApprovedList = [];
+let todayRejectedList = [];
 
-function escapeHTML(s){return s?String(s).replace(/[&<>'"]/g,t=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])):''}
-function formatPhoneNumber(val){
-  if(val==null||val==='')return '';
-  let str=String(val).trim();
-  if(/e\+/i.test(str))str=String(Math.round(Number(str)));
-  let d=str.replace(/\D/g,'');
-  if(d.length===10&&d.startsWith('1'))return '0'+d;
-  if(d.length===11&&d.startsWith('01'))return d;
-  if((d.length===12||d.length===13)&&d.startsWith('8801'))return '0'+d.slice(2);
-  return str;
+// =====================================================
+// 🏆 TOP ISSUE TAKERS MARQUEE LOGIC (SMART PARSER)
+// =====================================================
+async function fetchTopIssueTakers() {
+    if (!TOP_PERFORMER_SHEET_ID) return;
+
+    const url = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}`;
+    
+    try {
+        const res = await fetch(url);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+        const rows = json.table.rows || [];
+
+        let agentData = [];
+
+        // Scan rows for Morning/Evening tables
+        // In the sheet: Col 0 (No), Col 1 (Name), Col 5 (Taken)
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row || !row.c) continue;
+
+            const colA = row.c[0] ? String(row.c[0].v || '').trim() : ''; 
+            const colB = row.c[1] ? String(row.c[1].v || row.c[1].f || '').trim() : ''; 
+            const colF = row.c[5] ? Number(row.c[5].v || 0) : 0;          
+
+            // Valid agent row check: Col A is numeric (1, 2, 3...) & Col B is not empty/Total
+            if (colA && !isNaN(colA) && colB && colB.toLowerCase() !== 'total') {
+                agentData.push({ name: colB, score: colF });
+            }
+        }
+
+        // Sort agents by 'Taken' issues count descending
+        agentData.sort((a, b) => b.score - a.score);
+
+        // Take top 5
+        const top5 = agentData.slice(0, 5);
+        let marqueeHTML = "";
+        const medals = ["🏆", "🥇", "🥈", "🥉", "🏅"];
+
+        top5.forEach((agent, index) => {
+            marqueeHTML += `<span class="marquee-item"><span class="rank-icon">${medals[index]}</span> <span class="name">${escapeHTML(agent.name)}</span> <span class="score">${agent.score} Issues</span></span>`;
+        });
+
+        if (marqueeHTML) {
+            // Duplicate content for smooth infinite scrolling loop
+            document.getElementById("topIssueTakersText").innerHTML = marqueeHTML + marqueeHTML;
+            document.getElementById("topIssueTakerContainer").style.display = "flex";
+        }
+
+    } catch (e) {
+        console.error("Top Performers Fetch Error:", e);
+    }
 }
-function normHeader(h){return String(h||'').toLowerCase().replace(/[\s_\-\.\/]+/g,'').trim()}
-function todayStr(){return new Date().toISOString().split('T')[0]}
-function scrollToBreakSection(){document.getElementById('breakSection')?.scrollIntoView({behavior:'smooth',block:'center'})}
-function showToast(msg,type='success'){
-  const t=document.getElementById('toast');t.className='toast '+type;t.innerText=msg;t.classList.add('show');
-  clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),3000);
-}
-function updateClock(){document.getElementById('liveTimeDisplay').innerText=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}
-setInterval(updateClock,1000);updateClock();
 
-/* =====================================================
-   📍 DUAL-SHEET LOCATION SEARCH (FIXED FOR TOTAL VISIT)
-   ===================================================== */
-let locationDataCombined = []; 
+// =====================================================
+// GENERAL HELPERS
+// =====================================================
+function escapeHTML(str) { return str ? String(str).replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t])) : ''; }
+function formatPhoneNumber(val) {
+    if(val===null||val===undefined||val==='') return '';
+    let str = String(val).trim();
+    if(/e\+/i.test(str)) str = String(Math.round(Number(str)));
+    let d = str.replace(/\D/g,'');
+    if(d.length===10 && d.startsWith('1')) return '0'+d;
+    if(d.length===11 && d.startsWith('01')) return d;
+    if(d.length===12 && d.startsWith('8801')) return '0'+d.slice(2);
+    if(d.length===13 && d.startsWith('8801')) return '0'+d.slice(2);
+    return str;
+}
+function normHeader(h) { return String(h||'').toLowerCase().replace(/[\s_\-\.\/]+/g,'').trim(); }
+function scrollToBreakSection() { const el = document.getElementById('breakSection'); if(el) el.scrollIntoView({behavior:'smooth', block:'center'}); }
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.className = 'toast ' + type; t.innerText = msg; t.classList.add('show');
+    clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function updateClock() { document.getElementById("liveTimeDisplay").innerText = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: true}); }
+setInterval(updateClock, 1000); updateClock();
+
+// =====================================================
+// 📍 LOCATION SEARCH
+// =====================================================
+let locationDataAll = [];
 let locationLoaded = false;
 let locationLoading = false;
 let locSearchDebounce = null;
 
-function openLocationSearchModal(){
-  document.getElementById("locationSearchModal").style.display="flex";
-  const input=document.getElementById("locationSearchInput");
-  input.value="";
-  setTimeout(()=>input.focus(),80);
-  renderLocationResults([], "🔍 এলাকা / ইউনিয়ন / থানা / জেলার নাম লিখুন (বাংলা বা ইংরেজি)");
-  if(!locationLoaded && !locationLoading) loadBothLocationSheets();
-}
-function closeLocationModal(){ document.getElementById("locationSearchModal").style.display="none"; }
-function pickIdx(headers, aliases){
-  for(const a of aliases){ const i=headers.indexOf(a); if(i!==-1) return i; }
-  for(const a of aliases){ const i=headers.findIndex(h=>h.includes(a)); if(i!==-1) return i; }
-  return -1;
-}
-
-async function fetchLocationSheet(sheetName, source){
-  const url = `https://docs.google.com/spreadsheets/d/${LOCATION_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
-  const res = await fetch(url);
-  const text = await res.text();
-  const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}")+1));
-  const rows = json.table.rows || [];
-
-  let headers = (json.table.cols||[]).map(c => normHeader(c.label || c.id || ""));
-  const firstRow = rows[0]?.c?.map(c => normHeader(c ? (c.f ?? c.v ?? "") : "")) || [];
-  const firstIsHeader = firstRow.some(v => /union|thana|upazila|district|division|area|ward|zone|city|corp|ইউনিয়ন|থানা|উপজেলা|জেলা|বিভাগ|এলাকা/.test(v));
-  let start = 0;
-  if(firstIsHeader || headers.every(h=>!h)){ headers = firstRow; start = 1; }
-
-  const col = {
-    union:    pickIdx(headers, ['union','unionname','unionen','area','areaname','ইউনিয়ন','এলাকা']),
-    unionBn:  pickIdx(headers, ['unionbn','unionbangla','areabn','ইউনিয়নবাংলা','এলাকাবাংলা']),
-    thana:    pickIdx(headers, ['thana','upazila','ps','policestation','ward','zone','থানা','উপজেলা','ওয়ার্ড']),
-    thanaBn:  pickIdx(headers, ['thanabn','upazilabn','wardbn','থানাবাংলা']),
-    dist:    pickIdx(headers, ['district','dist','city','citycorp','জেলা','সিটি']),
-    distBn:  pickIdx(headers, ['districtbn','distbn','citybn','জেলাবাংলা']),
-    div:     pickIdx(headers, ['division','div','বিভাগ']),
-    divBn:   pickIdx(headers, ['divisionbn','divbn','বিভাগবাংলা'])
-  };
-  const cell = (row, i) => {
-    if(i < 0 || !row.c || !row.c[i]) return "";
-    const c = row.c[i];
-    if(c.f != null && String(c.f).trim() !== "") return String(c.f).trim();
-    if(c.v != null) return String(c.v).trim();
-    return "";
-  };
-  const result = [];
-  for(let r=start; r<rows.length; r++){
-    const row = rows[r]; if(!row?.c) continue;
-    const union    = cell(row, col.union)    || cell(row, 0);
-    const unionBn  = cell(row, col.unionBn)  || cell(row, 1);
-    const thana    = cell(row, col.thana)    || cell(row, 2);
-    const thanaBn  = cell(row, col.thanaBn)  || cell(row, 3);
-    const dist     = cell(row, col.dist)     || cell(row, 4);
-    const distBn   = cell(row, col.distBn)   || cell(row, 5);
-    const div      = cell(row, col.div)      || cell(row, 6);
-    const divBn    = cell(row, col.divBn)    || cell(row, 7);
-
-    if(!union && !thana && !dist) continue;
-    result.push({
-      source,
-      union, unionBn, thana, thanaBn, dist, distBn, div, divBn,
-      search: [union, unionBn, thana, thanaBn, dist, distBn, div, divBn].join(" ").toLowerCase()
-    });
+function openLocationSearchModal() {
+  document.getElementById("locationSearchModal").style.display = "flex";
+  const input = document.getElementById("locationSearchInput");
+  input.value = ""; setTimeout(() => input.focus(), 80);
+  buildLocationIndex();
+  renderLocationResults([], "🔍 ইউনিয়ন / থানা / জেলা লিখুন (বাংলা বা ইংরেজি)");
+  if (LOCATION_SHEET_ID && LOCATION_SHEET_ID !== "YOUR_UNION_SHEET_ID_HERE" && !locationLoaded && !locationLoading) {
+    loadUnionsFromSheet();
   }
-  return result;
+}
+function closeLocationModal() { document.getElementById("locationSearchModal").style.display = "none"; }
+function buildLocationIndex() {
+  allLocationIndex = [];
+  (typeof BD_LOCATIONS !== "undefined" ? BD_LOCATIONS : []).forEach(loc => {
+    allLocationIndex.push({
+      type: "thana", union: "", unionBn: "", thana: loc.th || "", thanaBn: loc.thBn || "",
+      dist: loc.dist || "", distBn: loc.distBn || "", div: loc.div || "", divBn: loc.divBn || "",
+      search: [loc.th, loc.thBn, loc.dist, loc.distBn, loc.div, loc.divBn].join(" ").toLowerCase()
+    });
+  });
 }
 
-async function loadBothLocationSheets(){
+async function loadUnionsFromSheet() {
   locationLoading = true;
   const sub = document.getElementById("locModalSubTitle");
-  if(sub) sub.innerText = "⏳ দুটি শিট লোড হচ্ছে (Nationwide + Dhaka Metro)...";
-  try{
-    const [nationwide, dhakaMetro] = await Promise.all([
-      fetchLocationSheet(LOCATION_SHEET_NATIONWIDE, 'nationwide').catch(e => { console.error("Nationwide err:", e); return []; }),
-      fetchLocationSheet(LOCATION_SHEET_DHAKA_METRO, 'dhaka-metro').catch(e => { console.error("Dhaka Metro err:", e); return []; })
-    ]);
-    locationDataCombined = [...nationwide, ...dhakaMetro];
-    locationLoaded = true;
-    if(sub) sub.innerText = `✅ ${nationwide.length} Nationwide + ${dhakaMetro.length} Dhaka Metro লোড হয়েছে`;
-    if(document.getElementById("locationSearchInput").value.trim()) filterLocations();
-  }catch(e){
-    console.error("Location load error:", e);
-    if(sub) sub.innerText = "⚠️ লোকেশন লোড ব্যর্থ — Share পারমিশন চেক করুন";
-  }finally{ locationLoading = false; }
-}
-
-function handleLocationSearchDebounced(){ clearTimeout(locSearchDebounce); locSearchDebounce = setTimeout(filterLocations, 120); }
-
-function filterLocations(){
-  const q = document.getElementById("locationSearchInput").value.trim().toLowerCase();
-  if(!q){ renderLocationResults([], "🔍 এলাকা / ইউনিয়ন / থানা / জেলার নাম লিখুন"); return; }
-  if(!locationLoaded){
-    renderLocationResults([], "⏳ ডাটা লোড হচ্ছে... একটু অপেক্ষা করুন");
-    if(!locationLoading) loadBothLocationSheets();
-    return;
-  }
-  const matches = locationDataCombined.filter(x => x.search.includes(q));
-  renderLocationResults(matches);
-}
-
-function renderLocationResults(list, prompt){
-  const box = document.getElementById("locationResultsContainer");
-  if(prompt){ box.innerHTML = `<div style="text-align:center;padding:28px;color:#94a3b8;font-size:12px">${prompt}</div>`; return; }
-  if(!list.length){ box.innerHTML = `<div style="text-align:center;padding:28px;color:#ef4444;font-size:12px">❌ কিছু পাওয়া যায়নি<br><span style="color:#94a3b8;font-size:11px">বানান বদলে চেষ্টা করুন</span></div>`; return; }
-
-  const dhakaMetroResults = list.filter(x => x.source === 'dhaka-metro');
-  const nationwideResults = list.filter(x => x.source === 'nationwide');
-  const MAX_PER_GROUP = 20;
-  let html = `<div style="color:#38bdf8;font-size:12px;font-weight:600;margin-bottom:10px">✅ মোট ${list.length}টি ফলাফল</div>`;
-
-  if(dhakaMetroResults.length > 0){
-    html += `<div class="location-section-divider divider-metro">🏙️ Dhaka Metro (City Corporation)<span class="divider-count">${dhakaMetroResults.length}টি</span></div>`;
-    dhakaMetroResults.slice(0, MAX_PER_GROUP).forEach(loc => html += renderLocationCard(loc, 'dhaka-metro'));
-    if(dhakaMetroResults.length > MAX_PER_GROUP) html += `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:6px">আরও ${dhakaMetroResults.length - MAX_PER_GROUP}টি Dhaka Metro ফলাফল</div>`;
-  }
-  if(nationwideResults.length > 0){
-    html += `<div class="location-section-divider divider-nation">🌆 Nationwide (সারাদেশ)<span class="divider-count">${nationwideResults.length}টি</span></div>`;
-    nationwideResults.slice(0, MAX_PER_GROUP).forEach(loc => html += renderLocationCard(loc, 'nationwide'));
-    if(nationwideResults.length > MAX_PER_GROUP) html += `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:6px">আরও ${nationwideResults.length - MAX_PER_GROUP}টি Nationwide ফলাফল</div>`;
-  }
-  box.innerHTML = html;
-}
-
-function renderLocationCard(loc, source){
-  const isMetro = source === 'dhaka-metro';
-  const hasUnion = loc.union || loc.unionBn;
-  const mainTitle = hasUnion ? (loc.union || loc.thana) : (loc.thana || loc.dist);
-  const subTitle = hasUnion ? loc.unionBn : loc.thanaBn;
-  const sourceBadge = isMetro ? `<span class="badge-metro">🏙️ Dhaka Metro</span>` : `<span class="badge-nation">🌆 Nationwide</span>`;
-  const typeBadge = hasUnion ? `<span class="badge-u">${isMetro?'এলাকা':'ইউনিয়ন'}</span>` : `<span class="badge-t">${isMetro?'ওয়ার্ড/জোন':'থানা/উপজেলা'}</span>`;
-  const copyText = [loc.union, loc.thana, loc.dist, loc.div].filter(Boolean).join(", ");
-  return `
-    <div class="location-result-item ${isMetro ? 'dhaka-metro' : 'nationwide'}">
-      <div class="loc-title">📍 ${escapeHTML(mainTitle || 'N/A')}${subTitle ? ` <span style="color:#64748b;font-weight:500">/</span> ${escapeHTML(subTitle)}` : ""} ${sourceBadge} ${typeBadge}</div>
-      ${hasUnion && (loc.thana || loc.thanaBn) ? `<div class="loc-detail-row"><span class="loc-lbl">📌 ${isMetro?'ওয়ার্ড:' : 'থানা:'}</span><span class="loc-val">${escapeHTML(loc.thana||'')}${loc.thanaBn?` (${escapeHTML(loc.thanaBn)})`:""}</span></div>` : ""}
-      <div class="loc-detail-row"><span class="loc-lbl">🏛️ ${isMetro?'সিটি:':'জেলা:'}</span><span class="loc-val">${escapeHTML(loc.dist||'N/A')}${loc.distBn?` (${escapeHTML(loc.distBn)})`:""}</span></div>
-      <div class="loc-detail-row"><span class="loc-lbl">🌐 বিভাগ:</span><span class="loc-val">${escapeHTML(loc.div||'N/A')}${loc.divBn?` (${escapeHTML(loc.divBn)})`:""}</span></div>
-      <div class="loc-copy-area"><button class="copy-icon-btn" onclick="copyLocation('${escapeHTML(copyText)}')">📋 কপি</button></div>
-    </div>`;
-}
-function copyLocation(text){ navigator.clipboard.writeText(text); showToast("📋 " + text); }
-
-/* =====================================================
-   🏢 HUB SEARCH LOGIC
-   ===================================================== */
-function openHubSearchModal(){
-  document.getElementById("hubSearchModal").style.display="flex";
-  const input=document.getElementById("hubSearchInput");
-  input.value=""; setTimeout(()=>input.focus(),100);
-  renderHubResults([],"🔍 হাবের নাম টাইপ করুন...");
-  if(!hubCacheList.length&&!isFetchingSheet)fetchHubsFromGoogleSheet();
-}
-function closeHubModal(){document.getElementById("hubSearchModal").style.display="none"}
-async function fetchHubsFromGoogleSheet(){
-  isFetchingSheet=true;
-  const sub=document.getElementById("hubModalSubTitle");
-  if(sub)sub.innerText="⏳ গুগল শিট লোড হচ্ছে...";
-  try{
-    const res=await fetch(`https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/gviz/tq?tqx=out:json`);
-    const text=await res.text();
-    const json=JSON.parse(text.substring(text.indexOf('{'),text.lastIndexOf('}')+1));
-    const rows=json.table.rows||[];
-    let headers=(json.table.cols||[]).map(c=>normHeader(c.label||c.id||''));
-    const first=rows[0]?.c?.map(c=>normHeader(c?(c.f??c.v??''):''))||[];
-    const firstLooksHeader=first.some(v=>/name|address|manager|phone|hub|district|zonal/.test(v));
-    let start=0; if(firstLooksHeader||headers.every(h=>!h)){headers=first;start=1}
-    /* Aliases are matched against ALREADY-NORMALIZED headers (normHeader strips
-       spaces/underscores/dots/hyphens), so aliases here must be written WITHOUT
-       those separators too, or they will never match. Expected sheet header row:
-       name | address | district | division | police_station | zonal | zonal phone |
-       hub_ip | hub_phone | manager | manager_phone | assistant_manager |
-       assistant_manager_phone | team_leader | team_leader_phone | whatsapp_group */
-    const col={
-      name:pickIdx(headers,['name','hubname']),address:pickIdx(headers,['address','location']),
-      district:pickIdx(headers,['district']),division:pickIdx(headers,['division']),
-      policeStation:pickIdx(headers,['policestation','thana','ps']),
-      zonalManager:pickIdx(headers,['zonal','zonalmanager','zm']),zonalPhone:pickIdx(headers,['zonalphone','zmphone']),
-      hubIp:pickIdx(headers,['hubip','ip']),hubPhone:pickIdx(headers,['hubphone']),
-      manager:pickIdx(headers,['manager']),managerPhone:pickIdx(headers,['managerphone']),
-      asstManager:pickIdx(headers,['assistantmanager','asstmanager']),
-      asstPhone:pickIdx(headers,['assistantmanagerphone','asstphone','asstmanagerphone']),
-      teamLeader:pickIdx(headers,['teamleader']),teamLeaderPhone:pickIdx(headers,['teamleaderphone','tlphone']),
-      whatsappGroup:pickIdx(headers,['whatsappgroup','whatsapp'])
+  if (sub) sub.innerText = "⏳ ইউনিয়ন তালিকা লোড হচ্ছে...";
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${LOCATION_SHEET_ID}/gviz/tq?tqx=out:json`;
+    const res = await fetch(url);
+    const text = await res.text();
+    const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+    const rows = json.table.rows || [];
+    let headers = (json.table.cols || []).map(c => normHeader(c.label || c.id || ""));
+    const first = rows[0]?.c?.map(c => normHeader(c ? (c.f ?? c.v ?? "") : "")) || [];
+    const looksHeader = first.some(v => /union|thana|district|division|ইউনিয়ন|থানা|জেলা/.test(v));
+    let start = 0;
+    if (looksHeader || headers.every(h => !h)) { headers = first; start = 1; }
+    const idx = (names) => {
+      for (const n of names) { const i = headers.indexOf(n); if (i !== -1) return i; }
+      for (const n of names) { const i = headers.findIndex(h => h.includes(n)); if (i !== -1) return i; }
+      return -1;
     };
-    const cellAt=(row,idx)=>{
-      if(idx<0||!row.c||!row.c[idx])return '';
-      const c=row.c[idx];
-      if(c.f!==null&&c.f!==undefined&&String(c.f).trim()!=='')return String(c.f).trim();
-      if(c.v!==null&&c.v!==undefined)return String(c.v).trim();
-      return '';
+    const col = {
+      union: idx(["union", "unionname", "ইউনিয়ন"]), unionBn: idx(["unionbn", "unionbangla", "ইউনিয়নবাংলা"]),
+      thana: idx(["thana", "upazila", "থানা", "উপজেলা"]), thanaBn: idx(["thanabn", "upazilabn"]),
+      dist: idx(["district", "dist", "জেলা"]), distBn: idx(["districtbn", "distbn"]),
+      div: idx(["division", "div", "বিভাগ"]), divBn: idx(["divisionbn", "divbn"])
     };
-    hubCacheList=[];
-    for(let i=start;i<rows.length;i++){
-      const row=rows[i]; if(!row?.c) continue;
-      const all=row.c.map(c=>c?String(c.f??c.v??'').trim():'');
-      const rawText=all.join(' ').toLowerCase();
-      if(!rawText.trim()) continue;
-      hubCacheList.push({
-        rawText,searchStr:rawText.replace(/[^a-z0-9\u0980-\u09FF]/gi,''),
-        name:cellAt(row,col.name)||'N/A',address:cellAt(row,col.address)||'N/A',
-        district:cellAt(row,col.district)||'N/A',division:cellAt(row,col.division)||'N/A',
-        policeStation:cellAt(row,col.policeStation)||'N/A',
-        zonalManager:cellAt(row,col.zonalManager)||'N/A',zonalPhone:formatPhoneNumber(cellAt(row,col.zonalPhone)),
-        hubIp:cellAt(row,col.hubIp)||'N/A',hubPhone:formatPhoneNumber(cellAt(row,col.hubPhone)),
-        manager:cellAt(row,col.manager)||'N/A',managerPhone:formatPhoneNumber(cellAt(row,col.managerPhone)),
-        asstManager:cellAt(row,col.asstManager)||'N/A',asstPhone:formatPhoneNumber(cellAt(row,col.asstPhone)),
-        teamLeader:cellAt(row,col.teamLeader)||'N/A',teamLeaderPhone:formatPhoneNumber(cellAt(row,col.teamLeaderPhone)),
-        whatsappGroup:cellAt(row,col.whatsappGroup)||''
+    const cell = (row, i) => {
+      if (i < 0 || !row.c || !row.c[i]) return "";
+      const c = row.c[i];
+      if (c.f != null && String(c.f).trim() !== "") return String(c.f).trim();
+      if (c.v != null) return String(c.v).trim();
+      return "";
+    };
+    locationDataAll = [];
+    for (let r = start; r < rows.length; r++) {
+      const row = rows[r]; if (!row?.c) continue;
+      const union = cell(row, col.union) || cell(row, 0); const thana = cell(row, col.thana) || cell(row, 2);
+      if (!union && !thana) continue;
+      locationDataAll.push({
+        type: union ? "union" : "thana",
+        union, unionBn: cell(row, col.unionBn) || cell(row, 1),
+        thana, thanaBn: cell(row, col.thanaBn) || cell(row, 3),
+        dist: cell(row, col.dist) || cell(row, 4), distBn: cell(row, col.distBn) || cell(row, 5),
+        div: cell(row, col.div) || cell(row, 6), divBn: cell(row, col.divBn) || cell(row, 7),
+        search: [union, cell(row, col.unionBn)||cell(row, 1), thana, cell(row, col.thanaBn)||cell(row, 3), cell(row, col.dist)||cell(row, 4), cell(row, col.distBn)||cell(row, 5)].join(" ").toLowerCase()
       });
     }
-    if(sub) sub.innerText=`✅ ${hubCacheList.length} টি হাব লোড হয়েছে`;
-    if(document.getElementById("hubSearchInput").value.trim()) filterHubs();
-  }catch(e){console.error(e); if(sub) sub.innerText="⚠️ শিট লোড ব্যর্থ";}
-  finally{isFetchingSheet=false;}
+    locationLoaded = true;
+    if (sub) sub.innerText = `✅ ${locationDataAll.length} লোকেশন লোড হয়েছে — সার্চ করুন`;
+    if (document.getElementById("locationSearchInput").value.trim()) filterLocations();
+  } catch (e) {
+    console.error(e); if (sub) sub.innerText = "⚠️ ইউনিয়ন শিট লোড ব্যর্থ";
+  } finally { locationLoading = false; }
 }
-function handleHubSearchDebounced(){clearTimeout(searchDebounceTimer);searchDebounceTimer=setTimeout(filterHubs,120)}
-function filterHubs(){
-  const q=document.getElementById("hubSearchInput").value.trim().toLowerCase();
-  if(!q){renderHubResults([],"🔍 হাবের নাম টাইপ করুন...");return}
-  if(!hubCacheList.length){renderHubResults([],"⏳ ডাটা লোড হচ্ছে...");if(!isFetchingSheet)fetchHubsFromGoogleSheet();return}
-  const cq=q.replace(/[^a-z0-9\u0980-\u09FF]/gi,'');
-  renderHubResults(hubCacheList.filter(it=>it.rawText.includes(q)||(cq&&it.searchStr.includes(cq))));
-}
-function pill(label,value,isPhone=false,isLink=false){
-  const v=value&&value!=='N/A'?value:'N/A';
-  let btn='';
-  if(v!=='N/A'){
-    if(isLink&&v.startsWith('http')) btn=`<a href="${escapeHTML(v)}" target="_blank" class="copy-icon-btn" style="text-decoration:none;">🔗 Open</a>`;
-    else if(isPhone) btn=`<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(v)}')">📄</button>`;
-  }
-  const valDisplay=(isLink&&v.startsWith('http'))?`<a href="${escapeHTML(v)}" target="_blank" style="color:#38bdf8;text-decoration:none">Group Link</a>`:escapeHTML(v);
-  return `<div class="hub-pill"><div><span class="lbl">${label}:</span> <span class="val">${valDisplay}</span></div>${btn}</div>`;
-}
-function renderHubResults(list,prompt){
-  const box=document.getElementById("hubResultsContainer");
-  if(prompt){box.innerHTML=`<div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">${prompt}</div>`;return}
-  if(!list.length){box.innerHTML=`<div style="text-align:center;padding:30px;color:#ef4444;font-size:12px">❌ কোনো হাব পাওয়া যায়নি</div>`;return}
-  const max=3,show=list.slice(0,max);
-  let html='';
-  show.forEach(item=>{
-    html+=`<div class="hub-sec-box">
-      <div class="hub-sec-header">Hub Details</div>
-      <div class="hub-grid-2 full-width">${pill('Name',item.name)}</div>
-      <div class="hub-grid-2 full-width">${pill('Address',item.address)}</div>
-      <div class="hub-grid-2">${pill('District',item.district)}${pill('Division',item.division)}</div>
-      <div class="hub-grid-2 full-width">${pill('Police Station',item.policeStation)}</div>
-      <div class="hub-grid-2">${pill('Zonal Manager',item.zonalManager)}${pill('Phone',item.zonalPhone,true)}</div>
-      <div class="hub-grid-2 full-width">${pill('WhatsApp Group',item.whatsappGroup,false,true)}</div>
-      <div class="hub-sec-header" style="margin-top:14px">Contact Details</div>
-      <div class="hub-grid-2">${pill('Hub IP',item.hubIp)}${pill('Hub Phone',item.hubPhone,true)}</div>
-      <div class="hub-grid-2">${pill('Manager',item.manager)}${pill('Phone',item.managerPhone,true)}</div>
-      <div class="hub-grid-2">${pill('Asst. Manager',item.asstManager)}${pill('Phone',item.asstPhone,true)}</div>
-      <div class="hub-grid-2">${pill('Team Leader',item.teamLeader)}${pill('Phone',item.teamLeaderPhone,true)}</div>
-    </div>`;
-  });
-  if(list.length>max) html+=`<div style="text-align:center;color:#38bdf8;font-size:11px;padding:8px">ℹ️ আরও ${list.length-max}টি মিলেছে</div>`;
-  box.innerHTML=html;
-}
-function copyNumber(t){navigator.clipboard.writeText(t);showToast('📋 কপি হয়েছে: '+t)}
 
-/* ========== NOTICE ========== */
-db.collection('notices').orderBy('timestamp','desc').onSnapshot(snap=>{
-  const c=document.getElementById('noticeContainer');
-  if(snap.empty){c.innerHTML=`<div class="notice-item"><div class="notice-title">স্বাগতম টিম! 👋</div><div class="notice-text">সব আপডেট এখানে দেখা যাবে।</div></div>`;return}
-  c.innerHTML='';noticesDataStore={};
-  snap.forEach(doc=>{
-    const d=doc.data();noticesDataStore[doc.id]=d;
-    const t=d.timestamp?new Date(d.timestamp.seconds*1000).toLocaleString('en-US',{day:'numeric',month:'short',hour:'numeric',minute:'numeric',hour12:true}):'Just now';
-    const long=d.content&&d.content.length>80;
-    c.innerHTML+=`<div class="notice-item">
-      <div class="notice-title">${escapeHTML(d.title)}</div>
-      <div class="notice-text">${escapeHTML(d.content).replace(/\n/g,'<br>')}</div>
-      ${long?`<span class="read-more-btn" onclick="openModal('${doc.id}')">📖 পুরো নোটিশ দেখুন</span>`:''}
-      <div class="notice-time">🕒 ${t}</div>
-      <button class="delete-btn" ${isAdmin?"style='display:block'":''} onclick="deleteNotice('${doc.id}')">✕</button>
-    </div>`;
+function handleLocationSearchDebounced() { clearTimeout(locSearchDebounce); locSearchDebounce = setTimeout(filterLocations, 120); }
+function filterLocations() {
+  const q = document.getElementById("locationSearchInput").value.trim().toLowerCase();
+  if (!q) { renderLocationResults([], "🔍 ইউনিয়ন / থানা / জেলা লিখুন"); return; }
+  if (!locationDataAll.length) { renderLocationResults([], "⏳ ডাটা লোড হচ্ছে..."); if(!locationLoading)loadUnionsFromSheet(); return;}
+  const matched = locationDataAll.filter(x => x.search.includes(q));
+  matched.sort((a, b) => {
+    if (a.type === "union" && b.type !== "union") return -1;
+    if (b.type === "union" && a.type !== "union") return 1;
+    return 0;
   });
-});
-function openModal(id){
-  const d=noticesDataStore[id]; if(!d) return;
-  const t=d.timestamp?new Date(d.timestamp.seconds*1000).toLocaleString('en-US',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'numeric',hour12:true}):'Just now';
-  document.getElementById('mTitle').innerText=d.title;
-  document.getElementById('mTime').innerText='🕒 '+t;
-  document.getElementById('mBody').innerText=d.content;
-  document.getElementById('noticeModal').style.display='flex';
+  renderLocationResults(matched);
 }
-function closeModal(){document.getElementById('noticeModal').style.display='none'}
-window.onclick=e=>{
-  if(e.target.id==='noticeModal') closeModal();
-  if(e.target.id==='hubSearchModal') closeHubModal();
-  if(e.target.id==='breakHistoryModal') closeBreakHistoryModal();
-  if(e.target.id==='locationSearchModal') closeLocationModal();
-};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeHubModal();closeBreakHistoryModal();closeLocationModal();}});
+function renderLocationResults(list, prompt) {
+  const box = document.getElementById("locationResultsContainer");
+  if (prompt) { box.innerHTML = `<div style="text-align:center;padding:28px;color:#94a3b8;font-size:12px">${prompt}</div>`; return; }
+  if (!list.length) { box.innerHTML = `<div style="text-align:center;padding:28px;color:#ef4444;font-size:12px">❌ কিছু পাওয়া যায়নি<br><span style="color:#94a3b8;font-size:11px">বানান বদলে চেষ্টা করুন</span></div>`; return; }
+  const MAX = 25; const show = list.slice(0, MAX);
+  let html = `<div style="color:#38bdf8;font-size:12px;font-weight:600;margin-bottom:10px">✅ ${list.length}টি ফলাফল</div>`;
+  show.forEach(loc => {
+    const isUnion = loc.type === "union" && loc.union;
+    const titleEn = isUnion ? loc.union : loc.thana;
+    const titleBn = isUnion ? (loc.unionBn || "") : (loc.thanaBn || "");
+    const badge = isUnion ? `<span class="badge-u">ইউনিয়ন</span>` : `<span class="badge-t">থানা/উপজেলা</span>`;
+    const copyText = isUnion ? `${loc.union}, ${loc.thana}, ${loc.dist}, ${loc.div}` : `${loc.thana}, ${loc.dist}, ${loc.div}`;
+    html += `
+      <div class="location-result-item ${isUnion?'union-item':'thana-item'}">
+        <div class="loc-title">📍 ${escapeHTML(titleEn)}${titleBn ? ` <span style="color:#64748b;font-weight:500">/</span> ${escapeHTML(titleBn)}` : ""} ${badge}</div>
+        ${isUnion ? `<div class="loc-detail-row"><span class="loc-lbl">📌 থানা:</span><span class="loc-val">${escapeHTML(loc.thana)}${loc.thanaBn ? " (" + escapeHTML(loc.thanaBn) + ")" : ""}</span></div>` : ""}
+        <div class="loc-detail-row"><span class="loc-lbl">🏛️ জেলা:</span><span class="loc-val">${escapeHTML(loc.dist)}${loc.distBn ? " (" + escapeHTML(loc.distBn) + ")" : ""}</span></div>
+        <div class="loc-detail-row"><span class="loc-lbl">🌐 বিভাগ:</span><span class="loc-val">${escapeHTML(loc.div)}${loc.divBn ? " (" + escapeHTML(loc.divBn) + ")" : ""}</span></div>
+        <div style="margin-top:8px;text-align:right"><button class="copy-icon-btn" onclick="copyLocation('${escapeHTML(copyText)}')">📋 কপি</button></div>
+      </div>`;
+  });
+  if (list.length > MAX) html += `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:8px">আরও ${list.length - MAX}টি — নাম আরও নির্দিষ্ট করুন</div>`;
+  box.innerHTML = html;
+}
+function copyLocation(text) { navigator.clipboard.writeText(text); showToast("📋 " + text); }
 
-/* ========== BREAK ========== */
-async function submitBreakRequest(){
-  const name=document.getElementById('agentNameSelect').value;
-  const type=document.getElementById('breakTypeSelect').value;
-  const btn=document.getElementById('submitBreakBtn');
-  if(!name){showToast('নাম নির্বাচন করুন!','warn');return}
-  btn.disabled=true;btn.innerText='যাচাই হচ্ছে...';
-  try{
-    const today=todayStr();
-    const dupSnap=await db.collection('break_requests').where('agentName','==',name).where('dateStr','==',today).get();
-    let hasPending=false,hasActive=false,totalToday=0;
-    dupSnap.forEach(doc=>{
-      const d=doc.data();totalToday++;
-      if(d.status==='pending')hasPending=true;
-      if(d.status==='approved'&&d.processedAt){
-        const end=d.processedAt+(BREAK_DURATIONS[d.breakType]||10)*60000;
-        if(Date.now()<end)hasActive=true;
-      }
-    });
-    if(hasPending){showToast(`⚠️ ${name}, একটি রিকোয়েস্ট ইতিমধ্যে পেন্ডিং!`,'warn');return}
-    if(hasActive){showToast(`⚠️ ${name}, আপনি এখন ব্রেকে আছেন!`,'warn');return}
-    if(totalToday>=2){showToast(`⚠️ ${name}, আজ ২ বার হয়ে গেছে!`,'warn');return}
-    await db.collection('break_requests').add({agentName:name,breakType:type,status:'pending',requestedAt:Date.now(),dateStr:today});
-    document.getElementById('agentNameSelect').value='';
-    showToast('🎉 রিকোয়েস্ট জমা হয়েছে!','success');
-  }catch(e){showToast(e.message,'error')}
-  finally{btn.disabled=false;btn.innerText='কিউতে যোগ করুন'}
+// =====================================================
+// 🔍 HUB SEARCH LOGIC
+// =====================================================
+let hubCacheList = [];
+let isFetchingSheet = false;
+let searchDebounceTimer = null;
+
+function openHubSearchModal() {
+    document.getElementById("hubSearchModal").style.display = "flex";
+    const input = document.getElementById("hubSearchInput");
+    input.value = ""; setTimeout(() => input.focus(), 100);
+    renderHubResults([], "🔍 হাবের নাম টাইপ করুন (Dhanmondi, Sutrapur, Rangpur)...");
+    if(!hubCacheList.length && !isFetchingSheet) fetchHubsFromGoogleSheet();
 }
-function listenBreakPortal(){
-  db.collection('break_requests').orderBy('requestedAt','asc').onSnapshot(snap=>{
-    const today=todayStr();
-    let p=0,a=0,r=0,html='';
-    activeBreakList=[];todayApprovedList=[];todayRejectedList=[];
-    snap.forEach(doc=>{
-      const d=doc.data(),dId=doc.id;
-      if(d.status==='pending'&&d.dateStr!==today){if(isAdmin)db.collection('break_requests').doc(dId).delete().catch(()=>{});return}
-      if(d.status==='pending'){
-        p++;
-        const mins=Math.max(0,Math.floor((Date.now()-d.requestedAt)/60000));
-        const tm=new Date(d.requestedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-        const block=activeBreakList.length>=MAX_CONCURRENT_BREAKS;
-        const actions=isAdmin?(block?`<button class="btn-mini-approve" disabled title="লিমিট পূর্ণ">✓</button>`:`<button class="btn-mini-approve" onclick="updateBreakStatus('${dId}','approved')">✓</button>`)+`<button class="btn-mini-reject" onclick="updateBreakStatus('${dId}','rejected')">✕</button>`:`<span class="mini-admin-badge">🔒 Admin</span>`;
-        html+=`<div class="compact-queue-item"><div class="compact-queue-top"><div class="compact-agent-info"><div class="compact-q-num">${p}</div><div class="compact-agent-name">${escapeHTML(d.agentName)}</div></div><span class="compact-type-badge">${escapeHTML(d.breakType)}</span></div><div class="compact-queue-bottom"><span>🕒 ${tm} (<span class="compact-wait-time">${mins} মি:</span>)</span><div class="compact-actions">${actions}</div></div></div>`;
-      }else if(d.dateStr===today){
-        if(d.status==='approved'){
-          a++;const item={id:dId,...d};todayApprovedList.push(item);
-          if(d.processedAt){
-            const durationMin=BREAK_DURATIONS[d.breakType]||10;
-            const endTime=d.processedAt+durationMin*60000;
-            if(Date.now()<endTime+60000) activeBreakList.push({...item,endTime,durationMin});
-          }
+function closeHubModal() { document.getElementById("hubSearchModal").style.display = "none"; }
+function pickColHub(headers, aliases) {
+    for(const a of aliases){ const i = headers.indexOf(a); if(i !== -1) return i; }
+    for(const a of aliases){ const i = headers.findIndex(h => h.includes(a)); if(i !== -1) return i; }
+    return -1;
+}
+
+async function fetchHubsFromGoogleSheet() {
+    isFetchingSheet = true;
+    const sub = document.getElementById("hubModalSubTitle");
+    if(sub) sub.innerText = "⏳ গুগল শিট লোড হচ্ছে...";
+    const url = `https://docs.google.com/spreadsheets/d/${HUB_SEARCH_SHEET_ID}/gviz/tq?tqx=out:json`;
+    try {
+        const res = await fetch(url);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}')+1));
+        const rows = json.table.rows || [];
+        let headers = (json.table.cols||[]).map(c => normHeader(c.label || c.id || ''));
+        const first = rows[0]?.c?.map(c => normHeader(c ? (c.f ?? c.v ?? '') : '')) || [];
+        const firstLooksHeader = first.some(v => /name|address|manager|phone|hub|district|zonal/.test(v));
+        let start = 0;
+        if(firstLooksHeader || headers.every(h=>!h)){ headers = first; start = 1; }
+        const col = {
+            name: pickColHub(headers, ['name','hubname']), address: pickColHub(headers, ['address','location']),
+            district: pickColHub(headers, ['district']), division: pickColHub(headers, ['division']),
+            policeStation: pickColHub(headers, ['policestation','thana','ps']),
+            zonalManager: pickColHub(headers, ['zonal','zonalmanager','zm']), zonalPhone: pickColHub(headers, ['zonalphone','zmphone']),
+            hubIp: pickColHub(headers, ['hubip','ip']), hubPhone: pickColHub(headers, ['hubphone','hub_phone']),
+            manager: pickColHub(headers, ['manager']), managerPhone: pickColHub(headers, ['managerphone','manager_phone']),
+            asstManager: pickColHub(headers, ['asstmanager','assistantmanager','assistant_manager']), asstPhone: pickColHub(headers, ['asstphone','assistant_manager_phone']),
+            teamLeader: pickColHub(headers, ['teamleader','team_leader']), teamLeaderPhone: pickColHub(headers, ['tlphone','team_leader_phone']),
+            whatsappGroup: pickColHub(headers, ['whatsappgroup','whatsapp_group'])
+        };
+        const cellAt = (row, idx) => {
+            if(idx < 0 || !row.c || !row.c[idx]) return '';
+            const c = row.c[idx];
+            if(c.f !== null && c.f !== undefined && String(c.f).trim() !== '') return String(c.f).trim();
+            if(c.v !== null && c.v !== undefined) return String(c.v).trim();
+            return '';
+        };
+        hubCacheList = [];
+        for(let i=start;i<rows.length;i++){
+            const row = rows[i]; if(!row?.c) continue;
+            const all = row.c.map(c => c ? String(c.f ?? c.v ?? '').trim() : '');
+            const rawText = all.join(' ').toLowerCase();
+            if(!rawText.trim()) continue;
+            const get = (idx, fallbackIdx) => { let v = cellAt(row, idx); if(!v && fallbackIdx !== undefined) v = cellAt(row, fallbackIdx); return v; };
+            hubCacheList.push({
+                rawText, searchStr: rawText.replace(/[^a-z0-9\u0980-\u09FF]/gi,''),
+                name: get(col.name, 0) || 'N/A', address: get(col.address, 1) || 'N/A',
+                district: get(col.district, 2) || 'N/A', division: get(col.division, 3) || 'N/A',
+                policeStation: get(col.policeStation, 4) || 'N/A',
+                zonalManager: get(col.zonalManager, 5) || 'N/A', zonalPhone: formatPhoneNumber(get(col.zonalPhone, 6)),
+                hubIp: get(col.hubIp, 7) || 'N/A', hubPhone: formatPhoneNumber(get(col.hubPhone, 8)),
+                manager: get(col.manager, 9) || 'N/A', managerPhone: formatPhoneNumber(get(col.managerPhone, 10)),
+                asstManager: get(col.asstManager, 11) || 'N/A', asstPhone: formatPhoneNumber(get(col.asstPhone, 12)),
+                teamLeader: get(col.teamLeader, 13) || 'N/A', teamLeaderPhone: formatPhoneNumber(get(col.teamLeaderPhone, 14)),
+                whatsappGroup: get(col.whatsappGroup, 15) || ''
+            });
         }
-        if(d.status==='rejected'){r++;todayRejectedList.push({id:dId,...d})}
-      }
+        if(sub) sub.innerText = `✅ ${hubCacheList.length} টি হাব লোড হয়েছে`;
+        if(document.getElementById("hubSearchInput").value.trim()) filterHubs();
+    } catch(e) { console.error(e); if(sub) sub.innerText = "⚠️ শিট লোড ব্যর্থ"; }
+    finally { isFetchingSheet = false; }
+}
+
+function handleHubSearchDebounced() { clearTimeout(searchDebounceTimer); searchDebounceTimer = setTimeout(filterHubs, 120); }
+function filterHubs() {
+    const q = document.getElementById("hubSearchInput").value.trim().toLowerCase();
+    if(!q){ renderHubResults([], "🔍 হাবের নাম টাইপ করুন..."); return; }
+    if(!hubCacheList.length){ renderHubResults([], "⏳ ডাটা লোড হচ্ছে..."); if(!isFetchingSheet) fetchHubsFromGoogleSheet(); return; }
+    const cq = q.replace(/[^a-z0-9\u0980-\u09FF]/gi,'');
+    const filtered = hubCacheList.filter(it => it.rawText.includes(q) || (cq && it.searchStr.includes(cq)));
+    renderHubResults(filtered);
+}
+
+function pill(label, value, isPhone=false, isLink=false) {
+    const v = value && value !== 'N/A' ? value : 'N/A';
+    let btn = '';
+    if (v !== 'N/A') {
+        if (isLink && v.startsWith('http')) btn = `<a href="${escapeHTML(v)}" target="_blank" class="copy-icon-btn" style="text-decoration:none;">🔗 Open</a>`;
+        else if (isPhone) btn = `<button class="copy-icon-btn" onclick="copyNumber('${escapeHTML(v)}')">📄</button>`;
+    }
+    const valDisplay = (isLink && v.startsWith('http')) ? `<a href="${escapeHTML(v)}" target="_blank" style="color:#38bdf8;text-decoration:none;">Group Link</a>` : escapeHTML(v);
+    return `<div class="hub-pill"><div><span class="lbl">${label}:</span> <span class="val">${valDisplay}</span></div>${btn}</div>`;
+}
+
+function renderHubResults(list, prompt) {
+    const box = document.getElementById("hubResultsContainer");
+    if(prompt){ box.innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px">${prompt}</div>`; return; }
+    if(!list.length){ box.innerHTML = `<div style="text-align:center;padding:30px;color:#ef4444;font-size:12px">❌ কোনো হাব পাওয়া যায়নি</div>`; return; }
+    const max = 3; const show = list.slice(0,max); let html = '';
+    show.forEach(item => {
+        html += `<div class="hub-sec-box">
+            <div class="hub-sec-header">Hub Details</div>
+            <div class="hub-grid-2 full-width">${pill('Name', item.name)}</div>
+            <div class="hub-grid-2 full-width">${pill('Address', item.address)}</div>
+            <div class="hub-grid-2">${pill('District', item.district)}${pill('Division', item.division)}</div>
+            <div class="hub-grid-2 full-width">${pill('Police Station', item.policeStation)}</div>
+            <div class="hub-grid-2">${pill('Zonal Manager', item.zonalManager)}${pill('Phone', item.zonalPhone, true)}</div>
+            <div class="hub-grid-2 full-width">${pill('WhatsApp Group', item.whatsappGroup, false, true)}</div>
+            <div class="hub-sec-header" style="margin-top:18px">Contact Details</div>
+            <div class="hub-grid-2">${pill('Hub IP', item.hubIp)}${pill('Hub Phone', item.hubPhone, true)}</div>
+            <div class="hub-grid-2">${pill('Manager', item.manager)}${pill('Phone', item.managerPhone, true)}</div>
+            <div class="hub-grid-2">${pill('Asst. Manager', item.asstManager)}${pill('Phone', item.asstPhone, true)}</div>
+            <div class="hub-grid-2">${pill('Team Leader', item.teamLeader)}${pill('Phone', item.teamLeaderPhone, true)}</div>
+        </div>`;
     });
-    todayApprovedList.sort((x,y)=>(y.processedAt||0)-(x.processedAt||0));
-    todayRejectedList.sort((x,y)=>(y.processedAt||0)-(x.processedAt||0));
-    document.getElementById('statPendingCount').innerText=p;
-    document.getElementById('statApprovedCount').innerText=a;
-    document.getElementById('statRejectedCount').innerText=r;
-    document.getElementById('queueBadgeCount').innerText=p+' জন';
-    document.getElementById('queueContainer').innerHTML=p?html:`<div class="empty-compact-q">🎉 কোনো অপেক্ষমাণ রিকোয়েস্ট নেই</div>`;
-    renderActiveBreaks();
-  });
+    if(list.length>max){ html += `<div style="text-align:center;color:#38bdf8;font-size:11px;padding:8px">ℹ️ আরও ${list.length-max}টি মিলেছে</div>`; }
+    box.innerHTML = html;
 }
-function renderActiveBreaks(){
-  const box=document.getElementById('liveActiveBreaks');
-  const list=document.getElementById('liveBreakList');
-  const badge=document.getElementById('activeBreakBadge');
-  const now=Date.now();
-  const activeNow=activeBreakList.filter(it=>now<it.endTime+60000);
-  document.getElementById('activeBreakCount').innerText=activeNow.length;
-  document.getElementById('activeBreakLimit').innerText=`${activeNow.length}/${MAX_CONCURRENT_BREAKS} জন`;
-  if(!activeNow.length){box.classList.remove('has-active');badge.classList.add('zero-active');return}
-  badge.classList.remove('zero-active');box.classList.add('has-active');
-  let html='';
-  activeNow.forEach(it=>{
-    const remainingMs=it.endTime-now;
-    const remainingMin=Math.ceil(remainingMs/60000);
-    let timerClass='timer-ok',timerText='';
-    if(remainingMs<=0){timerClass='timer-over';timerText=`⛔ ${Math.abs(Math.floor(remainingMs/60000))} মি: বেশি!`}
-    else if(remainingMin<=3){timerClass='timer-warn';timerText=`⚠️ ${remainingMin} মি: বাকি`}
-    else timerText=`⏳ ${remainingMin} মি: বাকি`;
-    html+=`<div class="live-break-item"><div><span class="live-break-name">${escapeHTML(it.agentName)}</span><span style="color:rgba(248,250,252,.55);font-size:10px;margin-left:5px">(${escapeHTML(it.breakType)})</span></div><span class="live-break-timer ${timerClass}">${timerText}</span></div>`;
-  });
-  list.innerHTML=html;
-}
-setInterval(renderActiveBreaks,15000);
-async function updateBreakStatus(id,s){
-  if(!isAdmin)return;
-  if(s==='approved'&&activeBreakList.length>=MAX_CONCURRENT_BREAKS){showToast(`⛔ সর্বোচ্চ ${MAX_CONCURRENT_BREAKS} জন একসাথে ব্রেকে থাকতে পারবে!`,'warn');return}
-  try{
-    await db.collection('break_requests').doc(id).update({status:s,processedAt:Date.now(),processedBy:'Admin'});
-    showToast(s==='approved'?'✅ অনুমোদন করা হয়েছে':'❌ বাতিল করা হয়েছে',s==='approved'?'success':'error');
-  }catch(e){showToast(e.message,'error')}
-}
-function openBreakHistory(type){
-  const title=document.getElementById("bhTitle");
-  const container=document.getElementById("bhListContainer");
-  container.innerHTML="";
-  const list=type==='approved'?todayApprovedList:todayRejectedList;
-  title.innerHTML=type==='approved'?"✅ আজকের অনুমোদিত ব্রেক":"❌ আজকের বাতিল ব্রেক";
-  title.style.color=type==='approved'?"#10b981":"#ef4444";
-  if(!list.length) container.innerHTML=`<div style="text-align:center;padding:30px;color:rgba(248,250,252,.6);font-size:13px">কোনো ডাটা পাওয়া যায়নি।</div>`;
-  else list.forEach(item=>{
-    const reqTime=new Date(item.requestedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-    const procTime=item.processedAt?new Date(item.processedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}):'--:--';
-    const color=type==='approved'?'#4ade80':'#fb7185';
-    const bg=type==='approved'?'rgba(16,185,129,.15)':'rgba(239,68,68,.15)';
-    container.innerHTML+=`<div class="history-item" style="border-left:3px solid ${color}"><div class="history-item-info"><h4>👤 ${escapeHTML(item.agentName)}</h4><p style="margin-bottom:4px;font-weight:600;color:#67e8f9">🏷️ ${escapeHTML(item.breakType)}</p><p>🕒 রিকোয়েস্ট: ${reqTime} | আপডেট: ${procTime}</p></div><div class="history-status-badge" style="background:${bg};color:${color}">${type==='approved'?'অনুমোদিত':'বাতিল'}</div></div>`;
-  });
-  document.getElementById('breakHistoryModal').style.display='flex';
-}
-function closeBreakHistoryModal(){document.getElementById('breakHistoryModal').style.display='none'}
+function copyNumber(t) { navigator.clipboard.writeText(t); showToast('📋 কপি হয়েছে: '+t); }
 
-/* ========== STATS ========== */
-function initTotalVisits(){
-  const ref=db.collection('portal_stats').doc('visits');
-  
-  // Real daily unique visit tracker
-  const today = new Date().toISOString().split('T')[0];
-  const lastVisitDay = localStorage.getItem('last_visit_date');
-  
-  if (lastVisitDay !== today) {
-    localStorage.setItem('last_visit_date', today);
-    ref.set({total:firebase.firestore.FieldValue.increment(1)},{merge:true}).catch(console.error);
-  }
-  
-  ref.onSnapshot(d=>{if(d.exists&&d.data().total!==undefined) document.getElementById('visitCount').innerText=d.data().total.toLocaleString()});
+// =====================================================
+// 📢 NOTICE
+// =====================================================
+db.collection("notices").orderBy("timestamp", "desc").onSnapshot(snap => {
+    const c = document.getElementById("noticeContainer");
+    if(snap.empty){ c.innerHTML = `<div class="notice-item"><div class="notice-title">স্বাগতম টিম! 👋</div><div class="notice-text">সব আপডেট এখানে দেখা যাবে।</div></div>`; return; }
+    c.innerHTML = ''; noticesDataStore = {};
+    snap.forEach(doc => {
+        const d = doc.data(); noticesDataStore[doc.id] = d;
+        const t = d.timestamp ? new Date(d.timestamp.seconds*1000).toLocaleString('en-US',{day:'numeric',month:'short',hour:'numeric',minute:'numeric',hour12:true}) : 'Just now';
+        const long = d.content && d.content.length > 80;
+        c.innerHTML += `<div class="notice-item"><div class="notice-title">${escapeHTML(d.title)}</div><div class="notice-text">${escapeHTML(d.content).replace(/\n/g,'<br>')}</div>${long ? `<span class="read-more-btn" onclick="openModal('${doc.id}')">📖 পুরো নোটিশ দেখুন</span>` : ''}<div class="notice-time">🕒 ${t}</div><button class="delete-btn" ${isAdmin ? "style='display:block'" : ""} onclick="deleteNotice('${doc.id}')">✕</button></div>`;
+    });
+});
+
+function openModal(id) {
+    const d = noticesDataStore[id]; if(!d) return;
+    const t = d.timestamp ? new Date(d.timestamp.seconds*1000).toLocaleString('en-US',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'numeric',hour12:true}) : 'Just now';
+    document.getElementById('mTitle').innerText = d.title;
+    document.getElementById('mTime').innerText = '🕒 ' + t;
+    document.getElementById('mBody').innerText = d.content;
+    document.getElementById('noticeModal').style.display = 'flex';
 }
-function initOnlinePresence(){
-  const ref=db.collection('active_presence').doc(mySessionId);
-  const beat=()=>ref.set({last_seen:Date.now()}).catch(()=>{});
-  beat();setInterval(beat,8000);
-  window.addEventListener('beforeunload',()=>ref.delete());
-  db.collection('active_presence').onSnapshot(snap=>{
-    const now=Date.now();let n=0;
-    snap.forEach(doc=>{const d=doc.data();if(d?.last_seen&&now-d.last_seen<20000)n++});
-    document.getElementById('onlineCount').innerText=Math.max(1,n);
-  });
+function closeModal() { document.getElementById('noticeModal').style.display = 'none'; }
+
+window.onclick = e => {
+    if(e.target.id === 'noticeModal') closeModal();
+    if(e.target.id === 'hubSearchModal') closeHubModal();
+    if(e.target.id === 'breakHistoryModal') closeBreakHistoryModal();
+    if(e.target.id === 'locationSearchModal') closeLocationModal();
+};
+document.addEventListener('keydown', e => { if(e.key === 'Escape') { closeModal(); closeHubModal(); closeBreakHistoryModal(); closeLocationModal(); } });
+
+// =====================================================
+// ☕ BREAK
+// =====================================================
+async function submitBreakRequest() {
+    const name = document.getElementById('agentNameSelect').value;
+    const type = document.getElementById('breakTypeSelect').value;
+    const btn = document.getElementById('submitBreakBtn');
+    if(!name) { showToast('নাম নির্বাচন করুন!', 'warn'); return; }
+    btn.disabled = true; btn.innerText = 'যাচাই হচ্ছে...';
+    try {
+        const today = todayStr();
+        const dupSnap = await db.collection('break_requests').where('agentName', '==', name).where('dateStr', '==', today).get();
+        let hasPending = false, hasActive = false, totalToday = 0;
+        dupSnap.forEach(doc => {
+            const d = doc.data(); totalToday++;
+            if(d.status === 'pending') hasPending = true;
+            if(d.status === 'approved' && d.processedAt) {
+                const end = d.processedAt + (BREAK_DURATIONS[d.breakType]||10)*60000;
+                if(Date.now() < end) hasActive = true;
+            }
+        });
+        if(hasPending) { showToast(`⚠️ ${name}, একটি রিকোয়েস্ট ইতিমধ্যে পেন্ডিং!`, 'warn'); return; }
+        if(hasActive) { showToast(`⚠️ ${name}, আপনি এখন ব্রেকে আছেন!`, 'warn'); return; }
+        if(totalToday >= 2) { showToast(`⚠️ ${name}, আজ ২ বার হয়ে গেছে!`, 'warn'); return; }
+        await db.collection('break_requests').add({agentName:name,breakType:type,status:'pending',requestedAt:Date.now(),dateStr:today});
+        document.getElementById('agentNameSelect').value = '';
+        showToast('🎉 রিকোয়েস্ট জমা হয়েছে!', 'success');
+    } catch(e){ showToast(e.message, 'error'); }
+    finally { btn.disabled = false; btn.innerText = 'কিউতে যোগ করুন'; }
 }
 
-/* ========== ADMIN ========== */
-function toggleAdmin(){
-  const panel=document.getElementById('adminPanel');
-  const btn=document.getElementById('adminBtn');
-  if(isAdmin){isAdmin=false;panel.style.display='none';btn.innerText='🔒 Admin Login';document.querySelectorAll('.delete-btn').forEach(el=>el.style.display='none');listenBreakPortal();}
-  else{const pin=prompt('Enter Admin PIN:');if(pin===ADMIN_PIN){isAdmin=true;panel.style.display='block';btn.innerText='🔓 Logout';document.querySelectorAll('.delete-btn').forEach(el=>el.style.display='block');listenBreakPortal();showToast('👑 অ্যাডমিন লগইন হয়েছে','success');} else if(pin!==null) showToast('❌ Incorrect PIN!','error');}
+function listenBreakPortal() {
+    db.collection('break_requests').orderBy('requestedAt','asc').onSnapshot(snap => {
+        const today = todayStr();
+        let p=0, a=0, r=0, queueHTML='';
+        activeBreakList = []; todayApprovedList = []; todayRejectedList = [];
+        snap.forEach(doc => {
+            const d = doc.data(), dId = doc.id;
+            if(d.status === 'pending' && d.dateStr !== today) { if(isAdmin) db.collection('break_requests').doc(dId).delete().catch(()=>{}); return; }
+            if(d.status === 'pending') {
+                p++;
+                const mins = Math.max(0,Math.floor((Date.now()-d.requestedAt)/60000));
+                const tm = new Date(d.requestedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+                const block = activeBreakList.length >= MAX_CONCURRENT_BREAKS;
+                const actions = isAdmin ? (block ? `<button class="btn-mini-approve" disabled title="লিমিট পূর্ণ">✓</button>` : `<button class="btn-mini-approve" onclick="updateBreakStatus('${dId}','approved')">✓</button>`) + `<button class="btn-mini-reject" onclick="updateBreakStatus('${dId}','rejected')">✕</button>` : `<span class="mini-admin-badge">🔒 Admin</span>`;
+                queueHTML += `<div class="compact-queue-item"><div class="compact-queue-top"><div class="compact-agent-info"><div class="compact-q-num">${p}</div><div class="compact-agent-name">${escapeHTML(d.agentName)}</div></div><span class="compact-type-badge">${escapeHTML(d.breakType)}</span></div><div class="compact-queue-bottom"><span>🕒 ${tm} (<span class="compact-wait-time">${mins} মি:</span>)</span><div class="compact-actions">${actions}</div></div></div>`;
+            }
+            else if(d.dateStr === today) {
+                if(d.status === 'approved') {
+                    a++; const item = { id: dId, ...d }; todayApprovedList.push(item);
+                    if(d.processedAt) {
+                        const durationMin = BREAK_DURATIONS[d.breakType]||10;
+                        const endTime = d.processedAt + durationMin*60000;
+                        if(Date.now() < endTime + 60000) activeBreakList.push({ ...item, endTime, durationMin });
+                    }
+                }
+                if(d.status === 'rejected') { r++; todayRejectedList.push({ id: dId, ...d }); }
+            }
+        });
+        todayApprovedList.sort((x,y) => (y.processedAt||0)-(x.processedAt||0));
+        todayRejectedList.sort((x,y) => (y.processedAt||0)-(x.processedAt||0));
+        document.getElementById('statPendingCount').innerText = p;
+        document.getElementById('statApprovedCount').innerText = a;
+        document.getElementById('statRejectedCount').innerText = r;
+        document.getElementById('queueBadgeCount').innerText = p + ' জন';
+        document.getElementById('queueContainer').innerHTML = p ? queueHTML : `<div class="empty-compact-q">🎉 কোনো অপেক্ষমাণ রিকোয়েস্ট নেই</div>`;
+        renderActiveBreaks();
+    });
 }
-async function publishNotice(){
-  const title=document.getElementById('noticeTitle').value.trim();
-  const content=document.getElementById('noticeContent').value.trim();
-  if(!title||!content){showToast('সব ঘর পূরণ করুন!','warn');return}
-  const btn=document.getElementById('publishBtn');
-  btn.disabled=true;btn.innerText='Publishing...';
-  try{
-    await db.collection('notices').add({title,content,timestamp:firebase.firestore.FieldValue.serverTimestamp()});
-    document.getElementById('noticeTitle').value='';document.getElementById('noticeContent').value='';
-    showToast('📢 নোটিশ প্রকাশিত!','success');
-  }catch(e){showToast(e.message,'error')}
-  finally{btn.disabled=false;btn.innerText='🚀 Publish Live'}
-}
-async function deleteNotice(id){if(confirm('ডিলিট করবেন?')){await db.collection('notices').doc(id).delete();showToast('🗑️ ডিলিট করা হয়েছে','success')}}
 
-document.addEventListener('DOMContentLoaded',()=>{initTotalVisits();initOnlinePresence();listenBreakPortal()});
+function renderActiveBreaks() {
+    const box = document.getElementById('liveActiveBreaks');
+    const list = document.getElementById('liveBreakList');
+    const badge = document.getElementById('activeBreakBadge');
+    const now = Date.now();
+    const activeNow = activeBreakList.filter(it => now < it.endTime + 60000);
+    document.getElementById('activeBreakCount').innerText = activeNow.length;
+    document.getElementById('activeBreakLimit').innerText = `${activeNow.length}/${MAX_CONCURRENT_BREAKS} জন`;
+    if(!activeNow.length) { box.classList.remove('has-active'); badge.classList.add('zero-active'); return; }
+    badge.classList.remove('zero-active'); box.classList.add('has-active');
+    let html = '';
+    activeNow.forEach(it => {
+        const remainingMs = it.endTime - now;
+        const remainingMin = Math.ceil(remainingMs / 60000);
+        let timerClass = 'timer-ok', timerText = '';
+        if(remainingMs <= 0) { timerClass = 'timer-over'; timerText = `⛔ ${Math.abs(Math.floor(remainingMs/60000))} মি: বেশি!`; }
+        else if(remainingMin <= 3) { timerClass = 'timer-warn'; timerText = `⚠️ ${remainingMin} মি: বাকি`; }
+        else timerText = `⏳ ${remainingMin} মি: বাকি`;
+        html += `<div class="live-break-item"><div><span class="live-break-name">${escapeHTML(it.agentName)}</span><span style="color:#94a3b8;font-size:10px;margin-left:5px;">(${escapeHTML(it.breakType)})</span></div><span class="live-break-timer ${timerClass}">${timerText}</span></div>`;
+    });
+    list.innerHTML = html;
+}
+setInterval(renderActiveBreaks, 15000);
+
+async function updateBreakStatus(id, s) {
+    if(!isAdmin) return;
+    if(s === 'approved' && activeBreakList.length >= MAX_CONCURRENT_BREAKS) { showToast(`⛔ সর্বোচ্চ ${MAX_CONCURRENT_BREAKS} জন একসাথে ব্রেকে থাকতে পারবে!`, 'warn'); return; }
+    try {
+        await db.collection('break_requests').doc(id).update({status:s,processedAt:Date.now(),processedBy:'Admin'});
+        showToast(s === 'approved' ? '✅ অনুমোদন করা হয়েছে' : '❌ বাতিল করা হয়েছে', s === 'approved' ? 'success' : 'error');
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
+function openBreakHistory(type) {
+    const modal = document.getElementById("breakHistoryModal");
+    const title = document.getElementById("bhTitle");
+    const container = document.getElementById("bhListContainer");
+    container.innerHTML = "";
+    const list = type === 'approved' ? todayApprovedList : todayRejectedList;
+    title.innerHTML = type === 'approved' ? "✅ আজকের অনুমোদিত ব্রেক" : "❌ আজকের বাতিল ব্রেক";
+    title.style.color = type === 'approved' ? "#10b981" : "#ef4444";
+    if(list.length === 0) container.innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">কোনো ডাটা পাওয়া যায়নি।</div>`;
+    else list.forEach(item => {
+        const reqTime = new Date(item.requestedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+        const procTime = item.processedAt ? new Date(item.processedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}) : '--:--';
+        const badgeColor = type === 'approved' ? '#10b981' : '#ef4444';
+        const badgeBg = type === 'approved' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+        container.innerHTML += `<div class="history-item" style="border-left: 3px solid ${badgeColor};"><div class="history-item-info"><h4>👤 ${escapeHTML(item.agentName)}</h4><p style="margin-bottom:4px;font-weight:600;color:#38bdf8;">🏷️ ${escapeHTML(item.breakType)}</p><p>🕒 রিকোয়েস্ট: ${reqTime} | আপডেট: ${procTime}</p></div><div class="history-status-badge" style="background:${badgeBg};color:${badgeColor};">${type === 'approved' ? 'অনুমোদিত' : 'বাতিল'}</div></div>`;
+    });
+    modal.style.display = "flex";
+}
+function closeBreakHistoryModal() { document.getElementById("breakHistoryModal").style.display = "none"; }
+
+// =====================================================
+// STATS & PRESENCE
+// =====================================================
+function initTotalVisits() {
+    const ref = db.collection('portal_stats').doc('visits');
+    const today = new Date().toISOString().split('T')[0];
+    const lastVisitDay = localStorage.getItem('last_visit_date');
+    if (lastVisitDay !== today) {
+        localStorage.setItem('last_visit_date', today);
+        ref.set({total:firebase.firestore.FieldValue.increment(1)},{merge:true}).catch(console.error);
+    }
+    ref.onSnapshot(d => { if(d.exists && d.data().total !== undefined) document.getElementById('visitCount').innerText = d.data().total.toLocaleString(); });
+}
+
+function initOnlinePresence() {
+    const ref = db.collection('active_presence').doc(mySessionId);
+    const beat = () => ref.set({last_seen:Date.now()}).catch(()=>{});
+    beat(); setInterval(beat, 8000);
+    window.addEventListener('beforeunload',()=>ref.delete());
+    db.collection('active_presence').onSnapshot(snap => {
+        const now = Date.now(); let n = 0;
+        snap.forEach(doc => { const d = doc.data(); if(d && d.last_seen && (now - d.last_seen < 20000)) n++; });
+        document.getElementById('onlineCount').innerText = Math.max(1, n);
+    });
+}
+
+function toggleAdmin() {
+    const panel = document.getElementById('adminPanel');
+    const btn = document.getElementById('adminBtn');
+    if(isAdmin){ isAdmin = false; panel.style.display='none'; btn.innerText='🔒 Admin Login'; document.querySelectorAll('.delete-btn').forEach(el=>el.style.display='none'); listenBreakPortal(); }
+    else{ const pin = prompt('Enter Admin PIN:'); if(pin === ADMIN_PIN){ isAdmin = true; panel.style.display='block'; btn.innerText='🔓 Logout'; document.querySelectorAll('.delete-btn').forEach(el=>el.style.display='block'); listenBreakPortal(); showToast('👑 অ্যাডমিন লগইন হয়েছে','success'); } else if(pin !== null) showToast('❌ Incorrect PIN!','error'); }
+}
+
+async function publishNotice() {
+    const title = document.getElementById('noticeTitle').value.trim();
+    const content = document.getElementById('noticeContent').value.trim();
+    if(!title || !content){ showToast('সব ঘর পূরণ করুন!','warn'); return; }
+    const btn = document.getElementById('publishBtn');
+    btn.disabled = true; btn.innerText = 'Publishing...';
+    try{ await db.collection('notices').add({title,content,timestamp:firebase.firestore.FieldValue.serverTimestamp()}); document.getElementById('noticeTitle').value=''; document.getElementById('noticeContent').value=''; showToast('📢 নোটিশ প্রকাশিত!','success'); }
+    catch(e){ showToast(e.message,'error'); }
+    finally{ btn.disabled=false; btn.innerText='🚀 Publish Live'; }
+}
+
+async function deleteNotice(id) { if(confirm('ডিলিট করবেন?')){ await db.collection('notices').doc(id).delete(); showToast('🗑️ ডিলিট করা হয়েছে','success'); } }
+
+document.addEventListener('DOMContentLoaded',()=>{
+    initTotalVisits();
+    initOnlinePresence();
+    listenBreakPortal();
+    fetchTopIssueTakers();
+});
 </script>
 </body>
 </html>
