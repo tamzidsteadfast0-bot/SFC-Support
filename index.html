@@ -1052,61 +1052,99 @@ let todayRejectedList = [];
 // =====================================================
 // 🏆 TOP ISSUE TAKERS MARQUEE LOGIC (PRECISE ROW PARSER)
 // =====================================================
+function getCurrentShiftBD() {
+    // ইউজারের ব্রাউজার যেই টাইমজোনেই থাকুক, সবসময় Bangladesh সময় ধরে হিসাব হবে
+    const bdTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka", hour12: false });
+    const bdDate = new Date(bdTimeStr);
+    const minutesNow = bdDate.getHours() * 60 + bdDate.getMinutes();
+
+    const morningStart = 7 * 60;        // সকাল ৭:০০ = 420
+    const morningEnd   = 15 * 60 + 15;  // দুপুর ৩:১৫ = 915
+
+    // ৭:০০ AM - ৩:১৫ PM => Morning, বাকি সময় (৩:১৬ PM - ১২:০০ AM এবং রাত ১২টার পর থেকে ভোর ৭টা আগ পর্যন্ত) => Evening
+    return (minutesNow >= morningStart && minutesNow <= morningEnd) ? "morning" : "evening";
+}
+
 async function fetchTopIssueTakers() {
     const textElem = document.getElementById("topIssueTakersText");
     if (!TOP_PERFORMER_SHEET_ID) return;
 
-    // Use direct CSV Export format for 100% reliable cell parsing
-    const csvUrl = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}`;
-    
+    const jsonUrl = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}`;
+
     try {
-        const res = await fetch(csvUrl);
-        const csvText = await res.text();
-        const lines = csvText.split('\n');
+        const res = await fetch(jsonUrl);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+        const rows = json.table.rows || [];
 
+        const cellVal = (row, i) => {
+            if (i < 0 || !row.c || !row.c[i]) return "";
+            const c = row.c[i];
+            if (c.f != null && String(c.f).trim() !== "") return String(c.f).trim();
+            if (c.v != null) return String(c.v).trim();
+            return "";
+        };
+        const rowText = (row) => (row?.c || []).map(c => (c ? String(c.f ?? c.v ?? "") : "")).join(" ").toLowerCase();
+
+        // ধাপ ১: "No"/"Name"/"Taken" হেডার খুঁজে প্রতিটা টেবিলের কলাম-পজিশন বের করা
+        let tables = [];
+        rows.forEach((row, rIdx) => {
+            if (!row?.c) return;
+            row.c.forEach((c, cIdx) => {
+                const h = normHeader(c ? (c.f ?? c.v ?? "") : "");
+                if (h === "no" || h === "sl" || h === "slno") {
+                    let nameCol = -1, takenCol = -1;
+                    for (let k = cIdx + 1; k < row.c.length; k++) {
+                        const hk = normHeader(row.c[k] ? (row.c[k].f ?? row.c[k].v ?? "") : "");
+                        if (nameCol === -1 && hk === "name") nameCol = k;
+                        if (hk === "taken") { takenCol = k; break; }
+                        if (hk === "no" || hk === "sl") break;
+                    }
+                    if (nameCol !== -1 && takenCol !== -1) {
+                        // এই টেবিলটা Morning নাকি Evening — হেডারের ৫ রো উপরে খুঁজে দেখা
+                        let shift = null;
+                        for (let up = rIdx - 1; up >= Math.max(0, rIdx - 6); up--) {
+                            const t = rowText(rows[up]);
+                            if (t.includes("morning")) { shift = "morning"; break; }
+                            if (t.includes("evening")) { shift = "evening"; break; }
+                        }
+                        tables.push({ headerRowIdx: rIdx, noCol: cIdx, nameCol, takenCol, shift });
+                    }
+                }
+            });
+        });
+
+        // ধাপ ২: বর্তমান সময় অনুযায়ী সঠিক শিফটের টেবিল বেছে নেওয়া
+        const currentShift = getCurrentShiftBD();
+        let activeTables = tables.filter(t => t.shift === currentShift);
+        if (activeTables.length === 0) activeTables = tables; // ট্যাগ না পেলে ফলব্যাক হিসেবে সব টেবিল
+
+        // ধাপ ৩: ডাটা রো পড়া (Total রো এলে থেমে যাবে)
         let agentData = [];
-
-        // Scan rows line by line
-        lines.forEach(line => {
-            if (!line.trim()) return;
-
-            // Simple CSV Split handling quotes
-            const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, ''));
-            
-            // Col 0 = No (Sl), Col 1 = Name, Col 5 = Taken
-            const slNo = parseInt(parts[0]);
-            const agentName = parts[1];
-            const takenCount = parseInt(parts[5]) || 0;
-
-            // STRICT FILTER:
-            // 1. Sl No must be a valid number (1 to 50)
-            // 2. Name must exist and NOT be Date/Total/Name/Header
-            if (!isNaN(slNo) && slNo >= 1 && slNo <= 50) {
-                if (agentName && 
-                    !agentName.startsWith('Date(') && 
-                    !agentName.toLowerCase().includes('report') && 
-                    !agentName.toLowerCase().includes('shift') && 
-                    agentName.toLowerCase() !== 'name' && 
-                    agentName.toLowerCase() !== 'total') {
-                    
-                    agentData.push({ name: agentName, score: takenCount });
+        activeTables.forEach(t => {
+            for (let r = t.headerRowIdx + 1; r < rows.length; r++) {
+                const row = rows[r]; if (!row?.c) continue;
+                const slNo = parseInt(cellVal(row, t.noCol));
+                if (isNaN(slNo)) break;
+                const agentName = cellVal(row, t.nameCol);
+                const takenCount = parseInt(cellVal(row, t.takenCol)) || 0;
+                if (agentName) {
+                    const existing = agentData.find(a => a.name.toLowerCase() === agentName.toLowerCase());
+                    if (existing) existing.score += takenCount;
+                    else agentData.push({ name: agentName, score: takenCount });
                 }
             }
         });
 
         if (agentData.length > 0) {
-            // Sort agents by 'Taken' count descending (highest first)
             agentData.sort((a, b) => b.score - a.score);
-
             const top5 = agentData.slice(0, 5);
+            const shiftLabel = currentShift === "morning" ? "Morning" : "Evening";
             let marqueeHTML = "";
             const medals = ["🏆", "🥇", "🥈", "🥉", "🏅"];
-
             top5.forEach((agent, index) => {
-                marqueeHTML += `<span class="marquee-item"><span class="rank-icon">${medals[index]}</span> <span class="name">${escapeHTML(agent.name)}</span> <span class="score">${agent.score} Issues</span></span>`;
+                marqueeHTML += `<span class="marquee-item"><span class="rank-icon">${medals[index]}</span> <span class="name">${escapeHTML(agent.name)} (${shiftLabel})</span> <span class="score">${agent.score} Issues</span></span>`;
             });
-
-            // Duplicate 3 times for seamless slow loop
             textElem.innerHTML = marqueeHTML + marqueeHTML + marqueeHTML;
         } else {
             textElem.innerHTML = `<span class="marquee-item"><span class="rank-icon">⏳</span> <span class="name">আজকের ডাটা প্রসেস হচ্ছে...</span></span>`;
