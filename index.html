@@ -128,7 +128,7 @@ header::before{
 .marquee-content {
     display: inline-block;
     white-space: nowrap;
-    animation: scroll-left 45s linear infinite; /* Slowed down to 45s for smooth reading */
+    animation: scroll-left 55s linear infinite; /* Slowed down to 55s for smooth reading */
     padding-left: 100%;
 }
 .marquee-content:hover {
@@ -1028,7 +1028,7 @@ const firebaseConfig = {
     appId: "1:589705470778:web:4390bc11624fe36635a603"
 };
 
-const ADMIN_PIN = "1234";
+const ADMIN_PIN = "4563";
 const MAX_CONCURRENT_BREAKS = 2;
 const BREAK_DURATIONS = { "শর্ট ব্রেক": 10, "নামাজের ব্রেক": 20 };
 
@@ -1069,7 +1069,7 @@ async function fetchTopIssueTakers() {
     const textElem = document.getElementById("topIssueTakersText");
     if (!TOP_PERFORMER_SHEET_ID) return;
 
-    const jsonUrl = `https://docs.google.com/spreadsheets/d/${1La_PUSmGKp7V-bIpBkseliyr0iH8ipBA-1tZjZqaZPc}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(Daily Report)}`;
+    const jsonUrl = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}`;
 
     try {
         const res = await fetch(jsonUrl);
