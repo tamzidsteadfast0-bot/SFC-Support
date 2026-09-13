@@ -92,22 +92,23 @@ header::before{
 /* ========================================= */
 .header-center-marquee {
     flex: 1;
-    margin: 0 20px;
-    background: rgba(15, 23, 42, 0.4);
-    border: 1px solid rgba(56, 189, 248, 0.2);
+    margin: 0 15px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(56, 189, 248, 0.25);
     border-radius: 8px;
     display: flex;
     align-items: center;
     overflow: hidden;
     height: 38px;
-    box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+    min-width: 250px;
 }
 .marquee-title {
     background: linear-gradient(135deg, #f59e0b, #f97316);
     color: #0f172a;
     font-weight: 800;
     font-size: 11px;
-    padding: 0 14px;
+    padding: 0 12px;
     height: 100%;
     display: flex;
     align-items: center;
@@ -136,7 +137,7 @@ header::before{
 .marquee-item {
     display: inline-flex;
     align-items: center;
-    margin-right: 40px;
+    margin-right: 35px;
     font-size: 13px;
     font-weight: 700;
 }
@@ -803,7 +804,22 @@ header::before{
 .history-item-info p { font-size: 11.5px; color: #94a3b8; }
 .history-status-badge { font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 6px; white-space: nowrap; }
 
-.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(200%); background: #1e293b; color: #fff; padding: 12px 22px; border-radius: 10px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 99999; font-size: 13px; font-weight: 600; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(200%);
+    background: #1e293b;
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: 1px solid #334155;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 99999;
+    font-size: 13px;
+    font-weight: 600;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.success { border-color: #10b981; color: #4ade80; }
 .toast.error { border-color: #ef4444; color: #f87171; }
@@ -854,12 +870,12 @@ footer strong{ color:rgba(255,255,255,0.8); }
             </div>
         </div>
 
-        <!-- TOP ISSUE TAKERS MARQUEE -->
-        <div class="header-center-marquee" id="topIssueTakerContainer" style="display: none;">
+        <!-- TOP ISSUE TAKERS MARQUEE (VISIBLE BY DEFAULT) -->
+        <div class="header-center-marquee" id="topIssueTakerContainer">
             <div class="marquee-title">🏆 Top Issue Takers</div>
             <div class="marquee-wrapper">
                 <div class="marquee-content" id="topIssueTakersText">
-                    <!-- Data will load here automatically -->
+                    <span class="marquee-item"><span class="rank-icon">⏳</span> <span class="name">Daily Report ডাটা লোড হচ্ছে...</span></span>
                 </div>
             </div>
         </div>
@@ -1049,41 +1065,91 @@ let todayApprovedList = [];
 let todayRejectedList = [];
 
 // =====================================================
-// 🏆 TOP ISSUE TAKERS MARQUEE LOGIC (SMART PARSER)
+// 🏆 TOP ISSUE TAKERS MARQUEE LOGIC (SMART MULTI-TAB PARSER)
 // =====================================================
 async function fetchTopIssueTakers() {
+    const textElem = document.getElementById("topIssueTakersText");
     if (!TOP_PERFORMER_SHEET_ID) return;
 
-    const url = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}`;
-    
-    try {
-        const res = await fetch(url);
-        const text = await res.text();
-        const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
-        const rows = json.table.rows || [];
+    let agentData = [];
+    const tabsToTry = ["Daily Report", "DailyReport", "Daily_Report"];
 
-        let agentData = [];
+    for (let tabName of tabsToTry) {
+        try {
+            const url = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+            const res = await fetch(url);
+            const text = await res.text();
+            
+            const jsonStart = text.indexOf('{');
+            const jsonEnd = text.lastIndexOf('}') + 1;
+            if (jsonStart === -1 || jsonEnd === -1) continue;
 
-        // Scan rows for Morning/Evening tables
-        // In the sheet: Col 0 (No), Col 1 (Name), Col 5 (Taken)
-        for (let i = 0; i < rows.length; i++) {
-            const row = rows[i];
-            if (!row || !row.c) continue;
+            const json = JSON.parse(text.substring(jsonStart, jsonEnd));
+            const rows = json.table ? json.table.rows : [];
 
-            const colA = row.c[0] ? String(row.c[0].v || '').trim() : ''; 
-            const colB = row.c[1] ? String(row.c[1].v || row.c[1].f || '').trim() : ''; 
-            const colF = row.c[5] ? Number(row.c[5].v || 0) : 0;          
+            if (!rows || rows.length === 0) continue;
 
-            // Valid agent row check: Col A is numeric (1, 2, 3...) & Col B is not empty/Total
-            if (colA && !isNaN(colA) && colB && colB.toLowerCase() !== 'total') {
-                agentData.push({ name: colB, score: colF });
+            let parsedInThisTab = [];
+
+            // Scan rows for agent reports
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || !row.c || !Array.isArray(row.c)) continue;
+
+                const vals = row.c.map(cell => {
+                    if (!cell) return '';
+                    if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
+                    if (cell.f !== null && cell.f !== undefined) return String(cell.f).trim();
+                    return '';
+                });
+
+                const numCol = parseInt(vals[0]);
+                const nameCol = vals[1];
+                const takenCol = parseInt(vals[5]) || parseInt(vals[4]) || 0; // Col F (Taken)
+
+                // Match valid agent row
+                if (!isNaN(numCol) && numCol >= 1 && numCol <= 50 && nameCol && nameCol.toLowerCase() !== 'total' && nameCol.toLowerCase() !== 'name') {
+                    parsedInThisTab.push({ name: nameCol, score: takenCol });
+                }
             }
-        }
 
-        // Sort agents by 'Taken' issues count descending
+            if (parsedInThisTab.length > 0) {
+                agentData = parsedInThisTab;
+                break; // Found data successfully
+            }
+        } catch (e) {
+            console.warn("GViz fetch failed for tab " + tabName, e);
+        }
+    }
+
+    // Fallback: If GViz API failed or sheet is not publicly formatted for JSON
+    if (agentData.length === 0) {
+        try {
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/export?format=csv&sheet=${encodeURIComponent("Daily Report")}`;
+            const res = await fetch(csvUrl);
+            const csvText = await res.text();
+            const lines = csvText.split('\n');
+
+            lines.forEach(line => {
+                const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, ''));
+                const num = parseInt(parts[0]);
+                const name = parts[1];
+                const taken = parseInt(parts[5]) || parseInt(parts[4]) || 0;
+
+                if (!isNaN(num) && num >= 1 && num <= 50 && name && name.toLowerCase() !== 'total' && name.toLowerCase() !== 'name') {
+                    agentData.push({ name: name, score: taken });
+                }
+            });
+        } catch (csvErr) {
+            console.warn("CSV Fallback failed:", csvErr);
+        }
+    }
+
+    // Render data
+    if (agentData.length > 0) {
+        // Sort agents by 'Taken' count descending
         agentData.sort((a, b) => b.score - a.score);
 
-        // Take top 5
         const top5 = agentData.slice(0, 5);
         let marqueeHTML = "";
         const medals = ["🏆", "🥇", "🥈", "🥉", "🏅"];
@@ -1092,14 +1158,11 @@ async function fetchTopIssueTakers() {
             marqueeHTML += `<span class="marquee-item"><span class="rank-icon">${medals[index]}</span> <span class="name">${escapeHTML(agent.name)}</span> <span class="score">${agent.score} Issues</span></span>`;
         });
 
-        if (marqueeHTML) {
-            // Duplicate content for smooth infinite scrolling loop
-            document.getElementById("topIssueTakersText").innerHTML = marqueeHTML + marqueeHTML;
-            document.getElementById("topIssueTakerContainer").style.display = "flex";
-        }
-
-    } catch (e) {
-        console.error("Top Performers Fetch Error:", e);
+        // Loop duplicate text for continuous scrolling
+        textElem.innerHTML = marqueeHTML + marqueeHTML + marqueeHTML;
+    } else {
+        // If sheet is restricted or empty
+        textElem.innerHTML = `<span class="marquee-item"><span class="rank-icon">⚠️</span> <span class="name">শিটের Share পারমিশন 'Anyone with link (Viewer)' করুন</span></span>`;
     }
 }
 
@@ -1379,6 +1442,7 @@ function renderHubResults(list, prompt) {
     if(list.length>max){ html += `<div style="text-align:center;color:#38bdf8;font-size:11px;padding:8px">ℹ️ আরও ${list.length-max}টি মিলেছে</div>`; }
     box.innerHTML = html;
 }
+
 function copyNumber(t) { navigator.clipboard.writeText(t); showToast('📋 কপি হয়েছে: '+t); }
 
 // =====================================================
