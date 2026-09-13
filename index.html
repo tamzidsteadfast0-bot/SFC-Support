@@ -1641,6 +1641,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     initOnlinePresence();
     listenBreakPortal();
     fetchTopIssueTakers();
+    setInterval(fetchTopIssueTakers, 2 * 60 * 1000); // প্রতি ২ মিনিটে রিফ্রেশ — শিফট চেঞ্জ ও নতুন ডাটা দুটোই অটোমেটিক ধরবে
 });
 </script>
 </body>
