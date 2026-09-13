@@ -88,7 +88,7 @@ header::before{
 .header-left p{ font-size:11.5px; opacity:.65; margin-top:2px; }
 
 /* ========================================= */
-/* 🏆 TOP ISSUE TAKER MARQUEE ANIMATION */
+/* 🏆 TOP ISSUE TAKER MARQUEE ANIMATION (SLOW & SLOW) */
 /* ========================================= */
 .header-center-marquee {
     flex: 1;
@@ -108,7 +108,7 @@ header::before{
     color: #0f172a;
     font-weight: 800;
     font-size: 11px;
-    padding: 0 12px;
+    padding: 0 14px;
     height: 100%;
     display: flex;
     align-items: center;
@@ -128,28 +128,28 @@ header::before{
 .marquee-content {
     display: inline-block;
     white-space: nowrap;
-    animation: scroll-left 25s linear infinite;
+    animation: scroll-left 55s linear infinite; /* Slowed down to 55s for smooth reading */
     padding-left: 100%;
 }
 .marquee-content:hover {
-    animation-play-state: paused;
+    animation-play-state: paused; /* Pause on mouse hover */
 }
 .marquee-item {
     display: inline-flex;
     align-items: center;
-    margin-right: 35px;
-    font-size: 13px;
+    margin-right: 45px;
+    font-size: 13.5px;
     font-weight: 700;
 }
-.marquee-item .rank-icon { font-size: 15px; margin-right: 6px; }
+.marquee-item .rank-icon { font-size: 16px; margin-right: 6px; }
 .marquee-item .name { color: #f8fafc; }
 .marquee-item .score {
     color: #38bdf8;
     background: rgba(56, 189, 248, 0.15);
-    padding: 2px 6px;
+    padding: 2px 8px;
     border-radius: 4px;
     margin-left: 8px;
-    font-size: 11px;
+    font-size: 12px;
 }
 @keyframes scroll-left {
     0% { transform: translateX(0); }
@@ -804,22 +804,7 @@ header::before{
 .history-item-info p { font-size: 11.5px; color: #94a3b8; }
 .history-status-badge { font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 6px; white-space: nowrap; }
 
-/* Toast */
-.toast {
-    position: fixed;
-    bottom: 30px; left: 50%;
-    transform: translateX(-50%) translateY(200%);
-    background: #1e293b;
-    color: #fff;
-    padding: 12px 22px;
-    border-radius: 10px;
-    border: 1px solid #334155;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    z-index: 99999;
-    font-size: 13px;
-    font-weight: 600;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(200%); background: #1e293b; color: #fff; padding: 12px 22px; border-radius: 10px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 99999; font-size: 13px; font-weight: 600; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.success { border-color: #10b981; color: #4ade80; }
 .toast.error { border-color: #ef4444; color: #f87171; }
@@ -870,7 +855,7 @@ footer strong{ color:rgba(255,255,255,0.8); }
             </div>
         </div>
 
-        <!-- TOP ISSUE TAKERS MARQUEE (VISIBLE BY DEFAULT) -->
+        <!-- TOP ISSUE TAKERS MARQUEE (ALWAYS VISIBLE) -->
         <div class="header-center-marquee" id="topIssueTakerContainer">
             <div class="marquee-title">🏆 Top Issue Takers</div>
             <div class="marquee-wrapper">
@@ -1065,104 +1050,71 @@ let todayApprovedList = [];
 let todayRejectedList = [];
 
 // =====================================================
-// 🏆 TOP ISSUE TAKERS MARQUEE LOGIC (SMART MULTI-TAB PARSER)
+// 🏆 TOP ISSUE TAKERS MARQUEE LOGIC (PRECISE ROW PARSER)
 // =====================================================
 async function fetchTopIssueTakers() {
     const textElem = document.getElementById("topIssueTakersText");
     if (!TOP_PERFORMER_SHEET_ID) return;
 
-    let agentData = [];
-    const tabsToTry = ["Daily Report", "DailyReport", "Daily_Report"];
+    // Use direct CSV Export format for 100% reliable cell parsing
+    const csvUrl = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}`;
+    
+    try {
+        const res = await fetch(csvUrl);
+        const csvText = await res.text();
+        const lines = csvText.split('\n');
 
-    for (let tabName of tabsToTry) {
-        try {
-            const url = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
-            const res = await fetch(url);
-            const text = await res.text();
+        let agentData = [];
+
+        // Scan rows line by line
+        lines.forEach(line => {
+            if (!line.trim()) return;
+
+            // Simple CSV Split handling quotes
+            const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, ''));
             
-            const jsonStart = text.indexOf('{');
-            const jsonEnd = text.lastIndexOf('}') + 1;
-            if (jsonStart === -1 || jsonEnd === -1) continue;
+            // Col 0 = No (Sl), Col 1 = Name, Col 5 = Taken
+            const slNo = parseInt(parts[0]);
+            const agentName = parts[1];
+            const takenCount = parseInt(parts[5]) || 0;
 
-            const json = JSON.parse(text.substring(jsonStart, jsonEnd));
-            const rows = json.table ? json.table.rows : [];
-
-            if (!rows || rows.length === 0) continue;
-
-            let parsedInThisTab = [];
-
-            // Scan rows for agent reports
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                if (!row || !row.c || !Array.isArray(row.c)) continue;
-
-                const vals = row.c.map(cell => {
-                    if (!cell) return '';
-                    if (cell.v !== null && cell.v !== undefined) return String(cell.v).trim();
-                    if (cell.f !== null && cell.f !== undefined) return String(cell.f).trim();
-                    return '';
-                });
-
-                const numCol = parseInt(vals[0]);
-                const nameCol = vals[1];
-                const takenCol = parseInt(vals[5]) || parseInt(vals[4]) || 0; // Col F (Taken)
-
-                // Match valid agent row
-                if (!isNaN(numCol) && numCol >= 1 && numCol <= 50 && nameCol && nameCol.toLowerCase() !== 'total' && nameCol.toLowerCase() !== 'name') {
-                    parsedInThisTab.push({ name: nameCol, score: takenCol });
+            // STRICT FILTER:
+            // 1. Sl No must be a valid number (1 to 50)
+            // 2. Name must exist and NOT be Date/Total/Name/Header
+            if (!isNaN(slNo) && slNo >= 1 && slNo <= 50) {
+                if (agentName && 
+                    !agentName.startsWith('Date(') && 
+                    !agentName.toLowerCase().includes('report') && 
+                    !agentName.toLowerCase().includes('shift') && 
+                    agentName.toLowerCase() !== 'name' && 
+                    agentName.toLowerCase() !== 'total') {
+                    
+                    agentData.push({ name: agentName, score: takenCount });
                 }
             }
-
-            if (parsedInThisTab.length > 0) {
-                agentData = parsedInThisTab;
-                break; // Found data successfully
-            }
-        } catch (e) {
-            console.warn("GViz fetch failed for tab " + tabName, e);
-        }
-    }
-
-    // Fallback: If GViz API failed or sheet is not publicly formatted for JSON
-    if (agentData.length === 0) {
-        try {
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/export?format=csv&sheet=${encodeURIComponent("Daily Report")}`;
-            const res = await fetch(csvUrl);
-            const csvText = await res.text();
-            const lines = csvText.split('\n');
-
-            lines.forEach(line => {
-                const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, ''));
-                const num = parseInt(parts[0]);
-                const name = parts[1];
-                const taken = parseInt(parts[5]) || parseInt(parts[4]) || 0;
-
-                if (!isNaN(num) && num >= 1 && num <= 50 && name && name.toLowerCase() !== 'total' && name.toLowerCase() !== 'name') {
-                    agentData.push({ name: name, score: taken });
-                }
-            });
-        } catch (csvErr) {
-            console.warn("CSV Fallback failed:", csvErr);
-        }
-    }
-
-    // Render data
-    if (agentData.length > 0) {
-        // Sort agents by 'Taken' count descending
-        agentData.sort((a, b) => b.score - a.score);
-
-        const top5 = agentData.slice(0, 5);
-        let marqueeHTML = "";
-        const medals = ["🏆", "🥇", "🥈", "🥉", "🏅"];
-
-        top5.forEach((agent, index) => {
-            marqueeHTML += `<span class="marquee-item"><span class="rank-icon">${medals[index]}</span> <span class="name">${escapeHTML(agent.name)}</span> <span class="score">${agent.score} Issues</span></span>`;
         });
 
-        // Loop duplicate text for continuous scrolling
-        textElem.innerHTML = marqueeHTML + marqueeHTML + marqueeHTML;
-    } else {
-        // If sheet is restricted or empty
-        textElem.innerHTML = `<span class="marquee-item"><span class="rank-icon">⚠️</span> <span class="name">শিটের Share পারমিশন 'Anyone with link (Viewer)' করুন</span></span>`;
+        if (agentData.length > 0) {
+            // Sort agents by 'Taken' count descending (highest first)
+            agentData.sort((a, b) => b.score - a.score);
+
+            const top5 = agentData.slice(0, 5);
+            let marqueeHTML = "";
+            const medals = ["🏆", "🥇", "🥈", "🥉", "🏅"];
+
+            top5.forEach((agent, index) => {
+                marqueeHTML += `<span class="marquee-item"><span class="rank-icon">${medals[index]}</span> <span class="name">${escapeHTML(agent.name)}</span> <span class="score">${agent.score} Issues</span></span>`;
+            });
+
+            // Duplicate 3 times for seamless slow loop
+            textElem.innerHTML = marqueeHTML + marqueeHTML + marqueeHTML;
+        } else {
+            textElem.innerHTML = `<span class="marquee-item"><span class="rank-icon">⏳</span> <span class="name">আজকের ডাটা প্রসেস হচ্ছে...</span></span>`;
+        }
+
+    } catch (e) {
+        console.error("Top Performers Fetch Error:", e);
+        textElem.innerHTML = `<span class="marquee-item"><span class="rank-icon">⚠️</span> <span class="name">শিটের Share পারমিশন 'Anyone with link (Viewer)' করা আছে কিনা দেখুন</span></span>`;
     }
 }
 
@@ -1442,11 +1394,10 @@ function renderHubResults(list, prompt) {
     if(list.length>max){ html += `<div style="text-align:center;color:#38bdf8;font-size:11px;padding:8px">ℹ️ আরও ${list.length-max}টি মিলেছে</div>`; }
     box.innerHTML = html;
 }
-
 function copyNumber(t) { navigator.clipboard.writeText(t); showToast('📋 কপি হয়েছে: '+t); }
 
 // =====================================================
-// 📢 NOTICE
+// 📢 NOTICE BOARD LOGIC
 // =====================================================
 db.collection("notices").orderBy("timestamp", "desc").onSnapshot(snap => {
     const c = document.getElementById("noticeContainer");
@@ -1479,7 +1430,7 @@ window.onclick = e => {
 document.addEventListener('keydown', e => { if(e.key === 'Escape') { closeModal(); closeHubModal(); closeBreakHistoryModal(); closeLocationModal(); } });
 
 // =====================================================
-// ☕ BREAK
+// ☕ BREAK PORTAL
 // =====================================================
 async function submitBreakRequest() {
     const name = document.getElementById('agentNameSelect').value;
