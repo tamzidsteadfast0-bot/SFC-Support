@@ -1074,13 +1074,23 @@ async function fetchTopIssueTakers() {
     const textElem = document.getElementById("topIssueTakersText");
     if (!TOP_PERFORMER_SHEET_ID) return;
 
-    const url = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}`;
+    // headers=0 tells Google's gviz API "don't auto-detect a header row" — this
+    // guarantees every row (including the real "No | Name | ... | Taken" header
+    // buried under title/logo rows) always comes back in json.table.rows, never
+    // silently absorbed into json.table.cols.
+    const url = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}&headers=0`;
 
     try {
         const res = await fetch(url);
         const text = await res.text();
         const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
-        const rows = json.table.rows || [];
+        const rawRows = json.table.rows || [];
+
+        // Kept as a safety net in case Google still returns column labels in cols
+        // for some sheets — merge them in as a virtual first row just in case.
+        const colsLabels = (json.table.cols || []).map(c => c.label || c.id || "");
+        const colsAsRow = { c: colsLabels.map(label => ({ v: label, f: label })) };
+        const rows = colsLabels.some(l => l) ? [colsAsRow, ...rawRows] : rawRows;
 
         const cellAt = (row, i) => {
             if (i < 0 || !row?.c || !row.c[i]) return "";
@@ -1113,7 +1123,7 @@ async function fetchTopIssueTakers() {
         }
 
         if (headerRowIdx === -1) {
-            console.warn("[TopIssueTakers] হেডার রো (No/Name/Taken) খুঁজে পাওয়া যায়নি।");
+            console.warn("[TopIssueTakers] হেডার রো (No/Name/Taken) খুঁজে পাওয়া যায়নি।", { colsLabels, rawRowsSample: rawRows.slice(0, 3) });
             textElem.innerHTML = `<span class="marquee-item"><span class="rank-icon">⚠️</span> <span class="name">শিটে হেডার রো খুঁজে পাওয়া যায়নি</span></span>`;
             return;
         }
