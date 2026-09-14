@@ -128,7 +128,7 @@ header::before{
 .marquee-content {
     display: inline-block;
     white-space: nowrap;
-    animation: scroll-left 55s linear infinite; /* Slowed down to 55s for smooth reading */
+    animation: scroll-left 45s linear infinite; /* Speed set to 45s */
     padding-left: 100%;
 }
 .marquee-content:hover {
@@ -1050,101 +1050,138 @@ let todayApprovedList = [];
 let todayRejectedList = [];
 
 // =====================================================
-// 🏆 TOP ISSUE TAKERS MARQUEE LOGIC (PRECISE ROW PARSER)
+// 🏆 TOP ISSUE TAKERS MARQUEE LOGIC
+// (Auto-detects header row + Morning/Evening blocks by label proximity,
+//  and switches which block to show based on the current time)
 // =====================================================
-function getCurrentShiftBD() {
-    // ইউজারের ব্রাউজার যেই টাইমজোনেই থাকুক, সবসময় Bangladesh সময় ধরে হিসাব হবে
-    const bdTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka", hour12: false });
-    const bdDate = new Date(bdTimeStr);
-    const minutesNow = bdDate.getHours() * 60 + bdDate.getMinutes();
+function bnToEnDigits(str) {
+    const bn = '০১২৩৪৫৬৭৮৯';
+    return String(str || '').replace(/[০-৯]/g, d => bn.indexOf(d));
+}
 
-    const morningStart = 7 * 60;        // সকাল ৭:০০ = 420
-    const morningEnd   = 15 * 60 + 15;  // দুপুর ৩:১৫ = 915
-
-    // ৭:০০ AM - ৩:১৫ PM => Morning, বাকি সময় (৩:১৬ PM - ১২:০০ AM এবং রাত ১২টার পর থেকে ভোর ৭টা আগ পর্যন্ত) => Evening
-    return (minutesNow >= morningStart && minutesNow <= morningEnd) ? "morning" : "evening";
+// Morning: 7:00 AM – 3:15 PM | Evening: 3:20 PM – 12:00 AM (and covers the
+// overnight gap before 7:00 AM too, so the marquee is never empty).
+function getActiveShift() {
+    const now = new Date();
+    const totalMin = now.getHours() * 60 + now.getMinutes();
+    const morningStart = 7 * 60;       // 07:00
+    const morningEnd = 15 * 60 + 15;   // 15:15
+    if (totalMin >= morningStart && totalMin <= morningEnd) return 'morning';
+    return 'evening'; // covers 15:16–23:59 and 00:00–06:59
 }
 
 async function fetchTopIssueTakers() {
     const textElem = document.getElementById("topIssueTakersText");
     if (!TOP_PERFORMER_SHEET_ID) return;
 
-    const jsonUrl = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}`;
+    const url = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}`;
 
     try {
-        const res = await fetch(jsonUrl);
+        const res = await fetch(url);
         const text = await res.text();
         const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
         const rows = json.table.rows || [];
 
-        const cellVal = (row, i) => {
-            if (i < 0 || !row.c || !row.c[i]) return "";
+        const cellAt = (row, i) => {
+            if (i < 0 || !row?.c || !row.c[i]) return "";
             const c = row.c[i];
             if (c.f != null && String(c.f).trim() !== "") return String(c.f).trim();
             if (c.v != null) return String(c.v).trim();
             return "";
         };
-        const rowText = (row) => (row?.c || []).map(c => (c ? String(c.f ?? c.v ?? "") : "")).join(" ").toLowerCase();
 
-        // ধাপ ১: "No"/"Name"/"Taken" হেডার খুঁজে প্রতিটা টেবিলের কলাম-পজিশন বের করা
-        let tables = [];
-        rows.forEach((row, rIdx) => {
-            if (!row?.c) return;
-            row.c.forEach((c, cIdx) => {
-                const h = normHeader(c ? (c.f ?? c.v ?? "") : "");
-                if (h === "no" || h === "sl" || h === "slno") {
-                    let nameCol = -1, takenCol = -1;
-                    for (let k = cIdx + 1; k < row.c.length; k++) {
-                        const hk = normHeader(row.c[k] ? (row.c[k].f ?? row.c[k].v ?? "") : "");
-                        if (nameCol === -1 && hk === "name") nameCol = k;
-                        if (hk === "taken") { takenCol = k; break; }
-                        if (hk === "no" || hk === "sl") break;
-                    }
-                    if (nameCol !== -1 && takenCol !== -1) {
-                        // এই টেবিলটা Morning নাকি Evening — হেডারের ৫ রো উপরে খুঁজে দেখা
-                        let shift = null;
-                        for (let up = rIdx - 1; up >= Math.max(0, rIdx - 6); up--) {
-                            const t = rowText(rows[up]);
-                            if (t.includes("morning")) { shift = "morning"; break; }
-                            if (t.includes("evening")) { shift = "evening"; break; }
-                        }
-                        tables.push({ headerRowIdx: rIdx, noCol: cIdx, nameCol, takenCol, shift });
-                    }
+        // 1) Find the "Morning" / "Evening" label columns anywhere in the sheet
+        //    (e.g. "Morning Shift... IR Team Report", "IR Team Report (Evening)").
+        let morningLabelCol = -1, eveningLabelCol = -1;
+        for (let r = 0; r < rows.length && (morningLabelCol === -1 || eveningLabelCol === -1); r++) {
+            const row = rows[r]; if (!row?.c) continue;
+            for (let c = 0; c < row.c.length; c++) {
+                const v = cellAt(row, c).toLowerCase();
+                if (morningLabelCol === -1 && v.includes('morning')) morningLabelCol = c;
+                if (eveningLabelCol === -1 && v.includes('evening')) eveningLabelCol = c;
+            }
+        }
+
+        // 2) Find the header row ("No | Name | ... | Taken") — appears once per block.
+        let headerRowIdx = -1;
+        for (let r = 0; r < rows.length; r++) {
+            const row = rows[r]; if (!row?.c) continue;
+            const hasNo = row.c.some(cell => normHeader(cell ? (cell.f ?? cell.v ?? "") : "") === "no");
+            const hasName = row.c.some(cell => normHeader(cell ? (cell.f ?? cell.v ?? "") : "") === "name");
+            const hasTaken = row.c.some(cell => normHeader(cell ? (cell.f ?? cell.v ?? "") : "") === "taken");
+            if (hasNo && hasName && hasTaken) { headerRowIdx = r; break; }
+        }
+
+        if (headerRowIdx === -1) {
+            console.warn("[TopIssueTakers] হেডার রো (No/Name/Taken) খুঁজে পাওয়া যায়নি।");
+            textElem.innerHTML = `<span class="marquee-item"><span class="rank-icon">⚠️</span> <span class="name">শিটে হেডার রো খুঁজে পাওয়া যায়নি</span></span>`;
+            return;
+        }
+
+        const headerRow = rows[headerRowIdx];
+
+        // 3) Build one block per "No" column, then label each block Morning/Evening
+        //    by which label column it sits closest to.
+        const blocks = [];
+        for (let c = 0; c < headerRow.c.length; c++) {
+            if (normHeader(cellAt(headerRow, c)) === "no") {
+                let nameCol = -1, takenCol = -1;
+                for (let k = c; k < Math.min(c + 8, headerRow.c.length); k++) {
+                    const h = normHeader(cellAt(headerRow, k));
+                    if (h === "name") nameCol = k;
+                    if (h === "taken") takenCol = k;
                 }
-            });
-        });
-
-        // ধাপ ২: বর্তমান সময় অনুযায়ী সঠিক শিফটের টেবিল বেছে নেওয়া
-        const currentShift = getCurrentShiftBD();
-        let activeTables = tables.filter(t => t.shift === currentShift);
-        if (activeTables.length === 0) activeTables = tables; // ট্যাগ না পেলে ফলব্যাক হিসেবে সব টেবিল
-
-        // ধাপ ৩: ডাটা রো পড়া (Total রো এলে থেমে যাবে)
-        let agentData = [];
-        activeTables.forEach(t => {
-            for (let r = t.headerRowIdx + 1; r < rows.length; r++) {
-                const row = rows[r]; if (!row?.c) continue;
-                const slNo = parseInt(cellVal(row, t.noCol));
-                if (isNaN(slNo)) break;
-                const agentName = cellVal(row, t.nameCol);
-                const takenCount = parseInt(cellVal(row, t.takenCol)) || 0;
-                if (agentName) {
-                    const existing = agentData.find(a => a.name.toLowerCase() === agentName.toLowerCase());
-                    if (existing) existing.score += takenCount;
-                    else agentData.push({ name: agentName, score: takenCount });
+                if (nameCol !== -1 && takenCol !== -1) {
+                    let shift = null;
+                    if (morningLabelCol !== -1 && eveningLabelCol !== -1) {
+                        shift = Math.abs(c - morningLabelCol) <= Math.abs(c - eveningLabelCol) ? 'morning' : 'evening';
+                    } else if (morningLabelCol !== -1) {
+                        shift = 'morning';
+                    } else if (eveningLabelCol !== -1) {
+                        shift = 'evening';
+                    }
+                    blocks.push({ noCol: c, nameCol, takenCol, shift });
                 }
             }
-        });
+        }
+
+        // 4) Pick only the block matching the current time window.
+        const activeShift = getActiveShift();
+        let activeBlocks = blocks.filter(b => b.shift === activeShift);
+        if (activeBlocks.length === 0) activeBlocks = blocks; // fallback: show whatever exists
+
+        const scoreMap = {};
+        for (let r = headerRowIdx + 1; r < rows.length; r++) {
+            const row = rows[r]; if (!row?.c) continue;
+            activeBlocks.forEach(b => {
+                const noRaw = bnToEnDigits(cellAt(row, b.noCol));
+                const name = cellAt(row, b.nameCol);
+                const takenRaw = bnToEnDigits(cellAt(row, b.takenCol));
+                if (!name) return;
+                const lname = name.toLowerCase();
+                if (lname === 'total' || lname === 'name') return;
+                const noNum = parseInt(noRaw);
+                if (isNaN(noNum) || noNum < 1 || noNum > 200) return; // skips the "Total" row
+                const taken = parseInt(takenRaw) || 0;
+                scoreMap[name] = (scoreMap[name] || 0) + taken;
+            });
+        }
+
+        const agentData = Object.entries(scoreMap).map(([name, score]) => ({ name, score }));
+
+        console.log("[TopIssueTakers] activeShift:", activeShift, "| blocks:", blocks, "| agents:", agentData);
 
         if (agentData.length > 0) {
             agentData.sort((a, b) => b.score - a.score);
             const top5 = agentData.slice(0, 5);
-            const shiftLabel = currentShift === "morning" ? "Morning" : "Evening";
             let marqueeHTML = "";
             const medals = ["🏆", "🥇", "🥈", "🥉", "🏅"];
+
             top5.forEach((agent, index) => {
-                marqueeHTML += `<span class="marquee-item"><span class="rank-icon">${medals[index]}</span> <span class="name">${escapeHTML(agent.name)} (${shiftLabel})</span> <span class="score">${agent.score} Issues</span></span>`;
+                marqueeHTML += `<span class="marquee-item"><span class="rank-icon">${medals[index]}</span> <span class="name">${escapeHTML(agent.name)}</span> <span class="score">${agent.score} Issues</span></span>`;
             });
+
+            // Duplicate 3 times for seamless slow loop
             textElem.innerHTML = marqueeHTML + marqueeHTML + marqueeHTML;
         } else {
             textElem.innerHTML = `<span class="marquee-item"><span class="rank-icon">⏳</span> <span class="name">আজকের ডাটা প্রসেস হচ্ছে...</span></span>`;
@@ -1155,6 +1192,10 @@ async function fetchTopIssueTakers() {
         textElem.innerHTML = `<span class="marquee-item"><span class="rank-icon">⚠️</span> <span class="name">শিটের Share পারমিশন 'Anyone with link (Viewer)' করা আছে কিনা দেখুন</span></span>`;
     }
 }
+
+// Re-check every 5 minutes so the marquee auto-switches Morning → Evening
+// (and vice versa) right at the 3:15/3:20 boundary without a page reload.
+setInterval(fetchTopIssueTakers, 5 * 60 * 1000);
 
 // =====================================================
 // GENERAL HELPERS
@@ -1641,7 +1682,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     initOnlinePresence();
     listenBreakPortal();
     fetchTopIssueTakers();
-    setInterval(fetchTopIssueTakers, 2 * 60 * 1000); // প্রতি ২ মিনিটে রিফ্রেশ — শিফট চেঞ্জ ও নতুন ডাটা দুটোই অটোমেটিক ধরবে
 });
 </script>
 </body>
