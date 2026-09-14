@@ -128,7 +128,7 @@ header::before{
 .marquee-content {
     display: inline-block;
     white-space: nowrap;
-    animation: scroll-left 45s linear infinite; /* Speed set to 45s */
+    animation: scroll-left 70s linear infinite; /* Slower marquee speed */
     padding-left: 100%;
 }
 .marquee-content:hover {
@@ -1028,7 +1028,7 @@ const firebaseConfig = {
     appId: "1:589705470778:web:4390bc11624fe36635a603"
 };
 
-const ADMIN_PIN = "1234";
+const ADMIN_PIN = "4563";
 const MAX_CONCURRENT_BREAKS = 2;
 const BREAK_DURATIONS = { "শর্ট ব্রেক": 10, "নামাজের ব্রেক": 20 };
 
@@ -1085,7 +1085,7 @@ async function fetchTopIssueTakers() {
     const nameCol = 0;
     const takenCol = activeShift === 'morning' ? 4 : 5;
 
-    const url = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}&range=${encodeURIComponent(range)}&headers=0`;
+    const url = `https://docs.google.com/spreadsheets/d/${TOP_PERFORMER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TOP_PERFORMER_TAB_NAME)}&range=${encodeURIComponent(range)}&headers=0&cachebust=${Date.now()}`;
 
     try {
         const res = await fetch(url);
@@ -1151,9 +1151,11 @@ async function fetchTopIssueTakers() {
     }
 }
 
-// Re-check every 5 minutes so the marquee auto-switches Morning → Evening
-// (and vice versa) right at the 3:15/3:20 boundary without a page reload.
-setInterval(fetchTopIssueTakers, 5 * 60 * 1000);
+// Auto-refresh every 1 minute WITHOUT page reload.
+// cachebust=${Date.now()} in the request forces fresh Google Sheet data.
+setInterval(() => {
+    fetchTopIssueTakers();
+}, 60 * 1000);
 
 // =====================================================
 // GENERAL HELPERS
@@ -1640,6 +1642,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     initOnlinePresence();
     listenBreakPortal();
     fetchTopIssueTakers();
+    setTimeout(fetchTopIssueTakers, 3000);
 });
 </script>
 </body>
