@@ -1077,11 +1077,11 @@ async function fetchTopIssueTakers() {
     // =====================================================
     // 🏆 FIXED TOP ISSUE TAKER RANGES
     // Morning: Name = C9:C13 | Taken = G9:G13
-    // Evening: Name = L9:L13 | Taken = Q9:Q13
+    // Evening: Name = M9:M13 | Taken = Q9:Q13
     // =====================================================
     const activeShift = getActiveShift();
 
-    const range = activeShift === 'morning' ? 'C9:G13' : 'L9:Q13';
+    const range = activeShift === 'morning' ? 'C9:G13' : 'M9:Q13';
     const nameCol = 0;
     const takenCol = activeShift === 'morning' ? 4 : 5;
 
