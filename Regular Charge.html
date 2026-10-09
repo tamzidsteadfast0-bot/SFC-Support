@@ -247,28 +247,9 @@
     border-radius: 4px;
   }
 
-  /* ── Calculate button ── */
-  .calc-btn {
-    width: 100%;
-    padding: 16px;
-    background: #1a9e5c;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: .8px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background .2s, transform .1s;
-    margin-top: 6px;
-  }
-  .calc-btn:hover { background: #158a4f; }
-  .calc-btn:active { transform: scale(.98); }
-
   /* ── Result ── */
   .result-box {
-    margin-top: 20px;
+    margin-top: 10px;
     background: #0b1e3d;
     border-radius: 12px;
     padding: 18px 20px;
@@ -386,12 +367,10 @@
     <div class="field" id="weightField">
       <div class="field-label"><span class="field-num">3</span> Weight</div>
       <div class="weight-wrap">
-        <input type="number" id="weight" step="0.01" min="0.1" placeholder="যেমন: 1.5">
+        <input type="number" id="weight" step="0.01" min="0.1" placeholder="যেমন: 1.5" oninput="calculate()">
         <span class="weight-unit">KG</span>
       </div>
     </div>
-
-    <button class="calc-btn" onclick="calculate()">Calculate Charge</button>
 
     <!-- Result -->
     <div class="result-box" id="result">
@@ -506,29 +485,24 @@ function renderOptions(){
       </div>`;
   }
 
-  // Initial check for default selected route
   handleRouteChange();
-  resetResult();
 }
 
 function handleRouteChange() {
   const routeSelect = document.getElementById('route');
   const suburbanList = document.getElementById('suburbanList');
-  if (!routeSelect || !suburbanList) return;
-
-  const val = routeSelect.value.toLowerCase();
   
-  // Check if selected route belongs to Sub Urban / Sub-Urben / Keraniganj/Savar/Tongi
-  if (val.includes('suburban') || val.includes('_sub') || val.startsWith('sub_')) {
-    suburbanList.style.display = 'block';
-  } else {
-    suburbanList.style.display = 'none';
+  if (routeSelect && suburbanList) {
+    const val = routeSelect.value.toLowerCase();
+    // Check if selected route belongs to Sub Urban / Sub-Urben / Keraniganj/Savar/Tongi
+    if (val.includes('suburban') || val.includes('_sub') || val.startsWith('sub_')) {
+      suburbanList.style.display = 'block';
+    } else {
+      suburbanList.style.display = 'none';
+    }
   }
-  resetResult();
-}
-
-function resetResult() {
-  showPlaceholder();
+  
+  calculate(); // Route চেঞ্জ হলেই অটোমেটিক হিসাব করবে
 }
 
 function showPlaceholder(){
@@ -558,14 +532,22 @@ function showError(msg){
 
 function calculate(){
   const s = document.getElementById('service').value;
-  const w = parseFloat(document.getElementById('weight').value);
-  if(s !== 'document' && (!w || w <= 0)){
-    showError('⚠️ সঠিক weight দিন');
-    return;
-  }
+  const weightInput = document.getElementById('weight');
+  const w = parseFloat(weightInput.value);
 
   if(s === 'document'){
     showResult(50, 'Document · Up to 120GM · Nationwide');
+    return;
+  }
+
+  // Weight ইনপুট খালি থাকলে প্লেসহোল্ডার দেখাবে, কোনো এরর দেখাবে না
+  if(weightInput.value === "" || isNaN(w)){
+    showPlaceholder();
+    return;
+  }
+
+  if(w <= 0){
+    showError('⚠️ সঠিক weight দিন');
     return;
   }
 
