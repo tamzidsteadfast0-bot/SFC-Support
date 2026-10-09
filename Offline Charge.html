@@ -158,7 +158,20 @@ input:focus,select:focus{
   padding:10px 12px;
   border-radius:12px;
   font-size:13px;
+  line-height:1.5;
 }
+.dim-box {
+  background:#f8fafc;
+  border:1px dashed #94a3b8;
+  border-radius:12px;
+  padding:12px 14px;
+  margin-top:14px;
+  font-size:13px;
+  color:#334155;
+}
+.dim-box b { color:#0f172a; }
+.dim-box span { color:#2563eb; font-weight:700; font-family:monospace; font-size:14px; }
+
 .result-box{
   margin-top:18px;
   background:linear-gradient(135deg,#16a34a,#15803d);
@@ -384,7 +397,7 @@ input:focus,select:focus{
         <li>দাহা কেমিক্যাল</li>
         <li>নগদ টাকা/ব্যাংক চেক</li>
         <li>স্বর্ণালংকার</li>
-        <li>পোষ্যপ্রাণী/জীবত মাছ</li>
+        <li>পোষ্যপ্রাণী/জীবন্ত মাছ</li>
         <li>কারেন্ট জাল</li>
         <li>স্বচ্ছ পলিথিন ব্যাগ</li>
         <li>বন বিভাগের অনুমতি বিহীন কাঠ</li>
@@ -399,6 +412,7 @@ input:focus,select:focus{
 </div>
 
 <script>
+// সাধারণ পণ্যের তালিকা (আগের কনফ্লিক্ট করা ফার্নিচারগুলো বাদ দেওয়া হয়েছে)
 const NORMAL_TSV = `Product type	পন্যের নাম	QoM	SFC Point charge	SFC Home charge
 Button Mobile	বাটন মোবাইল	Piece	100	140
 Smart Mobile /Tab	স্মার্ট মোবাইল / ট্যাব	Piece	150	180
@@ -520,7 +534,7 @@ Treadmill- Big	ট্রেডমিল-বড়	Piece	2500	3500
 Cricket Bat Per PCS	ক্রিকেট ব্যাট	Piece	150	220
 Racket Bat Per PCS	র‍্যাকেট ব্যাট	Piece	110	170
 Motorcycle 80CC to 100CC	মোটরসাইকেল ৮০ সিসি থেকে ১০০ সিসি	Piece	3000	3500
-Motorcycle 120CC to 150CC	মোটরসাইকেল ১২০ সিসি থেকে ১৫০ সিসি	Piece	3500	4500
+Motorcycle 120CC to 150CC	মোটরসাইকেল ১২0 সিসি থেকে ১৫০ সিসি	Piece	3500	4500
 Helmet	হেলমেট	Piece	200	280
 Trunk Small	ট্রাঙ্ক ছোট	Piece	300	500
 Trunk Medium	ট্রাঙ্ক মাঝারি	Piece	550	800
@@ -543,27 +557,11 @@ File Cabinet 4 Drawers	ফাইল কেবিনেট ৪ ড্রয়া
 Almira Wood - Steel Small	আলমারি কাঠ-স্টিল ছোট	Piece	2200	3000
 Almira Wood - Steel Standard	আলমারি কাঠ-স্টিল স্ট্যান্ডার্ড	Piece	3300	4000
 Almira Wood - Steel Double door	আলমারি কাঠ-স্টিল ডাবল ডোর	Piece	4500	6000
-Visiting Chair	ভিজিটিং চেয়ার	Piece	150	200
-General Executive Chair (Non movable)	জেনারেল এক্সিকিউটিভ চেয়ার (স্থির)	Piece	200	300
-Executive Chair (Revolving)	এক্সিকিউটিভ চেয়ার (রিভলভিং)	Piece	250	380
-Luxury / Boss Chair Executive Revolving	লাক্সারি / বস চেয়ার এক্সিকিউটিভ রিভলভিং	Piece	800	1100
-Chair Wood-Standard	কাঠের চেয়ার স্ট্যান্ডার্ড	Piece	500	700
-Rocking Chair	রকিং চেয়ার	Piece	700	900
 Chair Dental	ডেন্টাল চেয়ার	Piece	6000	8000
 Chair Dental with Machine	ডেন্টাল চেয়ার মেশিনসহ	Piece	7000	9000
 Salon Chair With Stand	স্ট্যান্ডসহ সেলুন চেয়ার	Piece	700	1200
 Plastic Tool	প্লাস্টিকের টুল	Piece	100	150
 Steel Tool	স্টিলের টুল	Piece	150	250
-Normal Foam Sofa 5 seat Without Handle	সাধারণ ফোম সোফা ৫ সিট হাতল ছাড়া	Seat	1500	2000
-Normal Foam Sofa 5 seat With Handle	সাধারণ ফোম সোফা ৫ সিট হাতলসহ	Seat	3000	3500
-Luxury / VIP Foam Sofa 5 Seat	লাক্সারি / ভিআইপি ফোম সোফা ৫ সিট	Seat	2000	2500
-VIP Wooden Sofa 5 Seat	ভিআইপি কাঠের সোফা ৫ সিট	Seat	3500	4200
-Sofa Tea Table	সোফা টি-টেবিল	Piece	450	600
-Devine Sofa	বিলাসবহুল সোফা	Piece	1800	2200
-Mini Cum Bed	মিনি কাম বেড	Piece	550	650
-Single Cum Bed	সিঙ্গেল কাম বেড	Piece	750	850
-Double Cum Bed	ডাবল কাম বেড	Piece	1000	1100
-VIP Cum Bed	ভিআইপি কাম বেড	Piece	1500	1700
 Dining Table with 4 Chairs	ডাইনিং টেবিল ৪ চেয়ারসহ	Piece	2800	3500
 Dining Table with 6 Chairs	ডাইনিং টেবিল ৬ চেয়ারসহ	Piece	3500	4500
 Book Shelves Small	বুকশেলফ ছোট	Piece	500	800
@@ -587,17 +585,16 @@ Wooden Wardrobe Wood-Medium (4/7)	কাঠের ওয়ারড্রোব
 Wooden Wardrobe Wood-Big (6/7)	কাঠের ওয়ারড্রোব মাঝারি (৬/৭)	Piece	4000	6000
 Plastic Wardrobe Medium	প্লাস্টিক ওয়ারড্রোব মাঝারি	Piece	1400	1800
 Plastic Wardrobe Big	প্লাস্টিক ওয়ারড্রোব বড়	Piece	1800	2200
-Ladder-6 steps  মই ৬ স্টেপ Piece	300	500
-Ladder-7 steps	মই ৭ স্টেপ 	Piece	350	500
-Ladder-8 steps	মই ৮ স্টেপ 	Piece	400	600
+Ladder-6 steps	মই ৬ স্টেপ	Piece	300	500
+Ladder-7 steps	মই ৭ স্টেপ	Piece	350	500
+Ladder-8 steps	মই ৮ স্টেপ	Piece	400	600
 Parlour Bed-Small	পার্লার বেড-ছোট	Piece	700	1000
-Parlour Bed-Standard  পার্লার বেড-স্ট্যান্ডার্ড	Piece	1200	1700
+Parlour Bed-Standard	পার্লার বেড-স্ট্যান্ডার্ড	Piece	1200	1700
 Travelling Luggage Small	ট্রাভেলিং লাগেজ ছোট	Piece	400	550
 Travelling Luggage Medium	ট্রাভেলিং লাগেজ মাঝারি	Piece	550	700
 Travelling Luggage Big	ট্রাভেলিং লাগেজ বড়	Piece	700	900
 Mattress up to 4'' Thickness	ম্যাট্রেস ৪ ইঞ্চি পুরু পর্যন্ত	1 Sft	25	35
 Mattress 5 to 8'' Thickness	ম্যাট্রেস ৫ থেকে ৮ ইঞ্চি পুরু	1 Sft	30	40
-Pillow Per Pcs	বালিশ প্রতি পিস	Piece	150	220
 Tyre / 5.50-13LT 95/93K SLG N10	টায়ার / 5.50-13LT 95/93K SLG N10	Piece	120	200
 Tyre / 6.50-16 SUPERMILLER N10 TT	টায়ার / 6.50-16 SUPERMILLER N10 TT	Piece	280	350
 Tyre / F78-15LT ESTATE N6	টায়ার / F78-15LT ESTATE N6	Piece	200	300
@@ -623,9 +620,7 @@ Tobla-Small	তবলা-ছোট	Piece	220	300
 Tobla-Medium	তবলা-মাঝারি	Piece	350	500
 Liquid Jar up to 20KG	লিকুইড জার ২০ কেজি পর্যন্ত	Piece	120	150
 Liquid Jar up to 50KG	লিকুইড জার ৫০ কেজি পর্যন্ত	Piece	250	300
-Rice/Corn Bag up to 25KG	চাল/ভুট্টা বস্তা ২৫ কেজি পর্যন্ত	Piece	125	150
-Rice/Corn Bag up to 50KG	চাল/ভুট্টা বস্তা ৫০ কেজি পর্যন্ত	Piece	150	200
-Rice Per KG	চাল প্রতি কেজি	1 KG	6	8
+Rice Per KG	চাল প্রতি কেজি	1 KG	5	15
 Carton Small up to 12*12*12	কার্টন ছোট ১২*১২*১২ পর্যন্ত	Piece	60	80
 Carton Medium up to 24*18*18	কার্টন মাঝারি ২৪*১৮*১৮ পর্যন্ত	Piece	200	220
 Carton Big up to 36*24*24	কার্টন বড় ৩৬*২৪*২৪ পর্যন্ত	Piece	400	550
@@ -673,7 +668,7 @@ Cable Bundle-Medium	কেবল বান্ডিল-মাঝারি	Piece	
 Tea per-KG	চা প্রতি কেজি	KG	5	6
 Shutki / Dried Fish Per KG (Over 40 KG)	শুটকি মাছ প্রতি কেজি (৪০ কেজির বেশি)	KG	6	7
 Supari / Betel Nut Per KG	সুপারি প্রতি কেজি	KG	5	6
-Rice seed Per KG	ধানের বীজ প্রতি কেজি	KG	6	8
+Rice seed Per KG	ধানের বীজ প্রতি কেজি	KG	6	20
 Nut Per KG	বাদাম প্রতি কেজি	KG	6	7
 SOLAR PANEL Per Watt	সোলার প্যানেল প্রতি ওয়াট	WATT	2.5	3
 Honey drum up to 30KG	মধুর ড্রাম ৩০ কেজি পর্যন্ত	Piece	200	250
@@ -701,9 +696,37 @@ Mud Pump-Medium with Wooden Box	মাটির পাম্প- কাঠের
 Mud Pump-Big with Wooden Box	মাটির পাম্প- কাঠের বাক্স সহ বড়	Piece	1300	1600
 Police Ration Bosta-Small	পুলিশ রেশন বোস্তা-ছোট	Piece	150	200
 Police Ration Bosta-Medium	পুলিশ রেশন বোস্তা- মিডিয়াম	Piece	220	280
-Police Ration Bosta-Big	পুলিশ রেশন বোস্তা-ছোট বড়	Piece	400	600`;
+Police Ration Bosta-Big	পুলিশ রেশন বোস্তা-ছোট বড়	Piece	400	600
+Wheel Barrow Trolley	ঠেলাগাড়ি ট্রলি	Piece	300	600
+Empty Drum 200 Liter	খালি ড্রাম ২০০ লিটার	Piece	600	1000`;
+
+const ecomNote = "এই রেট শুধুমাত্র E-Commerce Furniture Merchant-দের জন্য (১লা সেপ্টেম্বর থেকে কার্যকর)। এই আইটেমের ক্ষেত্রে শুধুমাত্র Home Delivery রেট প্রযোজ্য।";
 
 const SPECIAL_PRODUCTS = [
+  // ================= E-Commerce Furniture New List =================
+  {id:"ef-1", rule:"ecomFurniture", homeOnly:true, en:"Visiting Chair", bn:"ভিজিটিং চেয়ার", qom:"Piece", size:"L:20, W:21, H:34 (Inchi)", weight:"8 KG", rates:{inside:200, outside:250}, note:ecomNote},
+  {id:"ef-2", rule:"ecomFurniture", homeOnly:true, en:"General Executive Chair non movable", bn:"জেনারেল এক্সিকিউটিভ চেয়ার (স্থির)", qom:"Piece", size:"L:21, W:22, H:37 (Inchi)", weight:"9 KG", rates:{inside:200, outside:350}, note:ecomNote},
+  {id:"ef-3", rule:"ecomFurniture", homeOnly:true, en:"Chair Executive Revolving", bn:"এক্সিকিউটিভ চেয়ার (রিভলভিং)", qom:"Piece", size:"L:18-22, W:24, H:46 (Inchi)", weight:"10.2 KG", rates:{inside:250, outside:430}, note:ecomNote},
+  {id:"ef-4", rule:"ecomFurniture", homeOnly:true, en:"Luxury / Boss Chair Executive Revolving", bn:"লাক্সারি / বস চেয়ার এক্সিকিউটিভ রিভলভিং", qom:"Piece", size:"L:22, W:24, H:48 (Inchi)", weight:"15-19 KG", rates:{inside:350, outside:500}, note:ecomNote},
+  {id:"ef-5", rule:"ecomFurniture", homeOnly:true, en:"Rocking Chair", bn:"রকিং চেয়ার", qom:"Piece", size:"L:44-52, W:21, H:44 (Inchi)", weight:"13.5 KG", rates:{inside:400, outside:550}, note:ecomNote},
+  {id:"ef-6", rule:"ecomFurniture", homeOnly:true, en:"Normal Foam Sofa (Single) Without Handle", bn:"সাধারণ ফোম সোফা (সিঙ্গেল) হাতল ছাড়া", qom:"Seat", size:"L:28, W:26, H:28 (Inchi)", weight:"9 KG", rates:{inside:250, outside:350}, note:ecomNote},
+  {id:"ef-7", rule:"ecomFurniture", homeOnly:true, en:"Normal Foam Sofa (Double) Without Handle", bn:"সাধারণ ফোম সোফা (ডাবল) হাতল ছাড়া", qom:"Seat", size:"L:40, W:26, H:28 (Inchi)", weight:"18 KG", rates:{inside:500, outside:700}, note:ecomNote},
+  {id:"ef-8", rule:"ecomFurniture", homeOnly:true, en:"Normal Foam Sofa 5 seat Without Handle", bn:"সাধারণ ফোম সোফা ৫ সিট হাতল ছাড়া", qom:"Set", size:"L:55, W:26, H:28 (Inchi)", weight:"27 KG", rates:{inside:1250, outside:1750}, note:ecomNote},
+  {id:"ef-9", rule:"ecomFurniture", homeOnly:true, en:"Normal Wooden Sofa (Single) With Handle", bn:"সাধারণ কাঠের সোফা (সিঙ্গেল) হাতলসহ", qom:"Seat", size:"L:24, W:28, H:30 (Inchi)", weight:"24 KG", rates:{inside:300, outside:400}, note:ecomNote},
+  {id:"ef-10", rule:"ecomFurniture", homeOnly:true, en:"Normal Wooden Sofa (Double) With Handle", bn:"সাধারণ কাঠের সোফা (ডাবল) হাতলসহ", qom:"Seat", size:"L:48, W:28, H:32 (Inchi)", weight:"30 KG", rates:{inside:600, outside:800}, note:ecomNote},
+  {id:"ef-11", rule:"ecomFurniture", homeOnly:true, en:"Normal Wooden Sofa 5 seat With Handle", bn:"সাধারণ কাঠের সোফা ৫ সিট হাতলসহ", qom:"Set", size:"2+2+1 = 5 Sit", weight:"88 KG", rates:{inside:1500, outside:2000}, note:ecomNote},
+  {id:"ef-12", rule:"ecomFurniture", homeOnly:true, en:"VIP Wooden Sofa With Handle (Single)", bn:"ভিআইপি কাঠের সোফা (সিঙ্গেল) হাতলসহ", qom:"Seat", size:"L:34, W:28, H:30 (Inchi)", weight:"26 KG", rates:{inside:500, outside:750}, note:ecomNote},
+  {id:"ef-13", rule:"ecomFurniture", homeOnly:true, en:"VIP Wooden Sofa With Handle (Double)", bn:"ভিআইপি কাঠের সোফা (ডাবল) হাতলসহ", qom:"Seat", size:"L:52, W:28, H:32 (Inchi)", weight:"32 KG", rates:{inside:1000, outside:1500}, note:ecomNote},
+  {id:"ef-14", rule:"ecomFurniture", homeOnly:true, en:"VIP Wooden Sofa 5 Seat With Handle", bn:"ভিআইপি কাঠের সোফা ৫ সিট হাতলসহ", qom:"Set", size:"2+2+1 = 5 Sit", weight:"150 KG", rates:{inside:2500, outside:3750}, note:ecomNote},
+  {id:"ef-15", rule:"ecomFurniture", homeOnly:true, en:"Sofa Tea Table Wooden", bn:"সোফা টি-টেবিল কাঠের", qom:"Piece", size:"L:42, W:24, H:18 (Inchi)", weight:"20 KG", rates:{inside:300, outside:400}, note:ecomNote},
+  {id:"ef-16", rule:"ecomFurniture", homeOnly:true, en:"Counter Chair Moveble", bn:"কাউন্টার চেয়ার মুভেবল", qom:"Piece", size:"L:17, W:20, H:33 (Inchi)", weight:"7 KG", rates:{inside:200, outside:300}, note:ecomNote},
+  {id:"ef-17", rule:"ecomFurniture", homeOnly:true, en:"Counter Chair Non Moveble", bn:"কাউন্টার চেয়ার নন মুভেবল", qom:"Piece", size:"L:15, W:20, H:33 (Inchi)", weight:"6 KG", rates:{inside:180, outside:280}, note:ecomNote},
+  {id:"ef-18", rule:"ecomFurniture", homeOnly:true, en:"Mini Cum Bed", bn:"মিনি কাম বেড", qom:"Piece", size:"L:30, W:24, H:28 (Inchi)", weight:"24 KG", rates:{inside:550, outside:700}, note:ecomNote},
+  {id:"ef-19", rule:"ecomFurniture", homeOnly:true, en:"Single Cum Bed", bn:"সিঙ্গেল কাম বেড", qom:"Piece", size:"L:38, W:34, H:38 (Inchi)", weight:"40 KG", rates:{inside:750, outside:900}, note:ecomNote},
+  {id:"ef-20", rule:"ecomFurniture", homeOnly:true, en:"Double Cum Bed", bn:"ডাবল কাম বেড", qom:"Piece", size:"L:52, W:34, H:38 (Inchi)", weight:"50 KG", rates:{inside:1000, outside:1200}, note:ecomNote},
+  {id:"ef-21", rule:"ecomFurniture", homeOnly:true, en:"VIP Cum Bed", bn:"ভিআইপি কাম বেড", qom:"Piece", size:"L:65, W:30, H:26 (Inchi)", weight:"50 KG", rates:{inside:1500, outside:2000}, note:ecomNote},
+
+  // ================= Other Specials =================
   {id:"door-wood-chowkat-7-35",rule:"areaService",en:"Wooden Door Chowkat (7 feet by 3.5 Feet)",bn:"কাঠের দরজার চৌকাঠ (৭ ফুট বাই ৩.৫ ফুট)",qom:"Piece",rates:{point:{district:350,upazila:400},home:{district:450,upazila:500}}},
   {id:"door-wood-palla-7-35",rule:"areaService",en:"Wooden Door Palla (7 feet by 3.5 Feet)",bn:"কাঠের দরজার পাল্লা (৭ ফুট বাই ৩.৫ ফুট)",qom:"Piece",rates:{point:{district:350,upazila:400},home:{district:450,upazila:500}}},
   {id:"door-wood-chowkat-3-25",rule:"areaService",en:"Wooden Door Chowkat (3 feet by 2.5 Feet)",bn:"কাঠের দরজার চৌকাঠ (৩ ফুট বাই ২.৫ ফুট)",qom:"Piece",rates:{point:{district:250,upazila:300},home:{district:350,upazila:400}}},
@@ -712,6 +735,12 @@ const SPECIAL_PRODUCTS = [
   {id:"plastic-door-3-25",rule:"areaService",en:"Plastic Door Set (3 feet by 2.5 Feet)",bn:"প্লাস্টিক দরজা সেট (৩ ফুট বাই ২.৫ ফুট)",qom:"Piece",rates:{point:{district:250,upazila:300},home:{district:350,upazila:400}}},
   {id:"metal-door-7-35",rule:"areaService",en:"Metal / Steel Door (7 feet by 3.5 Feet)",bn:"মেটাল / স্টিল দরজা (৭ ফুট বাই ৩.৫ ফুট)",qom:"Piece",rates:{point:{district:800,upazila:900},home:{district:1000,upazila:1100}}},
   {id:"metal-door-7-5",rule:"areaService",en:"Metal / Steel Door (7 feet by 5 Feet)",bn:"মেটাল / স্টিল দরজা (৭ ফুট বাই ৫ ফুট)",qom:"Piece",rates:{point:{district:1500,upazila:1600},home:{district:2000,upazila:2100}}},
+  
+  {id:"pillow-special", rule:"pillowRule", en:"Pillow Per Pcs", bn:"বালিশ প্রতি পিস", qom:"Piece"},
+  {id:"chili-50kg-point", rule:"dhakaService", pointOnly:true, en:"Chili – 50 kg Bag Point Delivery Booking Charge", bn:"মরিচ – ৫০ কেজির বস্তা পয়েন্ট ডেলিভারি বুকিং চার্জ", qom:"Bag", rates:{point:{inside:350, outside:400}}},
+  {id:"rice-bag-25", rule:"normalWithNote", en:"Rice/Corn Bag up to 25KG", bn:"চাল/ভুট্টা বস্তা ২৫ কেজি পর্যন্ত", qom:"Piece", point:125, home:150, note:"Home Delivery রেট শুধুমাত্র Office-to-Dealer লট ডেলিভারির ক্ষেত্রে প্রযোজ্য।"},
+  {id:"rice-bag-50", rule:"normalWithNote", en:"Rice/Corn Bag up to 50KG", bn:"চাল/ভুট্টা বস্তা ৫০ কেজি পর্যন্ত", qom:"Piece", point:150, home:200, note:"Home Delivery রেট শুধুমাত্র Office-to-Dealer লট (৫০ বস্তার বেশি) ডেলিভারির ক্ষেত্রে প্রযোজ্য।"},
+  
   {id:"bubble-roll-5kg",rule:"dhakaService",en:"Bubble Roll (5 kg) Delivery Booking Charge",bn:"বাবল রোল ৫ কেজি ডেলিভারি বুকিং চার্জ",qom:"Booking",rates:{point:{inside:250,outside:400},home:{inside:350,outside:500}}},
   {id:"plant-booking-point",rule:"weightPlant",pointOnly:true,en:"Plant Booking Charge Point Delivery",bn:"গাছের পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
   {id:"grass-seed-cutting-point",rule:"weightGrass",pointOnly:true,en:"Grass Seed/Cutting Point Delivery Booking Charge",bn:"ঘাসের বীজ/কাটিং পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
@@ -730,7 +759,7 @@ const money = n => Number(n || 0).toLocaleString("en-US", {maximumFractionDigits
 const service = () => document.querySelector('input[name="service"]:checked').value;
 const serviceLabel = () => service() === "point" ? "SFC Point" : "SFC Home";
 const areaLabel = v => v === "district" ? "জেলা সদর" : "উপজেলা সদর";
-const dhakaLabel = v => v === "inside" ? "ঢাকার মধ্যে" : "ঢাকার বাহিরে";
+const dhakaLabel = v => v === "inside" ? "ঢাকার মধ্যে (ISD)" : "ঢাকার বাহিরে (OSD)";
 const norm = s => String(s || "").toLowerCase().replace(/\s+/g," ").trim();
 const readNum = (id, fallback=0) => {
   const n = parseFloat($(id)?.value);
@@ -755,14 +784,16 @@ let selected = null;
 $("productCount").textContent = ALL_PRODUCTS.length;
 
 function productMeta(p){
-  if(p.rule === "normal") return `Point ৳${money(p.point)} • Home ৳${money(p.home)} • ${p.qom}`;
+  if(p.rule === "normal" || p.rule === "normalWithNote") return `Point ৳${money(p.point)} • Home ৳${money(p.home)} • ${p.qom}`;
   if(p.rule === "areaService") return `District/Upazila rate`;
-  if(p.rule === "dhakaService") return `Dhaka Inside/Outside`;
+  if(p.rule === "dhakaService") return `Dhaka (ISD/OSD) rate`;
   if(p.rule === "weightPlant") return `KG range based (Point only)`;
   if(p.rule === "weightGrass") return `KG range based (Point only)`;
   if(p.rule === "geoBag") return `KG range + Location`;
   if(p.rule === "riceSeed") return `KG + Dhaka Inside/Outside`;
   if(p.rule === "locationFixed") return `জেলা/উপজেলা fixed`;
+  if(p.rule === "pillowRule") return `Base + Extra per piece`;
+  if(p.rule === "ecomFurniture") return `E-Com Furniture (ISD/OSD)`;
   return "Special";
 }
 
@@ -791,6 +822,15 @@ document.querySelectorAll('input[name="service"]').forEach(r=>{
 function selectProduct(id){
   selected = ALL_PRODUCTS.find(p => p.id === id);
   if(!selected) return;
+
+  // Auto-switch Radio Buttons for UX
+  if(selected.pointOnly && service() !== "point") {
+    document.querySelector('input[name="service"][value="point"]').checked = true;
+  }
+  if(selected.homeOnly && service() !== "home") {
+    document.querySelector('input[name="service"][value="home"]').checked = true;
+  }
+
   $("searchInput").value = selected.en;
   $("suggestions").classList.remove("show");
   renderFields();
@@ -819,32 +859,58 @@ function renderFields(){
 
   const p = selected;
   let html = `<h3>${p.en}</h3><p class="bn">${p.bn}</p>`;
-  if(p.pointOnly) html += `<div class="warning">⚠️ এই item শুধু Point Delivery-এর জন্য। SFC Home charge আলাদা নেই।</div>`;
+  
+  if(p.pointOnly) html += `<div class="warning">⚠️ এই আইটেমটি শুধুমাত্র <b>Point Delivery</b>-এর জন্য প্রযোজ্য।</div>`;
 
-  if(p.rule === "normal"){
+  if(p.rule === "normal" || p.rule === "normalWithNote"){
     html += `<div class="form-grid" style="margin-top:14px">
       <div class="form-group"><label>Quantity (${p.qom})</label><input id="qty" type="number" min="0" step="0.01" value="1"></div>
       <div class="form-group"><label>Unit Charge (Editable)</label><input id="unitCharge" type="number" min="0" step="0.01" value="${p[service()]}"></div>
     </div>`;
+    if(p.note) html += `<div class="warning" style="margin-top:12px">⚠️ ${p.note}</div>`;
   }
+  
+  if(p.rule === "ecomFurniture"){
+    html += `
+    <div class="dim-box">
+      <div>📏 <b>Parcel Size:</b> <span>${p.size}</span></div>
+      <div style="margin-top:4px">⚖️ <b>Parcel Weight:</b> <span>${p.weight}</span></div>
+    </div>
+    <div class="form-grid" style="margin-top:14px">
+      <div class="form-group"><label>Dhaka Location</label><select id="dhakaMode"><option value="inside">ঢাকার মধ্যে (ISD)</option><option value="outside">ঢাকার বাহিরে (OSD)</option></select></div>
+      <div class="form-group"><label>Quantity (${p.qom})</label><input id="qty" type="number" min="0" step="1" value="1"></div>
+    </div>
+    <div class="warning" style="margin-top:12px">⚠️ ${p.note}</div>`;
+  }
+
+  if(p.rule === "pillowRule"){
+    html += `<div class="form-grid" style="margin-top:14px">
+      <div class="form-group"><label>Quantity (Piece)</label><input id="qty" type="number" min="1" step="1" value="1"></div>
+    </div>`;
+  }
+
   if(p.rule === "areaService"){
     html += `<div class="form-grid" style="margin-top:14px">
       <div class="form-group"><label>Location</label><select id="areaMode"><option value="district">জেলা সদর</option><option value="upazila">উপজেলা সদর</option></select></div>
       <div class="form-group"><label>Quantity (${p.qom})</label><input id="qty" type="number" min="0" step="1" value="1"></div>
     </div>`;
   }
+
   if(p.rule === "dhakaService"){
     html += `<div class="form-grid" style="margin-top:14px">
-      <div class="form-group"><label>Dhaka Location</label><select id="dhakaMode"><option value="inside">ঢাকার মধ্যে</option><option value="outside">ঢাকার বাহিরে</option></select></div>
-      <div class="form-group"><label>Booking Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
+      <div class="form-group"><label>Dhaka Location</label><select id="dhakaMode"><option value="inside">ঢাকার মধ্যে (ISD)</option><option value="outside">ঢাকার বাহিরে (OSD)</option></select></div>
+      <div class="form-group"><label>Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
     </div>`;
+    if(p.note) html += `<div class="warning" style="margin-top:12px">⚠️ ${p.note}</div>`;
   }
+
   if(p.rule === "weightPlant" || p.rule === "weightGrass"){
     html += `<div class="form-grid" style="margin-top:14px">
       <div class="form-group"><label>Weight (KG)</label><input id="kg" type="number" min="0" step="0.01" value="1"></div>
       <div class="form-group"><label>Booking Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
     </div>`;
   }
+
   if(p.rule === "geoBag"){
     html += `<div class="form-grid" style="margin-top:14px">
       <div class="form-group"><label>Weight (KG)</label><input id="kg" type="number" min="0" step="0.01" value="1"></div>
@@ -853,6 +919,7 @@ function renderFields(){
       <div class="form-group"><label>Booking Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
     </div>`;
   }
+
   if(p.rule === "riceSeed"){
     html += `<div class="form-grid" style="margin-top:14px">
       <div class="form-group"><label>Weight (KG)</label><input id="kg" type="number" min="0" step="0.01" value="1"></div>
@@ -860,6 +927,7 @@ function renderFields(){
       <div class="form-group"><label>Booking Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
     </div>`;
   }
+
   if(p.rule === "locationFixed"){
     html += `<div class="form-grid" style="margin-top:14px">
       <div class="form-group"><label>Location</label><select id="areaMode"><option value="district">জেলা সদর</option><option value="upazila">উপজেলা সদর</option></select></div>
@@ -897,35 +965,67 @@ function calculateSelected(){
   const p = selected;
   const svc = service();
 
-  if(p.rule === "normal"){
+  // Mode validation
+  if(p.pointOnly && svc !== "point"){
+    throw new Error("⚠️ এটি শুধুমাত্র Point Delivery-এর জন্য। দয়া করে উপরে '📍 SFC Point Charge' সিলেক্ট করুন।");
+  }
+  if(p.homeOnly && svc !== "home"){
+    throw new Error("⚠️ এটি শুধুমাত্র Home Delivery-এর জন্য। দয়া করে উপরে '🏠 SFC Home Charge' সিলেক্ট করুন।");
+  }
+
+  if(p.rule === "normal" || p.rule === "normalWithNote"){
     const qty = readNum("qty",1); const unit = readNum("unitCharge",0);
     if(qty <= 0) throw new Error("Quantity দিন");
     return {details:`${serviceLabel()} • ${qty} ${p.qom} × ৳${money(unit)}`, total:qty * unit};
   }
+  
+  if(p.rule === "ecomFurniture"){
+    const dhaka = $("dhakaMode").value; const qty = readNum("qty",1);
+    const unit = p.rates[dhaka];
+    if(qty <= 0) throw new Error("Quantity দিন");
+    return {details:`SFC Home • ${dhakaLabel(dhaka)} • ${qty} × ৳${money(unit)}`, total:unit * qty};
+  }
+
+  if(p.rule === "pillowRule"){
+    const qty = readNum("qty", 1);
+    if(qty <= 0) throw new Error("Quantity দিন");
+    let total = 0;
+    if (svc === "point") {
+      total = 100 + (Math.max(0, qty - 1) * 30);
+    } else {
+      total = 120 + (Math.max(0, qty - 1) * 40);
+    }
+    return {details: `${serviceLabel()} • ১ম পিস ৳${svc==="point"?100:120}, পরেরগুলো +৳${svc==="point"?30:40}/পিস • Qty ${qty}`, total: total};
+  }
+
   if(p.rule === "areaService"){
     const area = $("areaMode").value; const qty = readNum("qty",1);
     const unit = p.rates[svc][area];
     if(qty <= 0) throw new Error("Quantity দিন");
     return {details:`${serviceLabel()} • ${areaLabel(area)} • ${qty} × ৳${money(unit)}`, total:unit * qty};
   }
+
   if(p.rule === "dhakaService"){
     const dhaka = $("dhakaMode").value; const qty = readNum("qty",1);
     const unit = p.rates[svc][dhaka];
-    if(qty <= 0) throw new Error("Booking quantity দিন");
+    if(qty <= 0) throw new Error("Quantity দিন");
     return {details:`${serviceLabel()} • ${dhakaLabel(dhaka)} • ${qty} × ৳${money(unit)}`, total:unit * qty};
   }
+
   if(p.rule === "weightPlant"){
     const kg = readNum("kg",0); const qty = readNum("qty",1);
     const r = calcPlantCharge(kg);
     if(qty <= 0) throw new Error("Booking quantity দিন");
     return {details:`Point • ${kg} KG • ${r.rule} • Qty ${qty}`, total:r.charge * qty};
   }
+
   if(p.rule === "weightGrass"){
     const kg = readNum("kg",0); const qty = readNum("qty",1);
     const r = calcGrassCharge(kg);
     if(qty <= 0) throw new Error("Booking quantity দিন");
     return {details:`Point • ${kg} KG • ${r.rule} • Qty ${qty}`, total:r.charge * qty};
   }
+
   if(p.rule === "geoBag"){
     const kg = readNum("kg",0); const area = $("areaMode").value; const qty = readNum("qty",1);
     if(kg <= 0) throw new Error("KG দিন");
@@ -939,6 +1039,7 @@ function calculateSelected(){
     else { const rate = area === "district" ? 25 : 28; unit = kg * rate; ruleText = `১০+ KG: ${areaLabel(area)} • ${kg}×${rate}`; }
     return {details:`Point • ${kg} KG • ${ruleText} • Qty ${qty}`, total:unit * qty};
   }
+
   if(p.rule === "riceSeed"){
     const kg = readNum("kg",0); const dhaka = $("dhakaMode").value; const qty = readNum("qty",1);
     if(kg <= 0) throw new Error("KG দিন");
@@ -954,6 +1055,7 @@ function calculateSelected(){
     }
     return {details:`Point • ${kg} KG • ${ruleText} • Qty ${qty}`, total:unit * qty};
   }
+
   if(p.rule === "locationFixed"){
     const area = $("areaMode").value; const qty = readNum("qty",1);
     const unit = p.rates[area];
