@@ -214,27 +214,9 @@
     pointer-events:none;
   }
 
-  button{
-    width:100%;
-    padding:14px;
-    margin-top:6px;
-    border:none;
-    border-radius:10px;
-    background:var(--mango);
-    color:#fff;
-    font-family:'Fraunces', serif;
-    font-weight:700;
-    font-size:15.5px;
-    letter-spacing:0.02em;
-    cursor:pointer;
-    transition:background .15s ease, transform .1s ease;
-  }
-  button:hover{ background:var(--mango-deep); }
-  button:active{ transform:scale(0.99); }
-
   /* ---- Result: mango crate stamp ---- */
   .stamp-wrap{
-    margin-top:22px;
+    margin-top:10px;
   }
   .stamp{
     position:relative;
@@ -330,10 +312,6 @@
     border-right:1px solid var(--line);
     border-bottom:1px solid var(--line);
   }
-
-  @media (prefers-reduced-motion: reduce){
-    button{ transition:none; }
-  }
 </style>
 </head>
 <body>
@@ -354,7 +332,7 @@
 
     <fieldset>
       <label><span class="num">1</span>ডেলিভারি এরিয়া</label>
-      <select id="location">
+      <select id="location" onchange="calculateMangoCharge()">
         <option value="dhaka_city">ঢাকা সিটি</option>
         <option value="district_city">সারাদেশ (জেলা/সিটি)</option>
         <option value="upazila">সারাদেশ (উপজেলা)</option>
@@ -363,7 +341,7 @@
 
     <fieldset>
       <label><span class="num">2</span>ডেলিভারির ধরণ</label>
-      <select id="delivery_type">
+      <select id="delivery_type" onchange="calculateMangoCharge()">
         <option value="point">পয়েন্ট ডেলিভারি</option>
         <option value="home">হোম ডেলিভারি</option>
       </select>
@@ -372,12 +350,10 @@
     <fieldset>
       <label><span class="num">3</span>ওজন</label>
       <div class="weight-row">
-        <input type="number" id="weight" placeholder="যেমন: 15" min="1" step="0.1">
+        <input type="number" id="weight" placeholder="যেমন: 15" min="1" step="0.1" oninput="calculateMangoCharge()">
         <span class="unit">KG</span>
       </div>
     </fieldset>
-
-    <button onclick="calculateMangoCharge()">চার্জ হিসাব করুন</button>
 
     <div class="stamp-wrap">
       <div class="stamp idle" id="result">
@@ -398,11 +374,21 @@
 function calculateMangoCharge() {
   const location = document.getElementById('location').value;
   const deliveryType = document.getElementById('delivery_type').value;
-  const weight = parseFloat(document.getElementById('weight').value);
+  const weightInput = document.getElementById('weight');
+  const weight = parseFloat(weightInput.value);
   const resultDiv = document.getElementById('result');
   const breakdownDiv = document.getElementById('breakdown');
 
-  if (!weight || weight <= 0) {
+  // ওজন খালি থাকলে শান্ত অবস্থায় রিসেট হবে
+  if (weightInput.value === "" || isNaN(weight)) {
+    resultDiv.className = 'stamp idle';
+    resultDiv.innerHTML = `<div><div class="lbl">মোট চার্জ</div></div><div class="amount">এখানে দেখাবে</div>`;
+    breakdownDiv.innerHTML = '';
+    return;
+  }
+
+  // ওজন ০ বা তার কম হলে এরর দেখাবে
+  if (weight <= 0) {
     resultDiv.className = 'stamp error';
     resultDiv.innerHTML = `<div><div class="lbl">ইনপুট প্রয়োজন</div></div><div class="amount">⚠️ সঠিক ওজন দিন</div>`;
     breakdownDiv.innerHTML = '';
@@ -464,7 +450,7 @@ function calculateMangoCharge() {
       <div class="breakdown">
         <div class="row"><span>ওজন অনুযায়ী চার্জ</span><span>৳${calculatedCharge.toFixed(2)}</span></div>
         <div class="row"><span>সর্বনিম্ন চার্জ</span><span>৳${minCharge}</span></div>
-        <div class="note">সর্বনিম্ন চার্জ প্রযোজ্য হওয়ায় চূড়ান্ত চার্জ নির্ধারিত হয়েছে</div>
+        <div class="note">সর্বনিম্ন চার্জ প্রযোজ্য থাকায় চূড়ান্ত চার্জ নির্ধারিত হয়েছে</div>
       </div>
     `;
   }
