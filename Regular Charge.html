@@ -190,6 +190,63 @@
     margin-bottom: 20px;
   }
 
+  /* ── Sub-urban areas list style ── */
+  .suburban-container {
+    background: #fdfaf2;
+    border: 1.5px solid #f39c12;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .suburban-title {
+    font-size: 11px;
+    font-weight: 750;
+    color: #d35400;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .suburban-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    max-height: 155px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .suburban-grid div {
+    font-size: 10px;
+    font-weight: 600;
+    color: #4a5568;
+    background: #fff;
+    padding: 5px 8px;
+    border-radius: 6px;
+    border: 1px solid #f0e4d0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  /* Custom Scrollbar for suburban grid */
+  .suburban-grid::-webkit-scrollbar {
+    width: 4px;
+  }
+  .suburban-grid::-webkit-scrollbar-thumb {
+    background: #ebd5b3;
+    border-radius: 4px;
+  }
+
   /* ── Calculate button ── */
   .calc-btn {
     width: 100%;
@@ -357,7 +414,7 @@ const routes = {
     {v:"other_other", t:"Other District → Other District", r:[{w:0.5,p:115},{w:1,p:135}], extra:20},
     {v:"dhaka_suburban", t:"Dhaka → Sub Urban", r:[{w:1,p:105}], extra:20},
     {v:"suburban_dhaka", t:"Sub Urban → Dhaka", r:[{w:1,p:85}], extra:20},
-    {v:"suburban_suburban", t:"Sub Urban → Sub Urban", r:[{w:0.5,p:115},{w:1,p:135}], extra:20},
+    {v:"suburban_suburban", t:"Sub Urban → Sub Urban", r:[{w:1,p:105}], extra:20},
     {v:"same_district", t:"Same District", r:[{w:1,p:60}], extra:20},
     {v:"dhaka_gazipur/tongi", t:"Dhaka → Gazipur/tongi", r:[{w:1,p:105}], extra:20},
     {v:"gazipur/tongi_dhaka", t:"Gazipur/tongi → Dhaka", r:[{w:1,p:105}], extra:20},
@@ -392,6 +449,25 @@ const serviceTitles = {
   point: 'Point Delivery Rate',
 };
 
+const suburbanAreas = [
+  "ASHULIA (ZIRABO)",
+  "BABURAIL HUB (NARAYANGANJ)",
+  "BAIPAIL (ASHULIA)",
+  "BANDAR (NARAYANGANJ)",
+  "CHANDRA",
+  "DHAMRAI",
+  "DOHAR NAWABGANJ",
+  "GAUCHIA (NARAYANGANJ)",
+  "HASNABAD (KERANIGANJ)",
+  "KANCHPUR HUB",
+  "KERANIGANJ",
+  "RAJENDRAPUR (GAZIPUR)",
+  "RUPGANJ",
+  "SAVAR",
+  "SAVAR WAREHOUSE",
+  "SONARGAON (NARAYANGANJ)"
+];
+
 function renderOptions(){
   const s = document.getElementById('service').value;
   const d = document.getElementById('dynamic');
@@ -403,12 +479,11 @@ function renderOptions(){
     weightField.style.display = 'none';
   } else if(s === 'point'){
     weightField.style.display = '';
-    // renumber weight as 3
     weightField.querySelector('.field-num').textContent = '3';
     d.innerHTML = `
       <div class="field">
         <div class="field-label"><span class="field-num">2</span> Area Type</div>
-        <select id="route">
+        <select id="route" onchange="handleRouteChange()">
           <option value="isd_osd">ISD-OSD / OSD-OSD</option>
           <option value="osd_isd">OSD-ISD</option>
           <option value="isd_isd">ISD-ISD</option>
@@ -421,11 +496,38 @@ function renderOptions(){
     d.innerHTML = `
       <div class="field">
         <div class="field-label"><span class="field-num">2</span> Route</div>
-        <select id="route">${opts}</select>
+        <select id="route" onchange="handleRouteChange()">${opts}</select>
+      </div>
+      <div id="suburbanList" class="suburban-container" style="display: none;">
+        <div class="suburban-title">📍 Sub-urban Covered Areas:</div>
+        <div class="suburban-grid">
+          ${suburbanAreas.map(area => `<div>${area}</div>`).join('')}
+        </div>
       </div>`;
   }
 
-  // reset result
+  // Initial check for default selected route
+  handleRouteChange();
+  resetResult();
+}
+
+function handleRouteChange() {
+  const routeSelect = document.getElementById('route');
+  const suburbanList = document.getElementById('suburbanList');
+  if (!routeSelect || !suburbanList) return;
+
+  const val = routeSelect.value.toLowerCase();
+  
+  // Check if selected route belongs to Sub Urban / Sub-Urben / Keraniganj/Savar/Tongi
+  if (val.includes('suburban') || val.includes('_sub') || val.startsWith('sub_')) {
+    suburbanList.style.display = 'block';
+  } else {
+    suburbanList.style.display = 'none';
+  }
+  resetResult();
+}
+
+function resetResult() {
   showPlaceholder();
 }
 
