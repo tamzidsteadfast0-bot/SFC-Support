@@ -686,11 +686,6 @@ Gas Stove Double Glass	গ্যাস চুলা ডাবল গ্লাস
 comforter Single	কমফোর্টার সিঙ্গেল	Piece	150	200
 comforter Double	কমফোর্টার ডাবল	Piece	250	350
 Comforter King Size (7 feet x7.5 feet)	কমফোর্টার কিং সাইজ (৭ ফুট x ৭.৫ ফুট)	Feet	20	30
-comforter ১ থেকে ৪ KG  কমফোর্টার  200 টাকা
-comforter ৪ থেকে ৮ KG  কমফোর্টার  ৩৫০ টাকা
-comforter ৮ থেকে ১২ KG  কমফোর্টার  ৪৫০ টাকা
-comforter ১২ থেকে ১৬ KG  কমফোর্টার  ৫০০ টাকা
-comforter ১৬ থেকে ২২ KG  কমফোর্টার  ৫৫০ টাকা
 Paint bucket up to 10 Liter	পেইন্ট বালতি ১০ লিটার পর্যন্ত	Piece	80	100
 Paint bucket up to 20 Liter	পেইন্ট বালতি ২০ লিটার পর্যন্ত	Piece	120	150
 Oil / Lubricant Steel Drum 220 Liter	তেল / লুব্রিকেন্ট স্টিল ড্রাম ২২০ লিটার	Piece	1400	2000
@@ -708,6 +703,9 @@ Empty Drum 200 Liter	খালি ড্রাম ২০০ লিটার	Piec
 const ecomNote = "এই রেট শুধুমাত্র E-Commerce Furniture Merchant-দের জন্য (১লা সেপ্টেম্বর থেকে কার্যকর)। এই আইটেমের ক্ষেত্রে শুধুমাত্র Home Delivery রেট প্রযোজ্য।";
 
 const SPECIAL_PRODUCTS = [
+  // ================= Comforter Weight Based Rule =================
+  {id:"comforter-wt", rule:"comforterWeight", en:"Comforter Weight Based", bn:"কমফোর্টার ওজনভিত্তিক (১-২২ কেজি)", qom:"KG"},
+
   // ================= E-Commerce Furniture New List =================
   {id:"ef-1", rule:"ecomFurniture", homeOnly:true, en:"Visiting Chair", bn:"ভিজিটিং চেয়ার", qom:"Piece", size:"L:20, W:21, H:34 (Inchi)", weight:"8 KG", rates:{inside:200, outside:250}, note:ecomNote},
   {id:"ef-2", rule:"ecomFurniture", homeOnly:true, en:"General Executive Chair non movable", bn:"জেনারেল এক্সিকিউটিভ চেয়ার (স্থির)", qom:"Piece", size:"L:21, W:22, H:37 (Inchi)", weight:"9 KG", rates:{inside:200, outside:350}, note:ecomNote},
@@ -749,7 +747,7 @@ const SPECIAL_PRODUCTS = [
   {id:"bubble-roll-5kg",rule:"dhakaService",en:"Bubble Roll (5 kg) Delivery Booking Charge",bn:"বাবল রোল ৫ কেজি ডেলিভারি বুকিং চার্জ",qom:"Booking",rates:{point:{inside:250,outside:400},home:{inside:350,outside:500}}},
   {id:"plant-booking-point",rule:"weightPlant",pointOnly:true,en:"Plant Booking Charge Point Delivery",bn:"গাছের পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
   {id:"grass-seed-cutting-point",rule:"weightGrass",pointOnly:true,en:"Grass Seed/Cutting Point Delivery Booking Charge",bn:"ঘাসের বীজ/কাটিং পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
-  {id:"geo-bag-point",rule:"geoBag",pointOnly:true,en:"Geo Bag Point Delivery Booking Charge",bn:"জিও ব্যাগে পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
+  {id:"geo-bag-point",rule:"geoBag",pointOnly:true,en:"Geo Bag Point Delivery বুকিং চার্জ",bn:"জিও ব্যাগে পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
   {id:"rice-seed-point",rule:"riceSeed",pointOnly:true,en:"Rice Seed Point Delivery Booking Charge",bn:"ধানের বীজের পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"KG"},
   {id:"popcorn-point",rule:"locationFixed",pointOnly:true,en:"Popcorn Point Delivery Booking Charge",bn:"ভুট্টা পয়েন্ট ডেলিভারি বুকিং চার্জ",qom:"Booking",rates:{district:180,upazila:200}},
   {id:"straw-point-25",rule:"locationFixed",pointOnly:true,en:"Straw Point Delivery Booking Charge (Up to 25 kg)",bn:"খড় পয়েন্ট ডেলিভারি বুকিং চার্জ (২৫ কেজি)",qom:"Booking",rates:{district:280,upazila:300}},
@@ -798,6 +796,7 @@ function productMeta(p){
   if(p.rule === "riceSeed") return `KG + Dhaka Inside/Outside`;
   if(p.rule === "locationFixed") return `জেলা/উপজেলা fixed`;
   if(p.rule === "pillowRule") return `Base + Extra per piece`;
+  if(p.rule === "comforterWeight") return `Weight slab based (1-22 KG)`;
   if(p.rule === "ecomFurniture") return `E-Com Furniture (ISD/OSD)`;
   return "Special";
 }
@@ -828,7 +827,6 @@ function selectProduct(id){
   selected = ALL_PRODUCTS.find(p => p.id === id);
   if(!selected) return;
 
-  // Auto-switch Radio Buttons for UX
   if(selected.pointOnly && service() !== "point") {
     document.querySelector('input[name="service"][value="point"]').checked = true;
   }
@@ -875,6 +873,13 @@ function renderFields(){
     if(p.note) html += `<div class="warning" style="margin-top:12px">⚠️ ${p.note}</div>`;
   }
   
+  if(p.rule === "comforterWeight"){
+    html += `<div class="form-grid" style="margin-top:14px">
+      <div class="form-group"><label>Weight (KG)</label><input id="kg" type="number" min="0" step="0.01" value="1"></div>
+      <div class="form-group"><label>Quantity</label><input id="qty" type="number" min="0" step="1" value="1"></div>
+    </div>`;
+  }
+
   if(p.rule === "ecomFurniture"){
     html += `
     <div class="dim-box">
@@ -956,6 +961,7 @@ function calcPlantCharge(kg){
   if(kg <= 30) return {charge:350, rule:"২৬-৩০ কেজি"};
   return {charge:kg * 13, rule:`৩০+ কেজি: ${kg} × ১৩`};
 }
+
 function calcGrassCharge(kg){
   if(kg <= 0) throw new Error("KG দিন");
   if(kg <= 5) return {charge:150, rule:"১-৫ কেজি"};
@@ -965,12 +971,21 @@ function calcGrassCharge(kg){
   return {charge:kg * 12, rule:`৫০+ কেজি: ${kg} × ১২`};
 }
 
+function calcComforterCharge(kg){
+  if(kg <= 0) throw new Error("KG দিন");
+  if(kg <= 4) return {charge:200, rule:"১ থেকে ৪ KG"};
+  if(kg <= 8) return {charge:350, rule:"৪ থেকে ৮ KG"};
+  if(kg <= 12) return {charge:450, rule:"৮ থেকে ১২ KG"};
+  if(kg <= 16) return {charge:500, rule:"১২ থেকে ১৬ KG"};
+  if(kg <= 22) return {charge:550, rule:"১৬ থেকে ২২ KG"};
+  return {charge:kg * 30, rule:`২২+ KG: ${kg} × ৩০`};
+}
+
 function calculateSelected(){
   if(!selected) throw new Error("Product select করুন");
   const p = selected;
   const svc = service();
 
-  // Mode validation
   if(p.pointOnly && svc !== "point"){
     throw new Error("⚠️ এটি শুধুমাত্র Point Delivery-এর জন্য। দয়া করে উপরে '📍 SFC Point Charge' সিলেক্ট করুন।");
   }
@@ -982,6 +997,13 @@ function calculateSelected(){
     const qty = readNum("qty",1); const unit = readNum("unitCharge",0);
     if(qty <= 0) throw new Error("Quantity দিন");
     return {details:`${serviceLabel()} • ${qty} ${p.qom} × ৳${money(unit)}`, total:qty * unit};
+  }
+
+  if(p.rule === "comforterWeight"){
+    const kg = readNum("kg",0); const qty = readNum("qty",1);
+    const r = calcComforterCharge(kg);
+    if(qty <= 0) throw new Error("Quantity দিন");
+    return {details:`${serviceLabel()} • ${kg} KG (${r.rule}) • Qty ${qty}`, total:r.charge * qty};
   }
   
   if(p.rule === "ecomFurniture"){
