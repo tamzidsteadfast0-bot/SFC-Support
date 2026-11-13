@@ -357,6 +357,7 @@
         <option value="book">Book</option>
         <option value="document">Document</option>
         <option value="point">Point Delivery</option>
+        <option value="gur">গুড়ের চার্জ (Gur)</option>
       </select>
     </div>
 
@@ -418,6 +419,10 @@ const routes = {
     {v:"other_other", t:"Other District → Other District", r:[{w:1,p:95}], extra:20},
     {v:"same_district", t:"Same District", r:[{w:1,p:55}], extra:20},
   ],
+  gur: [
+    {v:"same_district", t:"Same District", base:60},
+    {v:"other_district", t:"Other District", base:90}
+  ]
 };
 
 const serviceTitles = {
@@ -427,6 +432,7 @@ const serviceTitles = {
   book: 'Book Charge Rate',
   document: 'Document Charge Rate',
   point: 'Point Delivery Rate',
+  gur: 'Gur Charge Rate',
 };
 
 const suburbanAreas = [
@@ -469,6 +475,16 @@ function renderOptions(){
           <option value="isd_isd">ISD-ISD</option>
         </select>
       </div>`;
+  } else if(s === 'gur'){
+    weightField.style.display = '';
+    weightField.querySelector('.field-num').textContent = '3';
+    let opts = routes[s].map(r => `<option value="${r.v}">${r.t}</option>`).join('');
+    d.innerHTML = `
+      <div class="field">
+        <div class="field-label"><span class="field-num">2</span> Route</div>
+        <select id="route" onchange="handleRouteChange()">${opts}</select>
+      </div>
+      <div class="doc-note">🍯 গুড়ের ক্ষেত্রে চার্জ শুরু হবে সর্বনিম্ন ২ কেজি থেকে। প্রতি অতিরিক্ত কেজিতে ১৫ টাকা প্রযোজ্য।</div>`;
   } else {
     weightField.style.display = '';
     weightField.querySelector('.field-num').textContent = '3';
@@ -549,6 +565,20 @@ function calculate(){
 
   if(w <= 0){
     showError('⚠️ সঠিক weight দিন');
+    return;
+  }
+
+  if(s === 'gur'){
+    const route = document.getElementById('route').value;
+    const baseObj = routes.gur.find(r => r.v === route);
+    let baseCharge = baseObj.base;
+    let charge = baseCharge;
+    
+    // ২ কেজি বা তার কম হলে বেস চার্জ, এরপর প্রতি কেজিতে ১৫ টাকা যোগ হবে (ওজন সিলিং করে হিসাব করা হয়েছে)
+    if(w > 2) {
+      charge = baseCharge + Math.ceil(w - 2) * 15;
+    }
+    showResult(charge, `${baseObj.t} · ${w} KG (Gur)`);
     return;
   }
 
